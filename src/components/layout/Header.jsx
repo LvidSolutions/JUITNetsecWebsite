@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button, Container } from '../ui';
 import { cn } from '../../lib/cn';
 
@@ -10,7 +10,7 @@ const navigation = [
   { label: 'Kontakt', href: '#kontakt' },
 ];
 
-function NavLink({ href, children, onClick, className = '' }) {
+function NavLink({ href, children, onClick, className = '', ...props }) {
   return (
     <a
       href={href}
@@ -19,6 +19,7 @@ function NavLink({ href, children, onClick, className = '' }) {
         'text-sm font-medium text-brand-mist transition-colors duration-200 ease-smooth hover:text-brand-green focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-green',
         className,
       )}
+      {...props}
     >
       {children}
     </a>
@@ -28,12 +29,24 @@ function NavLink({ href, children, onClick, className = '' }) {
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  useEffect(() => {
+    function handleEscape(event) {
+      if (event.key === 'Escape') {
+        setIsMenuOpen(false);
+      }
+    }
+
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, []);
+
   return (
     <header className="z-50 border-b border-brand-line bg-brand-black/92 backdrop-blur md:sticky md:top-0">
       <Container>
         <div className="flex h-20 items-center justify-between gap-6">
           <a
             href="#hem"
+            aria-label="JUIT NetSec AB, gå till startsidan"
             className="shrink-0 text-base font-semibold tracking-wide text-brand-white transition-colors duration-200 hover:text-brand-green"
             onClick={() => setIsMenuOpen(false)}
           >
@@ -87,6 +100,7 @@ export function Header() {
 
         <div
           id="mobilmeny"
+          aria-hidden={!isMenuOpen}
           className={cn(
             'grid overflow-hidden transition-[grid-template-rows,opacity] duration-300 ease-smooth lg:hidden',
             isMenuOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0',
@@ -100,11 +114,17 @@ export function Header() {
                   href={item.href}
                   onClick={() => setIsMenuOpen(false)}
                   className="rounded-card px-1 py-3 text-base"
+                  tabIndex={isMenuOpen ? 0 : -1}
                 >
                   {item.label}
                 </NavLink>
               ))}
-              <Button href="#kontakt" className="mt-3 w-full" onClick={() => setIsMenuOpen(false)}>
+              <Button
+                href="#kontakt"
+                className="mt-3 w-full"
+                onClick={() => setIsMenuOpen(false)}
+                tabIndex={isMenuOpen ? 0 : -1}
+              >
                 Boka konsultation
               </Button>
             </nav>
