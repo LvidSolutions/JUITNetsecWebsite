@@ -3,22 +3,24 @@ import { Button, Container } from '../ui';
 import { cn } from '../../lib/cn';
 
 const navigation = [
-  { label: 'Hem', href: '#hem' },
-  { label: 'Tjänster', href: '#tjanster' },
-  { label: 'Om oss', href: '#om-oss' },
-  { label: 'Referenser', href: '#referenser' },
-  { label: 'Kontakt', href: '#kontakt' },
+  { label: 'Hem', href: '/' },
+  { label: 'Tjänster', href: '/tjanster' },
+  { label: 'Om oss', href: '/om-oss' },
+  { label: 'Referenser', href: '/referenser' },
+  { label: 'Kontakt', href: '/kontakt' },
 ];
 
-function NavLink({ href, children, onClick, className = '', ...props }) {
+function NavLink({ href, children, onClick, className = '', isActive = false, ...props }) {
   return (
     <a
       href={href}
       onClick={onClick}
       className={cn(
         'text-sm font-medium text-brand-mist transition-colors duration-200 ease-smooth hover:text-brand-green focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-green',
+        isActive && 'text-brand-green',
         className,
       )}
+      aria-current={isActive ? 'page' : undefined}
       {...props}
     >
       {children}
@@ -26,7 +28,7 @@ function NavLink({ href, children, onClick, className = '', ...props }) {
   );
 }
 
-export function Header() {
+export function Header({ currentPath = '/' }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -45,7 +47,7 @@ export function Header() {
       <Container>
         <div className="flex h-20 items-center justify-between gap-6">
           <a
-            href="#hem"
+            href="/"
             aria-label="JUIT NetSec AB, gå till startsidan"
             className="shrink-0 text-base font-semibold tracking-wide text-brand-white transition-colors duration-200 hover:text-brand-green"
             onClick={() => setIsMenuOpen(false)}
@@ -55,14 +57,14 @@ export function Header() {
 
           <nav aria-label="Huvudnavigering" className="hidden items-center gap-8 lg:flex">
             {navigation.map((item) => (
-              <NavLink key={item.href} href={item.href}>
+              <NavLink key={item.href} href={item.href} isActive={currentPath === item.href}>
                 {item.label}
               </NavLink>
             ))}
           </nav>
 
           <div className="hidden lg:block">
-            <Button href="#kontakt" size="sm">
+            <Button href="/kontakt" size="sm">
               Boka konsultation
             </Button>
           </div>
@@ -114,13 +116,14 @@ export function Header() {
                   href={item.href}
                   onClick={() => setIsMenuOpen(false)}
                   className="rounded-card px-1 py-3 text-base"
+                  isActive={currentPath === item.href}
                   tabIndex={isMenuOpen ? 0 : -1}
                 >
                   {item.label}
                 </NavLink>
               ))}
               <Button
-                href="#kontakt"
+                href="/kontakt"
                 className="mt-3 w-full"
                 onClick={() => setIsMenuOpen(false)}
                 tabIndex={isMenuOpen ? 0 : -1}
