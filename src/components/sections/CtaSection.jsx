@@ -16,7 +16,7 @@ export function CtaSection() {
               säkrare och mer robust IT-miljö.
             </p>
           </div>
-          <Button href="#kontakt" className="w-full sm:w-auto">
+          <Button href="/kontakt" className="w-full sm:w-auto">
             Kontakta oss
           </Button>
         </div>
