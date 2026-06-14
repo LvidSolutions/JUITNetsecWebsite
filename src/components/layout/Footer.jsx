@@ -1,11 +1,11 @@
 import { Container } from '../ui';
 
 const quickLinks = [
-  { label: 'Hem', href: '#hem' },
-  { label: 'Tjänster', href: '#tjanster' },
-  { label: 'Om oss', href: '#om-oss' },
-  { label: 'Referenser', href: '#referenser' },
-  { label: 'Kontakt', href: '#kontakt' },
+  { label: 'Hem', href: '/' },
+  { label: 'Tjänster', href: '/tjanster' },
+  { label: 'Om oss', href: '/om-oss' },
+  { label: 'Referenser', href: '/referenser' },
+  { label: 'Kontakt', href: '/kontakt' },
 ];
 
 const services = [
