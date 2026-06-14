@@ -54,6 +54,14 @@
   .hero-scan {
     animation: hero-scan 6s ease-in-out infinite;
   }
+
+  .hero-orbit {
+    animation: hero-orbit 16s linear infinite;
+  }
+
+  .hero-pulse {
+    animation: hero-pulse 2.8s ease-in-out infinite;
+  }
 }
 
 @keyframes hero-scan {
@@ -70,5 +78,24 @@
 
   50% {
     transform: translateY(18rem);
+  }
+}
+
+@keyframes hero-orbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes hero-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 200, 83, 0.42);
+    opacity: 0.82;
+  }
+
+  50% {
+    box-shadow: 0 0 0 18px rgba(0, 200, 83, 0);
+    opacity: 1;
   }
 }
