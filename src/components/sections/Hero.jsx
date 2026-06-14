@@ -29,8 +29,8 @@ export function Hero() {
             inom nätverk, cybersäkerhet, moln och infrastruktur.
           </p>
           <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-            <Button href="#kontakt">Boka konsultation</Button>
-            <Button href="#tjanster" variant="secondary">
+            <Button href="/kontakt">Boka konsultation</Button>
+            <Button href="/tjanster" variant="secondary">
               Se våra tjänster
             </Button>
           </div>
