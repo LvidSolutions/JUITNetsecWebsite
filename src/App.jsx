@@ -1,33 +1,19 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Header } from './components/layout/Header.jsx';
 import { Footer } from './components/layout/Footer.jsx';
+import { AnimatedLogo } from './components/layout/AnimatedLogo.jsx';
 import { AboutSection } from './components/sections/AboutSection.jsx';
 import { ContactSection } from './components/sections/ContactSection.jsx';
 import { Hero } from './components/sections/Hero.jsx';
 import { ReferencesSection } from './components/sections/ReferencesSection.jsx';
 import { ServicesSection } from './components/sections/ServicesSection.jsx';
 
-const pages = {
-  '/': {
-    title: 'JUIT NetSec AB – IT-säkerhet, nätverk och infrastruktur',
-    content: <Hero />,
-  },
-  '/tjanster': {
-    title: 'Tjänster – JUIT NetSec AB',
-    content: <ServicesSection />,
-  },
-  '/om-oss': {
-    title: 'Om oss – JUIT NetSec AB',
-    content: <AboutSection />,
-  },
-  '/referenser': {
-    title: 'Referenser – JUIT NetSec AB',
-    content: <ReferencesSection />,
-  },
-  '/kontakt': {
-    title: 'Kontakt – JUIT NetSec AB',
-    content: <ContactSection />,
-  },
+const titles = {
+  '/': 'JUIT NetSec AB – IT-säkerhet, nätverk och infrastruktur',
+  '/tjanster': 'Tjänster – JUIT NetSec AB',
+  '/om-oss': 'Om oss – JUIT NetSec AB',
+  '/referenser': 'Referenser – JUIT NetSec AB',
+  '/kontakt': 'Kontakt – JUIT NetSec AB',
 };
 
 function getCurrentPath() {
@@ -36,11 +22,14 @@ function getCurrentPath() {
 
 function App() {
   const [currentPath, setCurrentPath] = useState(getCurrentPath);
-  const page = useMemo(() => pages[currentPath] || pages['/'], [currentPath]);
+  const isHome = currentPath === '/';
+  const heroRef = useRef(null);
+  const logoSlotRef = useRef(null);
+  const title = titles[currentPath] || titles['/'];
 
   useEffect(() => {
     function navigate(path) {
-      const nextPath = pages[path] ? path : '/';
+      const nextPath = titles[path] ? path : '/';
       window.history.pushState({}, '', nextPath);
       setCurrentPath(nextPath);
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -77,8 +66,8 @@ function App() {
   }, []);
 
   useEffect(() => {
-    document.title = page.title;
-  }, [page.title]);
+    document.title = title;
+  }, [title]);
 
   return (
     <>
@@ -88,9 +77,14 @@ function App() {
       >
         Hoppa till huvudinnehåll
       </a>
-      <Header currentPath={currentPath} />
+      <Header currentPath={currentPath} logoSlotRef={logoSlotRef} hideStaticLogo={isHome} />
+      {isHome && <AnimatedLogo heroRef={heroRef} targetRef={logoSlotRef} />}
       <main id="huvudinnehall" className="min-h-screen bg-brand-black text-brand-white" tabIndex="-1">
-        {page.content}
+        {isHome && <Hero heroRef={heroRef} />}
+        {currentPath === '/tjanster' && <ServicesSection />}
+        {currentPath === '/om-oss' && <AboutSection />}
+        {currentPath === '/referenser' && <ReferencesSection />}
+        {currentPath === '/kontakt' && <ContactSection />}
       </main>
       <Footer />
     </>

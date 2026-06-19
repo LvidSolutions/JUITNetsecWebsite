@@ -51,51 +51,29 @@
     mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.9), transparent 78%);
   }
 
-  .hero-scan {
-    animation: hero-scan 6s ease-in-out infinite;
-  }
-
-  .hero-orbit {
-    animation: hero-orbit 16s linear infinite;
-  }
-
-  .hero-pulse {
-    animation: hero-pulse 2.8s ease-in-out infinite;
+  .animate-hero-reveal {
+    animation: hero-reveal 0.7s 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
 }
 
-@keyframes hero-scan {
-  0%,
-  100% {
-    transform: translateY(0);
-    opacity: 0.15;
+@keyframes hero-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
   }
 
-  45%,
-  55% {
-    opacity: 0.65;
-  }
-
-  50% {
-    transform: translateY(18rem);
-  }
-}
-
-@keyframes hero-orbit {
   to {
-    transform: rotate(360deg);
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-@keyframes hero-pulse {
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 rgba(0, 200, 83, 0.42);
-    opacity: 0.82;
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
   }
 
-  50% {
-    box-shadow: 0 0 0 18px rgba(0, 200, 83, 0);
-    opacity: 1;
+  .animate-hero-reveal {
+    animation: none;
   }
 }

@@ -28,8 +28,9 @@ function NavLink({ href, children, onClick, className = '', isActive = false, ..
   );
 }
 
-export function Header({ currentPath = '/' }) {
+export function Header({ currentPath = '/', logoSlotRef, hideStaticLogo = false }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
     function handleEscape(event) {
@@ -42,17 +43,38 @@ export function Header({ currentPath = '/' }) {
     return () => window.removeEventListener('keydown', handleEscape);
   }, []);
 
+  useEffect(() => {
+    function handleScroll() {
+      setIsScrolled(window.scrollY > 24);
+    }
+
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
-    <header className="z-50 border-b border-brand-line bg-brand-black/92 backdrop-blur md:sticky md:top-0">
+    <header
+      className={cn(
+        'sticky top-0 z-50 border-b transition-colors duration-300 ease-smooth',
+        isScrolled
+          ? 'border-brand-line bg-brand-black/85 backdrop-blur-md'
+          : 'border-transparent bg-transparent',
+      )}
+    >
       <Container>
         <div className="flex h-20 items-center justify-between gap-6">
           <a
             href="/"
             aria-label="JUIT NetSec AB, gå till startsidan"
-            className="shrink-0 text-base font-semibold tracking-wide text-brand-white transition-colors duration-200 hover:text-brand-green"
+            ref={logoSlotRef}
+            className={cn(
+              'shrink-0 text-base font-semibold tracking-wide text-brand-white transition-colors duration-200 hover:text-brand-green',
+              hideStaticLogo && 'invisible',
+            )}
             onClick={() => setIsMenuOpen(false)}
           >
-            JUIT NetSec AB
+            JUIT NETSEC
           </a>
 
           <nav aria-label="Huvudnavigering" className="hidden items-center gap-8 lg:flex">
