@@ -51,6 +51,17 @@
     mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.9), transparent 78%);
   }
 
+  .hero-network {
+    background-image:
+      radial-gradient(circle at 12% 28%, rgba(0, 200, 83, 0.52) 0 1px, transparent 2px),
+      radial-gradient(circle at 78% 22%, rgba(0, 200, 83, 0.42) 0 1px, transparent 2px),
+      radial-gradient(circle at 58% 72%, rgba(255, 255, 255, 0.24) 0 1px, transparent 2px),
+      linear-gradient(118deg, transparent 0 34%, rgba(0, 200, 83, 0.16) 34.2%, transparent 34.6% 100%),
+      linear-gradient(28deg, transparent 0 54%, rgba(0, 200, 83, 0.12) 54.2%, transparent 54.6% 100%);
+    background-size: 100% 100%, 100% 100%, 100% 100%, 220px 220px, 260px 260px;
+    animation: hero-network-drift 18s ease-in-out infinite alternate;
+  }
+
   .hero-scan {
     animation: hero-scan 6s ease-in-out infinite;
   }
@@ -59,8 +70,24 @@
     animation: hero-orbit 16s linear infinite;
   }
 
+  .hero-orbit-reverse {
+    animation: hero-orbit 22s linear infinite reverse;
+  }
+
   .hero-pulse {
     animation: hero-pulse 2.8s ease-in-out infinite;
+  }
+
+  .hero-float-slow {
+    animation: hero-float-slow 9s ease-in-out infinite;
+  }
+
+  .hero-float-medium {
+    animation: hero-float-medium 7s ease-in-out infinite;
+  }
+
+  .hero-marquee {
+    animation: hero-marquee 28s linear infinite;
   }
 }
 
@@ -77,7 +104,7 @@
   }
 
   50% {
-    transform: translateY(18rem);
+    transform: translateY(22rem);
   }
 }
 
@@ -97,5 +124,53 @@
   50% {
     box-shadow: 0 0 0 18px rgba(0, 200, 83, 0);
     opacity: 1;
+  }
+}
+
+@keyframes hero-float-slow {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  50% {
+    transform: translate3d(0.75rem, -1.1rem, 0);
+  }
+}
+
+@keyframes hero-float-medium {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  50% {
+    transform: translate3d(-0.8rem, 0.9rem, 0);
+  }
+}
+
+@keyframes hero-marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes hero-network-drift {
+  from {
+    transform: translate3d(-0.5rem, -0.25rem, 0) scale(1);
+  }
+
+  to {
+    transform: translate3d(0.5rem, 0.4rem, 0) scale(1.02);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
   }
 }
