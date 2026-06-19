@@ -27,14 +27,14 @@ const floatingPanels = [
     title: 'Network Core',
     meta: 'Segmentation',
     status: 'Stable',
-    className: 'bottom-16 left-8 w-60 hero-float-medium delay-700',
+    className: 'bottom-16 left-8 w-60 hero-float-medium',
     bars: ['w-10/12', 'w-5/12', 'w-9/12'],
   },
   {
     title: 'Cloud Edge',
     meta: 'Hybrid access',
     status: 'Monitored',
-    className: 'bottom-6 right-6 hidden w-64 hero-float-slow delay-1000 sm:block',
+    className: 'bottom-6 right-6 hidden w-64 hero-float-slow sm:block',
     bars: ['w-9/12', 'w-7/12', 'w-11/12'],
   },
 ];
@@ -106,9 +106,9 @@ function HeroBackground() {
       <div className="hero-network absolute inset-0 opacity-70" />
       <div className="hero-marquee absolute left-0 top-32 flex w-[200%] gap-6 opacity-20">
         {Array.from({ length: 2 }).map((_, groupIndex) => (
-          <div key={groupIndex} className="flex min-w-1/2 gap-6 text-xs font-semibold uppercase tracking-[0.28em] text-brand-green">
+          <div key={groupIndex} className="flex w-1/2 shrink-0 gap-6 text-xs font-semibold uppercase tracking-[0.28em] text-brand-green">
             {matrixRows.map((row) => (
-              <span key={`${groupIndex}-${row}`} className="rounded-full border border-brand-green/25 bg-brand-green/10 px-4 py-2">
+              <span key={`${groupIndex}-${row}`} className="whitespace-nowrap rounded-full border border-brand-green/25 bg-brand-green/10 px-4 py-2">
                 {row}
               </span>
             ))}
