@@ -43,15 +43,16 @@ export function Header({ currentPath = '/' }) {
   }, []);
 
   return (
-    <header className="z-50 border-b border-brand-line bg-brand-black/92 backdrop-blur md:sticky md:top-0">
+    <header className="sticky top-0 z-50 border-b border-white/10 bg-brand-black/55 backdrop-blur-xl">
       <Container>
         <div className="flex h-20 items-center justify-between gap-6">
           <a
             href="/"
             aria-label="JUIT NetSec AB, gå till startsidan"
-            className="shrink-0 text-base font-semibold tracking-wide text-brand-white transition-colors duration-200 hover:text-brand-green"
+            className="group flex shrink-0 items-center gap-3 text-base font-semibold tracking-wide text-brand-white transition-colors duration-200 hover:text-brand-green"
             onClick={() => setIsMenuOpen(false)}
           >
+            <span className="h-2.5 w-2.5 rounded-full bg-brand-green shadow-glow transition-transform duration-300 group-hover:scale-125" />
             JUIT NetSec AB
           </a>
 
@@ -64,14 +65,14 @@ export function Header({ currentPath = '/' }) {
           </nav>
 
           <div className="hidden lg:block">
-            <Button href="/kontakt" size="sm">
+            <Button href="/kontakt" size="sm" className="shadow-glow">
               Boka konsultation
             </Button>
           </div>
 
           <button
             type="button"
-            className="inline-flex h-11 w-11 items-center justify-center rounded-card border border-brand-line bg-white/[0.03] text-brand-white transition-colors duration-200 hover:border-brand-green hover:text-brand-green focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green lg:hidden"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-card border border-brand-line bg-white/[0.04] text-brand-white transition-colors duration-200 hover:border-brand-green hover:text-brand-green focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green lg:hidden"
             aria-label={isMenuOpen ? 'Stäng meny' : 'Öppna meny'}
             aria-expanded={isMenuOpen}
             aria-controls="mobilmeny"
