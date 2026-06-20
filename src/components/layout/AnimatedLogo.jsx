@@ -11,8 +11,9 @@ function measure(targetRef) {
 
   return {
     startX: window.innerWidth / 2,
-    startY: window.innerHeight * (isMobile ? 0.3 : 0.46),
-    startSize: isMobile ? 44 : 96,
+    startY: window.innerHeight * (isMobile ? 0.26 : 0.34),
+    startSize: isMobile ? 34 : 96,
+    startLetterSpacing: isMobile ? 2.5 : 6,
     endX: targetRect.left + targetRect.width / 2,
     endY: targetRect.top + targetRect.height / 2,
     endSize: 17,
@@ -44,7 +45,11 @@ export function AnimatedLogo({ targetRef, progress }) {
     inputRange,
     geometry ? [geometry.startSize, geometry.endSize] : [16, 16],
   );
-  const letterSpacing = useTransform(progress, inputRange, [6, 1.5]);
+  const letterSpacing = useTransform(
+    progress,
+    inputRange,
+    geometry ? [geometry.startLetterSpacing, 1.5] : [6, 1.5],
+  );
   const glow = useTransform(progress, [0, SHRINK_END * 0.7, SHRINK_END], [0.9, 0.45, 0]);
   const textShadow = useTransform(glow, (value) => `0 0 ${value * 56}px rgba(0,200,83,${value})`);
 

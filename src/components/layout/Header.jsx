@@ -63,9 +63,9 @@ export function Header({ currentPath = '/', logoSlotRef, hideStaticLogo = false,
 
   const backdropInputRange = introProgress ? [0, HEADER_LANDED_AT] : [0, 1];
   const backdropOpacity = useTransform(activeProgress, backdropInputRange, [0, 1]);
-  const backgroundColor = useTransform(backdropOpacity, (value) => `rgba(5, 5, 5, ${value * 0.85})`);
-  const borderColor = useTransform(backdropOpacity, (value) => `rgba(255, 255, 255, ${value * 0.12})`);
-  const backdropFilter = useTransform(backdropOpacity, (value) => `blur(${value * 12}px)`);
+  const backgroundColor = useTransform(backdropOpacity, (value) => `rgba(5, 5, 5, ${value * 0.55})`);
+  const borderColor = useTransform(backdropOpacity, (value) => `rgba(255, 255, 255, ${value * 0.08})`);
+  const backdropFilter = useTransform(backdropOpacity, (value) => `blur(${value * 14}px)`);
 
   return (
     <motion.header

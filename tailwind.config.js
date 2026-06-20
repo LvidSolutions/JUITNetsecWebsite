@@ -24,6 +24,7 @@ export default {
       },
       fontFamily: {
         sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Consolas', 'monospace'],
       },
       boxShadow: {
         glow: '0 0 0 1px rgba(0, 200, 83, 0.18), 0 24px 80px rgba(0, 200, 83, 0.12)',

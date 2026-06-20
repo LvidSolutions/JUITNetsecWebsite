@@ -1,16 +1,16 @@
-import { useState } from 'react';
-import { motion, useTransform, useReducedMotion, useMotionValueEvent } from 'framer-motion';
+import { useRef, useState } from 'react';
+import { motion, useReducedMotion, useMotionValueEvent } from 'framer-motion';
 import { Container } from '../ui';
 import { HeroVideoBackground } from './HeroVideoBackground.jsx';
+import { HeroLens } from './HeroLens.jsx';
 import { CTAButtons } from './CTAButtons.jsx';
 
-const BLACK_FADE_END = 0.2;
 const LOGO_LANDED_AT = 0.45;
 
 export function Hero({ heroRef, introProgress }) {
   const prefersReducedMotion = useReducedMotion();
+  const stickyRef = useRef(null);
   const [logoLanded, setLogoLanded] = useState(false);
-  const blackOverlayOpacity = useTransform(introProgress, [0, BLACK_FADE_END], [1, 0]);
 
   useMotionValueEvent(introProgress, 'change', (latest) => {
     if (!logoLanded && latest >= LOGO_LANDED_AT) {
@@ -21,19 +21,12 @@ export function Hero({ heroRef, introProgress }) {
   const copyVisible = prefersReducedMotion || logoLanded;
 
   return (
-    <section
-      id="hem"
-      ref={heroRef}
-      className="relative -mt-20 h-[220vh] sm:h-[240vh]"
-    >
-      <div className="sticky top-0 h-screen w-full overflow-hidden bg-brand-black">
+    <section id="hem" ref={heroRef} className="relative -mt-20 h-[220vh] sm:h-[240vh]">
+      <div ref={stickyRef} className="sticky top-0 h-screen w-full overflow-hidden bg-brand-black">
         <HeroVideoBackground />
 
-        <motion.div
-          aria-hidden="true"
-          className="absolute inset-0 z-10 bg-brand-black"
-          style={prefersReducedMotion ? { opacity: 0 } : { opacity: blackOverlayOpacity }}
-        />
+        {/* frostad konvex lins som följer musen (av på touch / reduced-motion) */}
+        <HeroLens containerRef={stickyRef} />
 
         <Container className="relative z-20 flex h-full flex-col justify-end pb-24 sm:pb-28 lg:pb-32">
           <motion.div

@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
+import { AnimatePresence } from 'framer-motion';
 import { Header } from './components/layout/Header.jsx';
 import { Footer } from './components/layout/Footer.jsx';
 import { AnimatedLogo } from './components/layout/AnimatedLogo.jsx';
 import { AboutSection } from './components/sections/AboutSection.jsx';
 import { ContactSection } from './components/sections/ContactSection.jsx';
 import { Hero } from './components/sections/Hero.jsx';
+import { IntroLoader } from './components/sections/IntroLoader.jsx';
 import { StatsSection } from './components/sections/StatsSection.jsx';
 import { NextStepPlaceholder } from './components/sections/NextStepPlaceholder.jsx';
 import { ReferencesSection } from './components/sections/ReferencesSection.jsx';
@@ -30,6 +32,16 @@ function App() {
   const logoSlotRef = useRef(null);
   const title = titles[currentPath] || titles['/'];
   const { scrollYProgress: introProgress } = useHeroIntroProgress(heroRef);
+  const [introDone, setIntroDone] = useState(() => getCurrentPath() !== '/');
+
+  // Lås scroll medan intro-loadern visas så hero inte kan scrollas bakom den.
+  useEffect(() => {
+    const locked = isHome && !introDone;
+    document.body.style.overflow = locked ? 'hidden' : '';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isHome, introDone]);
 
   useEffect(() => {
     function navigate(path) {
@@ -75,6 +87,11 @@ function App() {
 
   return (
     <>
+      <AnimatePresence>
+        {isHome && !introDone && (
+          <IntroLoader key="intro" onComplete={() => setIntroDone(true)} />
+        )}
+      </AnimatePresence>
       <a
         href="#huvudinnehall"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-card focus:bg-brand-green focus:px-4 focus:py-3 focus:font-semibold focus:text-brand-black"

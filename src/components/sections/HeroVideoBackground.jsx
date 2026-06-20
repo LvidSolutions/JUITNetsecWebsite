@@ -23,7 +23,7 @@ export function HeroVideoBackground() {
         className="absolute inset-0 h-full w-full object-cover"
         aria-hidden="true"
       >
-        <source src="/assets/juit-netsec-hero.mp4" type="video/mp4" />
+        <source src="/assets/tree-branch.mp4" type="video/mp4" />
       </video>
 
       <div className="absolute inset-0 bg-brand-black/70" />
