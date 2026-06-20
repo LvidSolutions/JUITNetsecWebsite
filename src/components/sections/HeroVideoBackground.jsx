@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 
 // hur länge brus-snutten flashas över när huvudvideon loopar om
-const GLITCH_MS = 360;
+const GLITCH_MS = 320;
+// hoppa förbi de mest pulserande/bultande sekunderna i brus-klippet
+const BRUS_OFFSET_S = 7;
 
 export function HeroVideoBackground() {
   const videoRef = useRef(null);
@@ -31,7 +33,7 @@ export function HeroVideoBackground() {
 
       const brus = brusRef.current;
       if (brus) {
-        brus.currentTime = 0;
+        brus.currentTime = BRUS_OFFSET_S;
         brus.play()?.catch(() => {});
       }
 
@@ -74,8 +76,8 @@ export function HeroVideoBackground() {
         muted
         playsInline
         preload="auto"
-        className={`pointer-events-none absolute inset-0 h-full w-full object-cover mix-blend-screen transition-opacity duration-100 ease-out ${
-          glitching ? 'opacity-80' : 'opacity-0'
+        className={`pointer-events-none absolute inset-0 h-full w-full object-cover mix-blend-screen transition-opacity duration-150 ease-out ${
+          glitching ? 'opacity-35' : 'opacity-0'
         }`}
         aria-hidden="true"
       >
