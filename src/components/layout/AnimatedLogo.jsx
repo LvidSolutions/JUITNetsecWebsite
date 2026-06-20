@@ -103,10 +103,14 @@ export function AnimatedLogo({ targetRef, progress }) {
         translateY: '-50%',
       }}
     >
+      {/* Den stora "JUIT NETSEC"-texten ligger absolut centrerad och utanför
+          ankarets flöde + pointer-events-none. Annars håller den ankaret ~hela
+          skärmbredden brett (även när det krympt, eftersom bara opaciteten
+          tonas – inte bredden) och blockerar klick på Home/Services i navet. */}
       <motion.span
         aria-hidden="true"
         style={{ opacity: largeTextOpacity }}
-        className="col-start-1 row-start-1 whitespace-nowrap text-[clamp(2.75rem,15.2vw,17rem)] font-display font-light uppercase leading-[0.9] tracking-[-0.03em] text-brand-white"
+        className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap text-[clamp(2.75rem,15.2vw,17rem)] font-display font-light uppercase leading-[0.9] tracking-[-0.03em] text-brand-white"
       >
         JUIT NETSEC
       </motion.span>

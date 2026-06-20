@@ -28,10 +28,9 @@ function getCurrentPath() {
 function App() {
   const [currentPath, setCurrentPath] = useState(getCurrentPath);
   const isHome = currentPath === '/';
-  const heroRef = useRef(null);
   const logoSlotRef = useRef(null);
   const title = titles[currentPath] || titles['/'];
-  const { scrollYProgress: introProgress } = useHeroIntroProgress(heroRef);
+  const { scrollYProgress: introProgress, heroRef } = useHeroIntroProgress();
   const [introDone, setIntroDone] = useState(() => getCurrentPath() !== '/');
 
   // Lås scroll medan intro-loadern visas så hero inte kan scrollas bakom den.
