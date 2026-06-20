@@ -1,5 +1,6 @@
 import { motion, useReducedMotion } from 'framer-motion';
 import { Container } from '../ui';
+import { ScrambleText } from './ScrambleText.jsx';
 import { cn } from '../../lib/cn';
 
 // ---------------------------------------------------------------------------
@@ -171,18 +172,19 @@ export function AboutSection() {
             </div>
           </div>
 
-          {/* Split-rubrik: A BOUT / JUIT NETSEC */}
+          {/* Split-rubrik: A BOUT / JUIT NETSEC – decodas fram vid mount,
+              identiskt med referensens scramble-reveal. */}
           <h1 className="mt-8 select-none font-display font-semibold uppercase leading-[0.82] tracking-[-0.03em] sm:mt-10">
             <span className="sr-only">About JUIT NetSec</span>
             <span aria-hidden="true" className="block">
               <span className="flex items-baseline justify-between gap-4">
-                <span className="text-[clamp(3.25rem,15vw,13rem)]">A</span>
-                <span className="text-[clamp(3.25rem,15vw,13rem)]">BOUT</span>
+                <ScrambleText as="span" text="A" trigger="mount" reserveWidth startDelay={0} durationMs={650} className="text-[clamp(3.25rem,15vw,13rem)]" />
+                <ScrambleText as="span" text="BOUT" trigger="mount" reserveWidth startDelay={120} durationMs={850} className="text-[clamp(3.25rem,15vw,13rem)]" />
               </span>
               <span className="mt-1 flex items-baseline justify-between gap-4 text-brand-white/90 sm:mt-2">
-                <span className="text-[clamp(2.5rem,11vw,9.5rem)]">JUIT</span>
+                <ScrambleText as="span" text="JUIT" trigger="mount" reserveWidth startDelay={240} durationMs={850} className="text-[clamp(2.5rem,11vw,9.5rem)]" />
                 <span className="text-[clamp(2.5rem,11vw,9.5rem)]">
-                  NETSEC
+                  <ScrambleText as="span" text="NETSEC" trigger="mount" reserveWidth startDelay={360} durationMs={950} />
                   <span aria-hidden="true" className="ml-[0.12em] inline-block align-baseline text-brand-green">.</span>
                 </span>
               </span>
@@ -204,9 +206,13 @@ export function AboutSection() {
                 )}
               >
                 <Label>{fact.label}</Label>
-                <p className="mt-5 font-display text-[clamp(1.75rem,3.4vw,2.75rem)] font-medium leading-none tracking-tight tabular-nums text-brand-white">
-                  {fact.value}
-                </p>
+                <ScrambleText
+                  as="p"
+                  text={fact.value}
+                  durationMs={900}
+                  startDelay={index * 90}
+                  className="mt-5 font-display text-[clamp(1.75rem,3.4vw,2.75rem)] font-medium leading-none tracking-tight tabular-nums text-brand-white"
+                />
                 <p className="mt-3 max-w-[16rem] text-sm leading-6 text-brand-mist/55">{fact.sub}</p>
               </Reveal>
             ))}
@@ -292,12 +298,18 @@ export function AboutSection() {
                 <li key={item.title}>
                   <Reveal delay={index * 0.04}>
                     <div className="group grid grid-cols-1 gap-2 border-b border-brand-line py-6 transition-colors duration-200 hover:bg-white/[0.025] lg:grid-cols-[3rem_minmax(0,1fr)_minmax(0,1.1fr)_8rem] lg:items-baseline lg:gap-6">
-                      <span className="font-mono text-xs tracking-[0.2em] text-brand-green">
-                        {String(index + 1).padStart(2, '0')}
-                      </span>
-                      <h3 className="font-display text-xl font-medium leading-snug text-brand-white transition-transform duration-200 group-hover:translate-x-1 sm:text-2xl">
-                        {item.title}
-                      </h3>
+                      <ScrambleText
+                        as="span"
+                        text={String(index + 1).padStart(2, '0')}
+                        durationMs={500}
+                        className="font-mono text-xs tracking-[0.2em] text-brand-green"
+                      />
+                      <ScrambleText
+                        as="h3"
+                        text={item.title}
+                        durationMs={850}
+                        className="font-display text-xl font-medium leading-snug text-brand-white transition-transform duration-200 group-hover:translate-x-1 sm:text-2xl"
+                      />
                       <p className="max-w-xl text-sm leading-6 text-brand-mist/65">{item.description}</p>
                       <span className="font-mono text-[11px] uppercase tracking-[0.24em] text-brand-mist/55 lg:text-right">
                         {item.area}
@@ -326,12 +338,19 @@ export function AboutSection() {
                 <Reveal delay={index * 0.04}>
                   <div className="group border-t border-brand-line py-9 transition-colors duration-200 hover:bg-white/[0.02] sm:py-10">
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-baseline sm:justify-between sm:gap-8">
-                      <h3 className="font-display text-3xl font-semibold leading-[1.02] tracking-tight text-brand-white transition-transform duration-200 group-hover:translate-x-1 sm:text-4xl lg:text-5xl">
-                        {item.title}
-                      </h3>
-                      <span className="shrink-0 font-mono text-[11px] uppercase tracking-[0.3em] text-brand-green/90">
-                        {String(index + 1).padStart(2, '0')} / {item.area}
-                      </span>
+                      <ScrambleText
+                        as="h3"
+                        text={item.title}
+                        durationMs={950}
+                        className="font-display text-3xl font-semibold leading-[1.02] tracking-tight text-brand-white transition-transform duration-200 group-hover:translate-x-1 sm:text-4xl lg:text-5xl"
+                      />
+                      <ScrambleText
+                        as="span"
+                        text={`${String(index + 1).padStart(2, '0')} / ${item.area}`}
+                        durationMs={750}
+                        startDelay={120}
+                        className="shrink-0 font-mono text-[11px] uppercase tracking-[0.3em] text-brand-green/90"
+                      />
                     </div>
                     <p className="mt-5 max-w-3xl text-base leading-7 text-brand-mist/70 sm:text-lg sm:leading-8">
                       {item.description}
