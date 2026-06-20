@@ -64,44 +64,6 @@
   .intro-scanbeam {
     animation: intro-scanbeam 2.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
   }
-
-  /* kort, dämpad datamosh-skav på hero-videon i samband med att den loopar om */
-  .hero-glitch-active {
-    animation: hero-glitch 0.32s steps(3, end) both;
-  }
-}
-
-@keyframes hero-glitch {
-  0% {
-    transform: translate(0, 0);
-    clip-path: inset(0 0 0 0);
-  }
-
-  18% {
-    transform: translate(-0.8%, 0);
-    filter: brightness(1.12) contrast(1.1);
-    clip-path: inset(0 0 62% 0);
-  }
-
-  36% {
-    transform: translate(1%, 0);
-    clip-path: inset(46% 0 24% 0);
-  }
-
-  54% {
-    transform: translate(-0.6%, 0);
-    clip-path: inset(74% 0 0 0);
-  }
-
-  72% {
-    transform: translate(0.4%, 0);
-    clip-path: inset(0 0 0 0);
-  }
-
-  100% {
-    transform: translate(0, 0);
-    clip-path: inset(0 0 0 0);
-  }
 }
 
 @keyframes intro-scanbeam {
@@ -132,9 +94,5 @@
   .intro-scanbeam {
     animation: none;
     opacity: 0;
-  }
-
-  .hero-glitch-active {
-    animation: none;
   }
 }

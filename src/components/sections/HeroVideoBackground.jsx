@@ -1,87 +1,93 @@
 import { useEffect, useRef, useState } from 'react';
 
-// hur länge brus-snutten flashas över när huvudvideon loopar om
-const GLITCH_MS = 320;
-// hoppa förbi de mest pulserande/bultande sekunderna i brus-klippet
-const BRUS_OFFSET_S = 7;
+// hur lång tid innan klippets slut crossfaden till nästa varv börjar
+const CROSSFADE_S = 0.9;
 
 export function HeroVideoBackground() {
-  const videoRef = useRef(null);
-  const brusRef = useRef(null);
-  const [glitching, setGlitching] = useState(false);
+  const videoARef = useRef(null);
+  const videoBRef = useRef(null);
+  const [activeIsA, setActiveIsA] = useState(true);
 
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const video = videoRef.current;
+    const videoA = videoARef.current;
+    const videoB = videoBRef.current;
 
-    if (!video) {
+    if (!videoA || !videoB) {
       return undefined;
     }
 
     if (prefersReducedMotion) {
-      video.pause();
-      brusRef.current?.pause();
+      videoA.pause();
+      videoB.pause();
       return undefined;
     }
 
-    let timeout;
+    let isCrossfading = false;
+    let activeRef = videoA;
+    let inactiveRef = videoB;
 
-    // Styr loopen själva (ingen loop-attribut) så vi kan lägga in en brus-glitch
-    // varje gång videon når slutet och startar om – då ser omstarten ut som en glitch.
-    function handleEnded() {
-      setGlitching(true);
+    // Ingen loop-attribut: vi triggar crossfaden själva strax innan klippet
+    // tar slut, så omstarten döljs som en mjuk tonövergång i stället för ett hopp.
+    function handleTimeUpdate() {
+      const active = activeRef;
+      const inactive = inactiveRef;
 
-      const brus = brusRef.current;
-      if (brus) {
-        brus.currentTime = BRUS_OFFSET_S;
-        brus.play()?.catch(() => {});
+      if (
+        !isCrossfading &&
+        active.duration &&
+        active.duration - active.currentTime <= CROSSFADE_S
+      ) {
+        isCrossfading = true;
+        inactive.currentTime = 0;
+        inactive.play()?.catch(() => {});
+        setActiveIsA(inactive === videoA);
+
+        window.setTimeout(() => {
+          active.pause();
+          activeRef = inactive;
+          inactiveRef = active;
+          isCrossfading = false;
+        }, CROSSFADE_S * 1000);
       }
-
-      video.currentTime = 0;
-      video.play()?.catch(() => {});
-
-      window.clearTimeout(timeout);
-      timeout = window.setTimeout(() => setGlitching(false), GLITCH_MS);
     }
 
-    video.addEventListener('ended', handleEnded);
+    videoA.addEventListener('timeupdate', handleTimeUpdate);
+    videoB.addEventListener('timeupdate', handleTimeUpdate);
 
     return () => {
-      video.removeEventListener('ended', handleEnded);
-      window.clearTimeout(timeout);
+      videoA.removeEventListener('timeupdate', handleTimeUpdate);
+      videoB.removeEventListener('timeupdate', handleTimeUpdate);
     };
   }, []);
 
   return (
     <div className="absolute inset-0 -z-20 overflow-hidden">
       <video
-        ref={videoRef}
+        ref={videoARef}
         autoPlay
         muted
         playsInline
-        preload="metadata"
-        className={`absolute inset-0 h-full w-full object-cover [filter:brightness(1.05)_contrast(1.08)] ${
-          glitching ? 'hero-glitch-active' : ''
+        preload="auto"
+        className={`absolute inset-0 h-full w-full object-cover [filter:brightness(1.05)_contrast(1.08)] transition-opacity duration-[900ms] ease-linear ${
+          activeIsA ? 'opacity-100' : 'opacity-0'
         }`}
         aria-hidden="true"
       >
         <source src="/assets/go-to.mp4" type="video/mp4" />
       </video>
 
-      {/* Brus-snutt som flashas över i omstartsögonblicket för en glitch-känsla */}
       <video
-        ref={brusRef}
-        autoPlay
-        loop
+        ref={videoBRef}
         muted
         playsInline
         preload="auto"
-        className={`pointer-events-none absolute inset-0 h-full w-full object-cover mix-blend-screen transition-opacity duration-150 ease-out ${
-          glitching ? 'opacity-35' : 'opacity-0'
+        className={`absolute inset-0 h-full w-full object-cover [filter:brightness(1.05)_contrast(1.08)] transition-opacity duration-[900ms] ease-linear ${
+          activeIsA ? 'opacity-0' : 'opacity-100'
         }`}
         aria-hidden="true"
       >
-        <source src="/assets/brus.mp4" type="video/mp4" />
+        <source src="/assets/go-to.mp4" type="video/mp4" />
       </video>
 
       {/* Lätt enhetlig dämpning så videon behåller liv men inte bländar */}
