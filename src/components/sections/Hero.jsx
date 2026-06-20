@@ -4,8 +4,8 @@ import { Container } from '../ui';
 import { HeroVideoBackground } from './HeroVideoBackground.jsx';
 import { CTAButtons } from './CTAButtons.jsx';
 
-const BLACK_FADE_END = 0.4;
-const LOGO_LANDED_AT = 0.65;
+const BLACK_FADE_END = 0.2;
+const LOGO_LANDED_AT = 0.45;
 
 export function Hero({ heroRef, introProgress }) {
   const prefersReducedMotion = useReducedMotion();
@@ -24,7 +24,7 @@ export function Hero({ heroRef, introProgress }) {
     <section
       id="hem"
       ref={heroRef}
-      className="relative -mt-20 h-[320vh] sm:h-[340vh]"
+      className="relative -mt-20 h-[220vh] sm:h-[240vh]"
     >
       <div className="sticky top-0 h-screen w-full overflow-hidden bg-brand-black">
         <HeroVideoBackground />

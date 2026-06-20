@@ -3,7 +3,7 @@ import { motion, useMotionValue, useTransform } from 'framer-motion';
 import { Button, Container } from '../ui';
 import { cn } from '../../lib/cn';
 
-const HEADER_LANDED_AT = 0.65;
+const HEADER_LANDED_AT = 0.45;
 
 const navigation = [
   { label: 'Hem', href: '/' },

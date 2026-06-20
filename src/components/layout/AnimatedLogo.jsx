@@ -19,7 +19,7 @@ function measure(targetRef) {
   };
 }
 
-const SHRINK_END = 0.65;
+const SHRINK_END = 0.45;
 
 export function AnimatedLogo({ targetRef, progress }) {
   const prefersReducedMotion = useReducedMotion();
