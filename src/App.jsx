@@ -17,6 +17,7 @@ const titles = {
   '/': 'JUIT NetSec AB – IT-säkerhet, nätverk och infrastruktur',
   '/tjanster': 'Tjänster – JUIT NetSec AB',
   '/om-oss': 'Om oss – JUIT NetSec AB',
+  '/about': 'Om oss – JUIT NetSec AB',
   '/referenser': 'Referenser – JUIT NetSec AB',
   '/kontakt': 'Kontakt – JUIT NetSec AB',
 };
@@ -113,7 +114,7 @@ function App() {
           </>
         )}
         {currentPath === '/tjanster' && <ServicesSection />}
-        {currentPath === '/om-oss' && <AboutSection />}
+        {(currentPath === '/om-oss' || currentPath === '/about') && <AboutSection />}
         {currentPath === '/referenser' && <ReferencesSection />}
         {currentPath === '/kontakt' && <ContactSection />}
       </main>

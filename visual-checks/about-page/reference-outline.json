@@ -1,0 +1,43 @@
+{
+  "title": "Gustaf Furusten Portfolio",
+  "headings": [
+    "H1: /",
+    "H1: A",
+    "H1: OUT",
+    "H1: B",
+    "H1: ME",
+    "H2: Designer&artdirector"
+  ],
+  "bigText": [
+    "150px: /",
+    "150px: A",
+    "150px: OUT",
+    "150px: B",
+    "150px: ME",
+    "80px: OO7",
+    "80px: O48",
+    "80px: O16",
+    "80px: D",
+    "80px: e",
+    "80px: s",
+    "80px: i",
+    "80px: g",
+    "80px: n",
+    "80px: e",
+    "80px: r",
+    "80px: &",
+    "80px: a",
+    "80px: r",
+    "80px: t"
+  ],
+  "bodyBg": "rgb(244, 244, 244)",
+  "bodyColor": "rgb(0, 0, 0)",
+  "fonts": [
+    "\"Orbit Mono Regular\", \"Orbit Mono Regular Placeholder\", monospace",
+    "\"Doto Rounded Bold\", \"Doto Rounded Bold Placeholder\", sans-serif",
+    "\"Doto Rounded ExtraBold\", \"Doto Rounded ExtraBold Placeholder\", sans-serif",
+    "Switzer, \"Switzer Placeholder\", sans-serif",
+    "\"Doto Rounded Black\", sans-serif"
+  ],
+  "pageHeight": 4420
+}
