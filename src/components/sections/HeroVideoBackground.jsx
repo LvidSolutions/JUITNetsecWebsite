@@ -20,10 +20,10 @@ export function HeroVideoBackground() {
         muted
         playsInline
         preload="metadata"
-        className="absolute inset-0 h-full w-full object-cover [filter:brightness(1.35)_contrast(1.12)_saturate(1.15)]"
+        className="absolute inset-0 h-full w-full object-cover [filter:brightness(1.05)_contrast(1.08)]"
         aria-hidden="true"
       >
-        <source src="/assets/tree-branch.mp4" type="video/mp4" />
+        <source src="/assets/go-to.mp4" type="video/mp4" />
       </video>
 
       {/* Lätt enhetlig dämpning så videon behåller liv men inte bländar */}

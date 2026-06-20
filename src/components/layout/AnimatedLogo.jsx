@@ -11,9 +11,9 @@ function measure(targetRef) {
   const isMobile = window.innerWidth < 640;
 
   return {
-    // startläge: stor wordmark centrerad i övre delen av hero (HackFirst-likt, bild 2)
+    // startläge: stor, nästan heltäckande "JUIT NETSEC" högt upp i hero (HackFirst-likt)
     startX: window.innerWidth / 2,
-    startY: window.innerHeight * (isMobile ? 0.28 : 0.32),
+    startY: window.innerHeight * (isMobile ? 0.22 : 0.24),
     startSize: isMobile ? 30 : 78,
     // slutläge: liten logga som landar i header-slotten uppe till vänster (bild 3)
     endX: targetRect.left + targetRect.width / 2,
@@ -106,7 +106,7 @@ export function AnimatedLogo({ targetRef, progress }) {
       <motion.span
         aria-hidden="true"
         style={{ opacity: largeTextOpacity }}
-        className="col-start-1 row-start-1 whitespace-nowrap text-[clamp(2.75rem,13vw,8.5rem)] font-display font-light uppercase tracking-[-0.01em] text-brand-white"
+        className="col-start-1 row-start-1 whitespace-nowrap text-[clamp(2.75rem,15.2vw,17rem)] font-display font-light uppercase leading-[0.9] tracking-[-0.03em] text-brand-white"
       >
         JUIT NETSEC
       </motion.span>
