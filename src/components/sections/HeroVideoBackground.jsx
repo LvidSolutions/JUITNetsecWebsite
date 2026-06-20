@@ -1,14 +1,53 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+
+// hur länge brus-snutten flashas över när huvudvideon loopar om
+const GLITCH_MS = 360;
 
 export function HeroVideoBackground() {
   const videoRef = useRef(null);
+  const brusRef = useRef(null);
+  const [glitching, setGlitching] = useState(false);
 
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const video = videoRef.current;
 
-    if (prefersReducedMotion && videoRef.current) {
-      videoRef.current.pause();
+    if (!video) {
+      return undefined;
     }
+
+    if (prefersReducedMotion) {
+      video.pause();
+      brusRef.current?.pause();
+      return undefined;
+    }
+
+    let timeout;
+
+    // Styr loopen själva (ingen loop-attribut) så vi kan lägga in en brus-glitch
+    // varje gång videon når slutet och startar om – då ser omstarten ut som en glitch.
+    function handleEnded() {
+      setGlitching(true);
+
+      const brus = brusRef.current;
+      if (brus) {
+        brus.currentTime = 0;
+        brus.play()?.catch(() => {});
+      }
+
+      video.currentTime = 0;
+      video.play()?.catch(() => {});
+
+      window.clearTimeout(timeout);
+      timeout = window.setTimeout(() => setGlitching(false), GLITCH_MS);
+    }
+
+    video.addEventListener('ended', handleEnded);
+
+    return () => {
+      video.removeEventListener('ended', handleEnded);
+      window.clearTimeout(timeout);
+    };
   }, []);
 
   return (
@@ -16,14 +55,31 @@ export function HeroVideoBackground() {
       <video
         ref={videoRef}
         autoPlay
-        loop
         muted
         playsInline
         preload="metadata"
-        className="absolute inset-0 h-full w-full object-cover [filter:brightness(1.05)_contrast(1.08)]"
+        className={`absolute inset-0 h-full w-full object-cover [filter:brightness(1.05)_contrast(1.08)] ${
+          glitching ? 'hero-glitch-active' : ''
+        }`}
         aria-hidden="true"
       >
         <source src="/assets/go-to.mp4" type="video/mp4" />
+      </video>
+
+      {/* Brus-snutt som flashas över i omstartsögonblicket för en glitch-känsla */}
+      <video
+        ref={brusRef}
+        autoPlay
+        loop
+        muted
+        playsInline
+        preload="auto"
+        className={`pointer-events-none absolute inset-0 h-full w-full object-cover mix-blend-screen transition-opacity duration-100 ease-out ${
+          glitching ? 'opacity-80' : 'opacity-0'
+        }`}
+        aria-hidden="true"
+      >
+        <source src="/assets/brus.mp4" type="video/mp4" />
       </video>
 
       {/* Lätt enhetlig dämpning så videon behåller liv men inte bländar */}
