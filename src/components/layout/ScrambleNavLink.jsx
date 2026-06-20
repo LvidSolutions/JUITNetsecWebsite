@@ -155,13 +155,16 @@ export function ScrambleNavLink({
         {label}
       </span>
       {/* Synlig text (scramblad eller stabil) centrerad ovanpå reservbredden.
-          Under typingen blir den helsvart och något tyngre så den läses mörk
-          mot det vita blocket (HackFirst-likt), utan att reservbredden ändras. */}
+          Som på HackFirst använder vi mix-blend-difference mot det vita blocket
+          i stället för en fast svart färg: pixlar som blocket täcker blir svarta,
+          pixlar utanför blir vita. När blocket sveper ut åt vänster vitnar därför
+          texten i exakt samma takt som blocket försvinner – ingen kvardröjande
+          svart text. Reservbredden påverkas inte. */}
       <span
         aria-hidden="true"
         className={cn(
           'absolute inset-0 flex items-center justify-center whitespace-nowrap',
-          darkText && 'font-normal text-black',
+          darkText && 'font-normal text-white mix-blend-difference',
         )}
       >
         {display}
