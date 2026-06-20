@@ -5,8 +5,11 @@ import { AnimatedLogo } from './components/layout/AnimatedLogo.jsx';
 import { AboutSection } from './components/sections/AboutSection.jsx';
 import { ContactSection } from './components/sections/ContactSection.jsx';
 import { Hero } from './components/sections/Hero.jsx';
+import { StatsSection } from './components/sections/StatsSection.jsx';
+import { NextStepPlaceholder } from './components/sections/NextStepPlaceholder.jsx';
 import { ReferencesSection } from './components/sections/ReferencesSection.jsx';
 import { ServicesSection } from './components/sections/ServicesSection.jsx';
+import { useHeroIntroProgress } from './lib/useHeroIntroProgress.js';
 
 const titles = {
   '/': 'JUIT NetSec AB – IT-säkerhet, nätverk och infrastruktur',
@@ -26,6 +29,7 @@ function App() {
   const heroRef = useRef(null);
   const logoSlotRef = useRef(null);
   const title = titles[currentPath] || titles['/'];
+  const { scrollYProgress: introProgress } = useHeroIntroProgress(heroRef);
 
   useEffect(() => {
     function navigate(path) {
@@ -77,10 +81,21 @@ function App() {
       >
         Hoppa till huvudinnehåll
       </a>
-      <Header currentPath={currentPath} logoSlotRef={logoSlotRef} hideStaticLogo={isHome} />
-      {isHome && <AnimatedLogo heroRef={heroRef} targetRef={logoSlotRef} />}
+      <Header
+        currentPath={currentPath}
+        logoSlotRef={logoSlotRef}
+        hideStaticLogo={isHome}
+        introProgress={isHome ? introProgress : undefined}
+      />
+      {isHome && <AnimatedLogo targetRef={logoSlotRef} progress={introProgress} />}
       <main id="huvudinnehall" className="min-h-screen bg-brand-black text-brand-white" tabIndex="-1">
-        {isHome && <Hero heroRef={heroRef} />}
+        {isHome && (
+          <>
+            <Hero heroRef={heroRef} introProgress={introProgress} />
+            <StatsSection />
+            <NextStepPlaceholder />
+          </>
+        )}
         {currentPath === '/tjanster' && <ServicesSection />}
         {currentPath === '/om-oss' && <AboutSection />}
         {currentPath === '/referenser' && <ReferencesSection />}

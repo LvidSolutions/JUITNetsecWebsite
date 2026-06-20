@@ -9,8 +9,8 @@ export function CTAButtons() {
       >
         Boka konsultation
       </Button>
-      <Button href="/tjanster" variant="secondary" className="hover:shadow-[0_0_24px_rgba(0,200,83,0.25)]">
-        Se våra tjänster
+      <Button href="#risklandskapet" variant="secondary" className="hover:shadow-[0_0_24px_rgba(0,200,83,0.25)]">
+        Utforska riskerna
       </Button>
     </div>
   );

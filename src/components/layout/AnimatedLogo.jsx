@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion';
+import { motion, useTransform, useReducedMotion } from 'framer-motion';
 
-function measure(heroRef, targetRef) {
-  if (!heroRef.current || !targetRef.current) {
+function measure(targetRef) {
+  if (!targetRef.current) {
     return null;
   }
 
@@ -11,52 +11,42 @@ function measure(heroRef, targetRef) {
 
   return {
     startX: window.innerWidth / 2,
-    startY: window.innerHeight * (isMobile ? 0.22 : 0.26),
-    startSize: isMobile ? 34 : 64,
+    startY: window.innerHeight * (isMobile ? 0.3 : 0.46),
+    startSize: isMobile ? 44 : 96,
     endX: targetRect.left + targetRect.width / 2,
     endY: targetRect.top + targetRect.height / 2,
     endSize: 17,
   };
 }
 
-export function AnimatedLogo({ heroRef, targetRef }) {
+const SHRINK_END = 0.65;
+
+export function AnimatedLogo({ targetRef, progress }) {
   const prefersReducedMotion = useReducedMotion();
   const [geometry, setGeometry] = useState(null);
-  const { scrollYProgress } = useScroll({
-    target: heroRef,
-    offset: ['start start', 'end start'],
-  });
 
   useEffect(() => {
     function recalc() {
-      setGeometry(measure(heroRef, targetRef));
+      setGeometry(measure(targetRef));
     }
 
     recalc();
     window.addEventListener('resize', recalc);
     return () => window.removeEventListener('resize', recalc);
-  }, [heroRef, targetRef]);
+  }, [targetRef]);
 
-  const inputRange = [0, 0.62, 1];
+  const inputRange = [0, SHRINK_END];
 
-  const x = useTransform(
-    scrollYProgress,
-    inputRange,
-    geometry ? [geometry.startX, geometry.startX, geometry.endX] : [0, 0, 0],
-  );
-  const y = useTransform(
-    scrollYProgress,
-    inputRange,
-    geometry ? [geometry.startY, geometry.startY, geometry.endY] : [0, 0, 0],
-  );
+  const x = useTransform(progress, inputRange, geometry ? [geometry.startX, geometry.endX] : [0, 0]);
+  const y = useTransform(progress, inputRange, geometry ? [geometry.startY, geometry.endY] : [0, 0]);
   const fontSize = useTransform(
-    scrollYProgress,
+    progress,
     inputRange,
-    geometry ? [geometry.startSize, geometry.startSize, geometry.endSize] : [16, 16, 16],
+    geometry ? [geometry.startSize, geometry.endSize] : [16, 16],
   );
-  const letterSpacing = useTransform(scrollYProgress, [0, 1], [4, 1.5]);
-  const glow = useTransform(scrollYProgress, [0, 0.7, 1], [0.85, 0.35, 0]);
-  const textShadow = useTransform(glow, (value) => `0 0 ${value * 48}px rgba(0,200,83,${value})`);
+  const letterSpacing = useTransform(progress, inputRange, [6, 1.5]);
+  const glow = useTransform(progress, [0, SHRINK_END * 0.7, SHRINK_END], [0.9, 0.45, 0]);
+  const textShadow = useTransform(glow, (value) => `0 0 ${value * 56}px rgba(0,200,83,${value})`);
 
   if (!geometry) {
     return null;

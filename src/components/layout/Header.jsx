@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
+import { motion, useMotionValue, useTransform } from 'framer-motion';
 import { Button, Container } from '../ui';
 import { cn } from '../../lib/cn';
+
+const HEADER_LANDED_AT = 0.65;
 
 const navigation = [
   { label: 'Hem', href: '/' },
@@ -28,9 +31,10 @@ function NavLink({ href, children, onClick, className = '', isActive = false, ..
   );
 }
 
-export function Header({ currentPath = '/', logoSlotRef, hideStaticLogo = false }) {
+export function Header({ currentPath = '/', logoSlotRef, hideStaticLogo = false, introProgress }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
+  const fallbackProgress = useMotionValue(0);
+  const activeProgress = introProgress || fallbackProgress;
 
   useEffect(() => {
     function handleEscape(event) {
@@ -44,23 +48,29 @@ export function Header({ currentPath = '/', logoSlotRef, hideStaticLogo = false 
   }, []);
 
   useEffect(() => {
+    if (introProgress) {
+      return undefined;
+    }
+
     function handleScroll() {
-      setIsScrolled(window.scrollY > 24);
+      fallbackProgress.set(window.scrollY > 24 ? 1 : 0);
     }
 
     handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [introProgress, fallbackProgress]);
+
+  const backdropInputRange = introProgress ? [0, HEADER_LANDED_AT] : [0, 1];
+  const backdropOpacity = useTransform(activeProgress, backdropInputRange, [0, 1]);
+  const backgroundColor = useTransform(backdropOpacity, (value) => `rgba(5, 5, 5, ${value * 0.85})`);
+  const borderColor = useTransform(backdropOpacity, (value) => `rgba(255, 255, 255, ${value * 0.12})`);
+  const backdropFilter = useTransform(backdropOpacity, (value) => `blur(${value * 12}px)`);
 
   return (
-    <header
-      className={cn(
-        'sticky top-0 z-50 border-b transition-colors duration-300 ease-smooth',
-        isScrolled
-          ? 'border-brand-line bg-brand-black/85 backdrop-blur-md'
-          : 'border-transparent bg-transparent',
-      )}
+    <motion.header
+      className="sticky top-0 z-50 border-b transition-[background-color,border-color] duration-200 ease-smooth"
+      style={{ backgroundColor, borderColor, backdropFilter, WebkitBackdropFilter: backdropFilter }}
     >
       <Container>
         <div className="flex h-20 items-center justify-between gap-6">
@@ -156,6 +166,6 @@ export function Header({ currentPath = '/', logoSlotRef, hideStaticLogo = false 
           </div>
         </div>
       </Container>
-    </header>
+    </motion.header>
   );
 }
