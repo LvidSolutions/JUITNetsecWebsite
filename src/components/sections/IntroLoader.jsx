@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
+import { BrandWordmark } from '../layout/BrandWordmark.jsx';
 
 const TICKS = Array.from({ length: 40 });
 
@@ -83,9 +84,9 @@ export function IntroLoader({ onComplete }) {
           transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
           className="flex w-full max-w-xl flex-col items-center"
         >
-          <p className="mb-6 font-mono text-[0.7rem] uppercase tracking-[0.45em] text-brand-green/80">
-            JUIT NETSEC
-          </p>
+          <div className="mb-7 text-[20px]">
+            <BrandWordmark />
+          </div>
 
           <div className="flex items-end gap-2 font-mono tabular-nums">
             <span className="text-6xl font-semibold leading-none text-brand-white sm:text-7xl">

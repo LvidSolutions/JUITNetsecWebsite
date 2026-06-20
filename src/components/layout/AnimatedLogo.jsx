@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion, useTransform, useReducedMotion } from 'framer-motion';
+import { BrandWordmark } from './BrandWordmark.jsx';
 
 function measure(targetRef) {
   if (!targetRef.current) {
@@ -10,13 +11,14 @@ function measure(targetRef) {
   const isMobile = window.innerWidth < 640;
 
   return {
+    // startläge: stor wordmark centrerad i övre delen av hero (HackFirst-likt, bild 2)
     startX: window.innerWidth / 2,
-    startY: window.innerHeight * (isMobile ? 0.26 : 0.34),
-    startSize: isMobile ? 34 : 96,
-    startLetterSpacing: isMobile ? 2.5 : 6,
+    startY: window.innerHeight * (isMobile ? 0.28 : 0.32),
+    startSize: isMobile ? 30 : 78,
+    // slutläge: liten logga som landar i header-slotten uppe till vänster (bild 3)
     endX: targetRect.left + targetRect.width / 2,
     endY: targetRect.top + targetRect.height / 2,
-    endSize: 17,
+    endSize: isMobile ? 18 : 20,
   };
 }
 
@@ -43,15 +45,10 @@ export function AnimatedLogo({ targetRef, progress }) {
   const fontSize = useTransform(
     progress,
     inputRange,
-    geometry ? [geometry.startSize, geometry.endSize] : [16, 16],
+    geometry ? [geometry.startSize, geometry.endSize] : [20, 20],
   );
-  const letterSpacing = useTransform(
-    progress,
-    inputRange,
-    geometry ? [geometry.startLetterSpacing, 1.5] : [6, 1.5],
-  );
-  const glow = useTransform(progress, [0, SHRINK_END * 0.7, SHRINK_END], [0.9, 0.45, 0]);
-  const textShadow = useTransform(glow, (value) => `0 0 ${value * 56}px rgba(0,200,83,${value})`);
+  const glow = useTransform(progress, [0, SHRINK_END * 0.7, SHRINK_END], [0.85, 0.4, 0]);
+  const textShadow = useTransform(glow, (value) => `0 0 ${value * 48}px rgba(0,200,83,${value})`);
 
   if (!geometry) {
     return null;
@@ -62,16 +59,15 @@ export function AnimatedLogo({ targetRef, progress }) {
       <a
         href="/"
         aria-label="JUIT NetSec AB, gå till startsidan"
-        className="pointer-events-auto fixed left-0 top-0 z-[60] whitespace-nowrap font-semibold text-brand-white"
+        className="pointer-events-auto fixed left-0 top-0 z-[60]"
         style={{
           left: geometry.endX,
           top: geometry.endY,
           transform: 'translate(-50%, -50%)',
           fontSize: geometry.endSize,
-          letterSpacing: 1.5,
         }}
       >
-        JUIT NETSEC
+        <BrandWordmark />
       </a>
     );
   }
@@ -80,17 +76,18 @@ export function AnimatedLogo({ targetRef, progress }) {
     <motion.a
       href="/"
       aria-label="JUIT NetSec AB, gå till startsidan"
-      className="pointer-events-auto fixed left-0 top-0 z-[60] whitespace-nowrap font-semibold text-brand-white"
+      className="pointer-events-auto fixed left-0 top-0 z-[60]"
       style={{
         x,
         y,
         translateX: '-50%',
         translateY: '-50%',
         fontSize,
-        letterSpacing,
       }}
     >
-      <motion.span style={{ textShadow }}>JUIT NETSEC</motion.span>
+      <motion.span className="inline-block" style={{ textShadow }}>
+        <BrandWordmark />
+      </motion.span>
     </motion.a>
   );
 }

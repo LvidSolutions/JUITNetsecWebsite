@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion, useMotionValue, useTransform } from 'framer-motion';
 import { Button, Container } from '../ui';
+import { BrandWordmark } from './BrandWordmark.jsx';
 import { cn } from '../../lib/cn';
 
 const HEADER_LANDED_AT = 0.45;
@@ -79,12 +80,12 @@ export function Header({ currentPath = '/', logoSlotRef, hideStaticLogo = false,
             aria-label="JUIT NetSec AB, gå till startsidan"
             ref={logoSlotRef}
             className={cn(
-              'shrink-0 text-base font-semibold tracking-wide text-brand-white transition-colors duration-200 hover:text-brand-green',
+              'shrink-0 text-[20px] transition-opacity duration-200 hover:opacity-80',
               hideStaticLogo && 'invisible',
             )}
             onClick={() => setIsMenuOpen(false)}
           >
-            JUIT NETSEC
+            <BrandWordmark />
           </a>
 
           <nav aria-label="Huvudnavigering" className="hidden items-center gap-8 lg:flex">
