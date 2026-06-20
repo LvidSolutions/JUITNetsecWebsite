@@ -2,9 +2,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useReducedMotion } from 'framer-motion';
 import { cn } from '../../lib/cn';
 
-// Tecken som flimrar förbi innan länknamnet "decodas" fram (samma uppsättning
-// för alla länkar): versaler, siffror och en handfull symboler.
-const SCRAMBLE_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#@!_';
+// Tecken som flimrar förbi innan länknamnet "decodas" fram. Exakt samma
+// uppsättning som HackFirst använder: gemener a–z plus en rad symboler
+// (inga siffror).
+const SCRAMBLE_CHARS = 'abcdefghijklmnopqrstuvwxyz!@#$%^&*-_+=;:<>,';
 // Hur länge hela decode-resan tar och hur ofta slumptecknen byts.
 const REVEAL_MS = 620;
 const TICK_MS = 45;
@@ -31,6 +32,20 @@ export function ScrambleNavLink({
   const prefersReducedMotion = useReducedMotion();
   const [display, setDisplay] = useState(label);
   const [scrambling, setScrambling] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  // Texten ligger kvar mörk tills blocket sopats bort helt, annars skulle vit
+  // text blinka mot ett ännu synligt vitt block under utsvepet.
+  const [darkText, setDarkText] = useState(false);
+
+  // Det vita blocket visas så länge pekaren är kvar (HackFirst håller --anim=1
+  // under hela hover) eller medan mount-decoden spelar upp.
+  const blockVisible = hovered || scrambling;
+
+  useEffect(() => {
+    if (blockVisible) {
+      setDarkText(true);
+    }
+  }, [blockVisible]);
 
   const rafRef = useRef(0);
   const timersRef = useRef([]);
@@ -101,8 +116,16 @@ export function ScrambleNavLink({
     <a
       href={href}
       onClick={onClick}
-      onMouseEnter={runScramble}
-      onFocus={runScramble}
+      onMouseEnter={() => {
+        setHovered(true);
+        runScramble();
+      }}
+      onMouseLeave={() => setHovered(false)}
+      onFocus={() => {
+        setHovered(true);
+        runScramble();
+      }}
+      onBlur={() => setHovered(false)}
       aria-label={label}
       aria-current={isActive ? 'page' : undefined}
       className={cn(
@@ -112,13 +135,20 @@ export function ScrambleNavLink({
       )}
       {...props}
     >
-      {/* Litet vitt block runt texten, syns bara under scramble. Sharpa hörn. */}
+      {/* Vitt block runt texten. Som på HackFirst sveper det in från vänster
+          (scaleX 0→1) när pekaren kommer, ligger kvar under hela hovern och
+          sveper ut igen när man lämnar. Sharpa hörn. */}
       <span
         aria-hidden="true"
         className={cn(
-          'pointer-events-none absolute inset-y-0 -inset-x-0.5 rounded-[1px] bg-brand-white transition-opacity duration-100',
-          scrambling ? 'opacity-100' : 'opacity-0',
+          'pointer-events-none absolute inset-y-0 -inset-x-0.5 origin-left rounded-[1px] bg-brand-white transition-transform duration-[600ms] ease-[cubic-bezier(0.16,1,0.3,1)]',
+          blockVisible ? 'scale-x-100' : 'scale-x-0',
         )}
+        onTransitionEnd={() => {
+          if (!blockVisible) {
+            setDarkText(false);
+          }
+        }}
       />
       {/* Osynlig reservbredd = slutlabel, så layouten aldrig hoppar. */}
       <span aria-hidden="true" className="invisible">
@@ -131,7 +161,7 @@ export function ScrambleNavLink({
         aria-hidden="true"
         className={cn(
           'absolute inset-0 flex items-center justify-center whitespace-nowrap',
-          scrambling && 'font-normal text-black',
+          darkText && 'font-normal text-black',
         )}
       >
         {display}

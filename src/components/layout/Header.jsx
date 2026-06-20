@@ -59,7 +59,9 @@ export function Header({ currentPath = '/', logoSlotRef, hideStaticLogo = false,
       style={{ backgroundColor, backdropFilter, WebkitBackdropFilter: backdropFilter }}
     >
       <Container>
-        <div className="flex h-20 items-center justify-between gap-6">
+        {/* Som på HackFirst: logotyp till vänster, navlänkarna utspridda
+            (space-between) i ett centrerat band, hamburgaren längst till höger. */}
+        <div className="relative flex h-20 items-center">
           <a
             href="/"
             aria-label="JUIT NetSec AB, gå till startsidan"
@@ -73,19 +75,22 @@ export function Header({ currentPath = '/', logoSlotRef, hideStaticLogo = false,
             <BrandWordmark />
           </a>
 
-          <div className="flex items-center gap-7">
-            <nav aria-label="Huvudnavigering" className="hidden items-center gap-7 lg:flex">
-              {navigation.map((item) => (
-                <ScrambleNavLink
-                  key={item.href}
-                  label={item.label}
-                  href={item.href}
-                  delay={item.delay}
-                  isActive={currentPath === item.href}
-                />
-              ))}
-            </nav>
+          <nav
+            aria-label="Huvudnavigering"
+            className="absolute left-1/2 hidden w-[clamp(360px,34vw,520px)] -translate-x-1/2 items-center justify-between lg:flex"
+          >
+            {navigation.map((item) => (
+              <ScrambleNavLink
+                key={item.href}
+                label={item.label}
+                href={item.href}
+                delay={item.delay}
+                isActive={currentPath === item.href}
+              />
+            ))}
+          </nav>
 
+          <div className="ml-auto flex items-center">
             {/* Minimalistisk hamburger – två tunna vita linjer, ingen knappruta. */}
             <button
               type="button"
