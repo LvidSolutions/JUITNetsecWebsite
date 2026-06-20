@@ -2,9 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 
 // hur lång tid innan klippets slut crossfaden till nästa varv börjar
 const CROSSFADE_S = 0.9;
-// saktar ner uppspelningen så det blir längre tid mellan varje övergång
-// (klippet är bara ~3,7 s, 0.55 ger ~6,7 s mellan transitions)
-const PLAYBACK_RATE = 0.55;
+const PLAYBACK_RATE = 1;
 
 export function HeroVideoBackground() {
   const videoARef = useRef(null);
