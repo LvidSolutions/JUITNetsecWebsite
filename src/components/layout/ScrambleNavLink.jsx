@@ -2,8 +2,9 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useReducedMotion } from 'framer-motion';
 import { cn } from '../../lib/cn';
 
-// Tecken som flimrar förbi innan länknamnet "decodas" fram.
-const SCRAMBLE_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#@!%&_|?/';
+// Tecken som flimrar förbi innan länknamnet "decodas" fram (samma uppsättning
+// för alla länkar): versaler, siffror och en handfull symboler.
+const SCRAMBLE_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#@!_';
 // Hur länge hela decode-resan tar och hur ofta slumptecknen byts.
 const REVEAL_MS = 620;
 const TICK_MS = 45;
@@ -106,7 +107,7 @@ export function ScrambleNavLink({
       aria-current={isActive ? 'page' : undefined}
       className={cn(
         'group relative inline-flex items-center px-1 font-display text-sm font-light uppercase tracking-[0.18em] transition-colors duration-200 ease-smooth focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-green',
-        scrambling ? 'text-brand-black' : isActive ? 'text-brand-green' : 'text-brand-white/85 hover:text-brand-white',
+        isActive ? 'text-brand-green' : 'text-brand-white/85 hover:text-brand-white',
         className,
       )}
       {...props}
@@ -123,8 +124,16 @@ export function ScrambleNavLink({
       <span aria-hidden="true" className="invisible">
         {label}
       </span>
-      {/* Synlig text (scramblad eller stabil) centrerad ovanpå reservbredden. */}
-      <span aria-hidden="true" className="absolute inset-0 flex items-center justify-center whitespace-nowrap">
+      {/* Synlig text (scramblad eller stabil) centrerad ovanpå reservbredden.
+          Under typingen blir den helsvart och något tyngre så den läses mörk
+          mot det vita blocket (HackFirst-likt), utan att reservbredden ändras. */}
+      <span
+        aria-hidden="true"
+        className={cn(
+          'absolute inset-0 flex items-center justify-center whitespace-nowrap',
+          scrambling && 'font-normal text-black',
+        )}
+      >
         {display}
       </span>
     </a>
