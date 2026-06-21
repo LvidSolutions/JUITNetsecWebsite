@@ -96,7 +96,7 @@ export function Header({ currentPath = '/', logoSlotRef, hideStaticLogo = false,
 
           <nav
             aria-label="Huvudnavigering"
-            className="absolute left-1/2 hidden w-[clamp(360px,34vw,520px)] -translate-x-1/2 items-center justify-between lg:flex"
+            className="absolute left-1/2 z-30 hidden w-[clamp(360px,34vw,520px)] -translate-x-1/2 items-center justify-between lg:flex"
           >
             {navigation.map((item) => (
               <ScrambleNavLink
@@ -109,7 +109,7 @@ export function Header({ currentPath = '/', logoSlotRef, hideStaticLogo = false,
             ))}
           </nav>
 
-          <div className="ml-auto flex items-center">
+          <div className="relative z-30 ml-auto flex items-center">
             {/* Minimalistisk hamburger – två tunna vita linjer, ingen knappruta. */}
             <button
               type="button"

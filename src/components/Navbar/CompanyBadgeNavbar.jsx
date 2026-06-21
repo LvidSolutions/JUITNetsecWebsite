@@ -37,7 +37,7 @@ const FRONT_UV_RECT = { x: 0, y: 0, w: 0.5, h: 0.755 };
 const BACK_UV_RECT = { x: 0.5, y: 0, w: 0.5, h: 0.757 };
 
 export default function CompanyBadgeNavbar({
-  position = [0, 0, 18],
+  position = [0, 0, 26],
   gravity = [0, -35, 0],
   fov = 18,
   transparent = true,
@@ -155,9 +155,9 @@ function Band({
   const [dragged, drag] = useState(false);
   const [hovered, hover] = useState(false);
 
-  useRopeJoint(fixed, j1, [[0, 0, 0], [0, 0, 0], 1]);
-  useRopeJoint(j1, j2, [[0, 0, 0], [0, 0, 0], 1]);
-  useRopeJoint(j2, j3, [[0, 0, 0], [0, 0, 0], 1]);
+  useRopeJoint(fixed, j1, [[0, 0, 0], [0, 0, 0], 1.3]);
+  useRopeJoint(j1, j2, [[0, 0, 0], [0, 0, 0], 1.3]);
+  useRopeJoint(j2, j3, [[0, 0, 0], [0, 0, 0], 1.3]);
   useSphericalJoint(j3, card, [
     [0, 0, 0],
     [0, 1.5, 0],
@@ -200,19 +200,19 @@ function Band({
 
   return (
     <>
-      {/* Kompaktare upphängning så brickan hänger mer vertikalt från navbaren. */}
-      <group position={[0, 3.2, 0]}>
+      {/* Upphängning nära toppen så lanyarden ser ut att hänga från navbaren. */}
+      <group position={[0, 4.2, 0]}>
         <RigidBody ref={fixed} {...segmentProps} type="fixed" />
-        <RigidBody position={[0.3, -0.4, 0]} ref={j1} {...segmentProps}>
+        <RigidBody position={[0.3, -0.5, 0]} ref={j1} {...segmentProps}>
           <BallCollider args={[0.1]} />
         </RigidBody>
-        <RigidBody position={[0.5, -0.8, 0]} ref={j2} {...segmentProps}>
+        <RigidBody position={[0.5, -1.0, 0]} ref={j2} {...segmentProps}>
           <BallCollider args={[0.1]} />
         </RigidBody>
-        <RigidBody position={[0.7, -1.2, 0]} ref={j3} {...segmentProps}>
+        <RigidBody position={[0.7, -1.5, 0]} ref={j3} {...segmentProps}>
           <BallCollider args={[0.1]} />
         </RigidBody>
-        <RigidBody position={[0.9, -1.6, 0]} ref={card} {...segmentProps} type={dragged ? 'kinematicPosition' : 'dynamic'}>
+        <RigidBody position={[0.9, -2.0, 0]} ref={card} {...segmentProps} type={dragged ? 'kinematicPosition' : 'dynamic'}>
           <CuboidCollider args={[0.8, 1.125, 0.01]} />
           <group
             scale={2.25}
