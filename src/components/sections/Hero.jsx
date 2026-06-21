@@ -1,15 +1,13 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { motion, useReducedMotion, useMotionValueEvent } from 'framer-motion';
 import { Container } from '../ui';
 import { HeroVideoBackground } from './HeroVideoBackground.jsx';
-import { PixelCursorField } from './PixelCursorField.jsx';
 import { CTAButtons } from './CTAButtons.jsx';
 
 const LOGO_LANDED_AT = 0.45;
 
 export function Hero({ heroRef, introProgress }) {
   const prefersReducedMotion = useReducedMotion();
-  const stickyRef = useRef(null);
   const [logoLanded, setLogoLanded] = useState(false);
 
   useMotionValueEvent(introProgress, 'change', (latest) => {
@@ -22,11 +20,8 @@ export function Hero({ heroRef, introProgress }) {
 
   return (
     <section id="hem" ref={heroRef} className="relative -mt-20 h-[220vh] sm:h-[240vh]">
-      <div ref={stickyRef} className="sticky top-0 h-screen w-full overflow-hidden bg-brand-black">
+      <div className="sticky top-0 h-screen w-full overflow-hidden bg-brand-black">
         <HeroVideoBackground />
-
-        {/* ChainGPT Labs-inspirerat pixelfält runt musen (av på touch / reduced-motion) */}
-        <PixelCursorField containerRef={stickyRef} />
 
         <Container className="relative z-20 flex h-full flex-col justify-end pb-24 sm:pb-28 lg:pb-32">
           <motion.div
