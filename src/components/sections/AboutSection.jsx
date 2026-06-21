@@ -17,7 +17,7 @@ const facts = [
   { label: 'Plats', value: 'STHLM', sub: 'Stockholm, Sverige' },
   { label: 'Org.nr', value: '559243-2727', sub: 'Svenskt aktiebolag' },
   { label: 'Inriktning', value: 'IT / SEC', sub: 'Infrastruktur, kommunikation och säkerhet' },
-  { label: 'Fokus', value: 'DRIFT', sub: 'Datakonsult­verksamhet och datordrifttjänster' },
+  { label: 'Fokus', value: 'DRIFT', sub: 'Datakonsultverksamhet och datordrifttjänster' },
 ];
 
 const values = [
@@ -29,6 +29,20 @@ const values = [
   'Teknisk precision',
   'Praktisk expertis',
   'Förtroende',
+];
+
+const contactProfile = {
+  name: 'Ulf Wernersson',
+  role: 'Senior Infrastructure Architect',
+  email: 'ulf.wernersson@juit.se',
+  phone: '+46 708-25 63 93',
+  phoneHref: 'tel:+46708256393',
+};
+
+const companyContact = [
+  { k: 'Bolag', v: 'JUIT NetSec AB' },
+  { k: 'Adress', v: 'Fatburs kvarngata 26, 118 64 Stockholm' },
+  { k: 'Webb', v: 'www.juit.se', href: 'https://www.juit.se' },
 ];
 
 // Ersätter referensens "Awards & Recognition" – inga påhittade priser.
@@ -133,6 +147,30 @@ function Reveal({ children, className = '', delay = 0 }) {
     >
       {children}
     </motion.div>
+  );
+}
+
+function ContactRow({ row }) {
+  return (
+    <div className="flex flex-col gap-1 border-b border-brand-line py-4 sm:flex-row sm:items-center sm:gap-8">
+      <dt className="w-28 shrink-0 text-[11px] uppercase tracking-[0.24em] text-brand-mist/45">
+        {row.k}
+      </dt>
+      <dd className="text-brand-white/90">
+        {row.href ? (
+          <a
+            href={row.href}
+            target={row.href.startsWith('http') ? '_blank' : undefined}
+            rel={row.href.startsWith('http') ? 'noreferrer' : undefined}
+            className="transition-colors duration-200 hover:text-brand-green"
+          >
+            {row.v}
+          </a>
+        ) : (
+          row.v
+        )}
+      </dd>
+    </div>
   );
 }
 
@@ -406,7 +444,7 @@ export function AboutSection() {
       </section>
 
       {/* ---------------------------------------------------------------- */}
-      {/* KONTAKT / SLUTSEKTION – inspirerad av referensens footer-känsla   */}
+      {/* KONTAKT / SLUTSEKTION – kontaktperson och bolagsinformation       */}
       {/* ---------------------------------------------------------------- */}
       <section className="relative overflow-hidden pt-24 sm:pt-28 lg:pt-32">
         <Container>
@@ -421,35 +459,38 @@ export function AboutSection() {
             </Reveal>
 
             <Reveal delay={0.08}>
-              <Label>Kontakt</Label>
-              <dl className="mt-8 space-y-0 border-t border-brand-line font-mono text-sm">
-                {[
-                  { k: 'Mail', v: 'info@juitnetsec.se', href: 'mailto:info@juitnetsec.se' },
-                  { k: 'Plats', v: 'Stockholm, Sverige' },
-                  { k: 'Org.nr', v: '559243-2727' },
-                ].map((row) => (
-                  <div
-                    key={row.k}
-                    className="flex flex-col gap-1 border-b border-brand-line py-4 sm:flex-row sm:items-center sm:gap-8"
-                  >
-                    <dt className="w-28 shrink-0 text-[11px] uppercase tracking-[0.24em] text-brand-mist/45">
-                      {row.k}
-                    </dt>
-                    <dd className="text-brand-white/90">
-                      {row.href ? (
-                        <a
-                          href={row.href}
-                          className="transition-colors duration-200 hover:text-brand-green"
-                        >
-                          {row.v}
-                        </a>
-                      ) : (
-                        row.v
-                      )}
-                    </dd>
+              <Label>Kontaktperson</Label>
+              <div className="mt-8 grid gap-8 lg:grid-cols-[0.95fr_1.05fr]">
+                <div className="rounded-[2px] border border-brand-line bg-white/[0.025] p-6 transition-colors duration-200 hover:border-brand-green/40 sm:p-8">
+                  <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-brand-green">
+                    Senior kontakt
+                  </p>
+                  <h2 className="mt-5 font-display text-3xl font-semibold leading-tight tracking-tight text-brand-white sm:text-4xl">
+                    {contactProfile.name}
+                  </h2>
+                  <p className="mt-3 text-base leading-7 text-brand-mist/70">{contactProfile.role}</p>
+                  <div className="mt-8 space-y-3 text-sm leading-6 text-brand-mist/85">
+                    <a
+                      href={`mailto:${contactProfile.email}`}
+                      className="block transition-colors duration-200 hover:text-brand-green"
+                    >
+                      {contactProfile.email}
+                    </a>
+                    <a
+                      href={contactProfile.phoneHref}
+                      className="block transition-colors duration-200 hover:text-brand-green"
+                    >
+                      {contactProfile.phone}
+                    </a>
                   </div>
-                ))}
-              </dl>
+                </div>
+
+                <dl className="space-y-0 border-t border-brand-line font-mono text-sm">
+                  {companyContact.map((row) => (
+                    <ContactRow key={row.k} row={row} />
+                  ))}
+                </dl>
+              </div>
             </Reveal>
           </div>
 
