@@ -8,12 +8,10 @@ const LOGO_LANDED_AT = 0.45;
 
 export function Hero({ heroRef, introProgress }) {
   const prefersReducedMotion = useReducedMotion();
-  const [logoLanded, setLogoLanded] = useState(false);
+  const [logoLanded, setLogoLanded] = useState(() => introProgress.get() >= LOGO_LANDED_AT);
 
   useMotionValueEvent(introProgress, 'change', (latest) => {
-    if (!logoLanded && latest >= LOGO_LANDED_AT) {
-      setLogoLanded(true);
-    }
+    setLogoLanded(latest >= LOGO_LANDED_AT);
   });
 
   const copyVisible = prefersReducedMotion || logoLanded;
