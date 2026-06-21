@@ -14,7 +14,7 @@ function measure(targetRef) {
     // startläge: den mindre JUIT NetSec-wordmarken centrerad över hero-videon
     startX: window.innerWidth / 2,
     startY: window.innerHeight * (isMobile ? 0.22 : 0.24),
-    startSize: isMobile ? 30 : 46,
+    startSize: isMobile ? 36 : 58,
     // slutläge: liten logga som landar i header-slotten uppe till vänster
     endX: targetRect.left + targetRect.width / 2,
     endY: targetRect.top + targetRect.height / 2,
