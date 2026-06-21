@@ -100,7 +100,7 @@ export function TerminalSignalSection() {
               mouseStrength={0.35}
               dpr={desktop ? undefined : 1.25}
               pageLoadAnimation={!reducedMotion}
-              brightness={desktop ? 0.72 : 0.6}
+              brightness={desktop ? 1.05 : 0.9}
             />
           </TerminalBoundary>
         ) : (
@@ -108,14 +108,15 @@ export function TerminalSignalSection() {
         )}
       </div>
 
-      {/* Läsbarhetslager: mörk vinjett + gradient så texten alltid syns. */}
+      {/* Läsbarhetslager: lättare vinjett så effekten syns tydligt men texten
+          fortfarande är läsbar (vänsterscrim bakom rubriken). */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-[1] bg-[linear-gradient(90deg,rgba(5,5,5,0.92)_0%,rgba(5,5,5,0.72)_42%,rgba(5,5,5,0.35)_100%)]"
+        className="pointer-events-none absolute inset-0 z-[1] bg-[linear-gradient(90deg,rgba(5,5,5,0.72)_0%,rgba(5,5,5,0.4)_45%,rgba(5,5,5,0)_100%)]"
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-[1] bg-[linear-gradient(180deg,rgba(5,5,5,0.85)_0%,transparent_28%,transparent_72%,rgba(5,5,5,0.9)_100%)]"
+        className="pointer-events-none absolute inset-0 z-[1] bg-[linear-gradient(180deg,rgba(5,5,5,0.55)_0%,transparent_24%,transparent_78%,rgba(5,5,5,0.7)_100%)]"
       />
 
       {/* Innehåll ovanpå effekten. pointer-events-none gör att musrörelser når
