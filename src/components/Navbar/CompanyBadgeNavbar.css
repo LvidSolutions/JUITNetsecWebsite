@@ -1,13 +1,14 @@
 /* Kompakt navbar-variant av Lanyard. Hänger i övre högra hörnet på /about,
    under hamburgaren och höger om CONTACT. Wrappern fångar inga pekarhändelser
    (så navbarens knappar förblir klickbara) – bara själva canvasen är dragbar.
-   Ytan är medvetet större än brickan så kortet kan dras en bra bit innan det
-   klipps av canvaskanten; nav-länkarna ligger ovanför i z-led (se Header). */
+   Ytan är bred nog att rymma hela repets halvcirkel (radie ORBIT_R) så kortet
+   kan dras längs hela bågen utan att klippas av canvaskanten; nav-länkarna
+   ligger ovanför i z-led (se Header). */
 .company-badge-navbar {
   position: absolute;
   top: 0;
   right: 36px;
-  width: 360px;
+  width: 520px;
   height: 540px;
   z-index: 20;
   pointer-events: none;

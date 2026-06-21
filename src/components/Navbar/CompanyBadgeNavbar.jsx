@@ -39,17 +39,19 @@ const BACK_UV_RECT = { x: 0.5, y: 0, w: 0.5, h: 0.757 };
 // Dragmålet begränsas till repets fysiska omloppsbana: en halvcirkel (radie
 // ORBIT_R) runt upphängningspunkten PIVOT, och aldrig ovanför den. Det gör att
 // kortet svänger längs en båge precis som på ett verkligt rep i stället för i
-// en rektangel. En diskret canvas-säkerhetsruta (SAFE_*) ligger kvar som yttre
-// skydd så kortet aldrig kan klippas av kanten i extremlägena.
+// en rektangel.
 // Mittpunkten ligger där repet börjar (PIVOT). Kortet får gå lika långt
 // (ORBIT_R) från mittpunkten i ALLA riktningar inom den nedre halvan -> en äkta
-// halvcirkel. Canvasen är bred nog att rymma hela halvcirkeln så den radiella
-// gränsen är den enda som styr (SAFE_* ligger utanför radien som ren nödgräns).
+// halvcirkel. Väggarna (SAFE_*) ligger ungefär dubbelt så långt ut som repet
+// når, så repet maxar ut på ca 3/4 av vägen från mittpunkten till väggen och
+// den radiella halvcirkeln är den ENDA gräns man känner (väggen är bara en
+// nödbackstop som i praktiken aldrig nås). Canvasen är bred nog att rymma hela
+// halvcirkeln så kortet aldrig klipps av kanten.
 const PIVOT = { x: 0, y: 4.8, z: 0 };
-const ORBIT_R = 4.5;
-// Liten hörn-canvas: halvcirkeln får inte plats fullt ut, så kortet stoppas
-// (krockar) mot väggarna i sidled — det är OK och avsiktligt här.
-const SAFE_X = 2.5;
+const ORBIT_R = 3.75;
+// Väggar ~2x repets räckvidd -> repet (ORBIT_R) stannar vid ~3/4 av vägen ut
+// och väggen klipper aldrig kortet.
+const SAFE_X = 5.0;
 const SAFE_Y_TOP = 4.0;
 const SAFE_Y_BOTTOM = -3.9;
 const clamp = (v, min, max) => Math.min(Math.max(v, min), max);
