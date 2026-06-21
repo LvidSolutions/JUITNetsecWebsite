@@ -21,7 +21,10 @@ import './CompanyBadgeNavbar.css';
 
 extend({ MeshLineGeometry, MeshLineMaterial });
 
-useGLTF.preload(cardGLB);
+// card.glb är Draco-komprimerad (geometri) + webp-textur. Draco-avkodaren
+// hostas lokalt under /draco/ så vi slipper ett runtime-CDN-beroende.
+const DRACO_PATH = '/draco/';
+useGLTF.preload(cardGLB, DRACO_PATH);
 
 // 1x1 transparent pixel — låter useTexture anropas ovillkorligt när en
 // front/back-bild inte angetts.
@@ -95,7 +98,7 @@ function Band({
   const rot = new THREE.Vector3();
   const dir = new THREE.Vector3();
   const segmentProps = { type: 'dynamic', canSleep: true, colliders: false, angularDamping: 4, linearDamping: 4 };
-  const { nodes, materials } = useGLTF(cardGLB);
+  const { nodes, materials } = useGLTF(cardGLB, DRACO_PATH);
   const texture = useTexture(lanyardImage || lanyard);
   const frontTex = useTexture(frontImage || BLANK_PIXEL);
   const backTex = useTexture(backImage || BLANK_PIXEL);
