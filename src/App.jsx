@@ -8,6 +8,7 @@ import { ContactSection } from './components/sections/ContactSection.jsx';
 import { Hero } from './components/sections/Hero.jsx';
 import { IntroLoader } from './components/sections/IntroLoader.jsx';
 import { StatsSection } from './components/sections/StatsSection.jsx';
+import { TerminalSignalSection } from './components/sections/TerminalSignalSection.jsx';
 import { NextStepPlaceholder } from './components/sections/NextStepPlaceholder.jsx';
 import { ReferencesSection } from './components/sections/ReferencesSection.jsx';
 import { ServicesSection } from './components/sections/ServicesSection.jsx';
@@ -110,6 +111,7 @@ function App() {
           <>
             <Hero heroRef={heroRef} introProgress={introProgress} />
             <StatsSection />
+            <TerminalSignalSection />
             <NextStepPlaceholder />
           </>
         )}
