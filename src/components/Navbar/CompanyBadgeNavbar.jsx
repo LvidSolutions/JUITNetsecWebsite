@@ -36,12 +36,16 @@ const BLANK_PIXEL =
 const FRONT_UV_RECT = { x: 0, y: 0, w: 0.5, h: 0.755 };
 const BACK_UV_RECT = { x: 0.5, y: 0, w: 0.5, h: 0.757 };
 
-// Dragmålet klampas i NDC (skärmkoordinater, upplösningsoberoende) så kortet
-// aldrig kan föras närmare canvaskanten än sin egen storlek – då syns det
-// aldrig "klippas" av väggarna, hur långt man än drar musen utanför.
-const DRAG_X = 0.55;
-const DRAG_Y_MAX = 0.62;
-const DRAG_Y_MIN = -0.42;
+// Dragmålet begränsas till repets fysiska omloppsbana: en halvcirkel (radie
+// ORBIT_R) runt upphängningspunkten PIVOT, och aldrig ovanför den. Det gör att
+// kortet svänger längs en båge precis som på ett verkligt rep i stället för i
+// en rektangel. En diskret canvas-säkerhetsruta (SAFE_*) ligger kvar som yttre
+// skydd så kortet aldrig kan klippas av kanten i extremlägena.
+const PIVOT = { x: 0, y: 4.8, z: 0 };
+const ORBIT_R = 6.2;
+const SAFE_X = 1.95;
+const SAFE_Y_TOP = 3.4;
+const SAFE_Y_BOTTOM = -3.2;
 const clamp = (v, min, max) => Math.min(Math.max(v, min), max);
 
 export default function CompanyBadgeNavbar({
@@ -105,7 +109,8 @@ function Band({
   const ang = new THREE.Vector3();
   const rot = new THREE.Vector3();
   const dir = new THREE.Vector3();
-  const segmentProps = { type: 'dynamic', canSleep: true, colliders: false, angularDamping: 4, linearDamping: 4 };
+  // Lägre dämpning = mer elastiskt, gungande rep.
+  const segmentProps = { type: 'dynamic', canSleep: true, colliders: false, angularDamping: 2.5, linearDamping: 2.5 };
   const { nodes, materials } = useGLTF(cardGLB, DRACO_PATH);
   const texture = useTexture(lanyardImage || lanyard);
   const frontTex = useTexture(frontImage || BLANK_PIXEL);
@@ -163,9 +168,9 @@ function Band({
   const [dragged, drag] = useState(false);
   const [hovered, hover] = useState(false);
 
-  useRopeJoint(fixed, j1, [[0, 0, 0], [0, 0, 0], 1.3]);
-  useRopeJoint(j1, j2, [[0, 0, 0], [0, 0, 0], 1.3]);
-  useRopeJoint(j2, j3, [[0, 0, 0], [0, 0, 0], 1.3]);
+  useRopeJoint(fixed, j1, [[0, 0, 0], [0, 0, 0], 1.4]);
+  useRopeJoint(j1, j2, [[0, 0, 0], [0, 0, 0], 1.4]);
+  useRopeJoint(j2, j3, [[0, 0, 0], [0, 0, 0], 1.4]);
   useSphericalJoint(j3, card, [
     [0, 0, 0],
     [0, 1.5, 0],
@@ -180,13 +185,33 @@ function Band({
 
   useFrame((state, delta) => {
     if (dragged) {
-      const px = clamp(state.pointer.x, -DRAG_X, DRAG_X);
-      const py = clamp(state.pointer.y, DRAG_Y_MIN, DRAG_Y_MAX);
-      vec.set(px, py, 0.5).unproject(state.camera);
+      vec.set(state.pointer.x, state.pointer.y, 0.5).unproject(state.camera);
       dir.copy(vec).sub(state.camera.position).normalize();
       vec.add(dir.multiplyScalar(state.camera.position.length()));
+      // Önskad kortposition i världskoordinater före begränsning.
+      let tx = vec.x - dragged.x;
+      let ty = vec.y - dragged.y;
+      let tz = vec.z - dragged.z;
+      // 1) Halvcirkel: håll kortet inom repets radie och aldrig ovanför pivot.
+      let ox = tx - PIVOT.x;
+      let oy = ty - PIVOT.y;
+      let oz = tz - PIVOT.z;
+      if (oy > 0) oy = 0;
+      const dist = Math.hypot(ox, oy, oz);
+      if (dist > ORBIT_R) {
+        const s = ORBIT_R / dist;
+        ox *= s;
+        oy *= s;
+        oz *= s;
+      }
+      tx = PIVOT.x + ox;
+      ty = PIVOT.y + oy;
+      tz = PIVOT.z + oz;
+      // 2) Canvas-skydd så kortet aldrig klipps av kanten i extremlägena.
+      tx = clamp(tx, -SAFE_X, SAFE_X);
+      ty = clamp(ty, SAFE_Y_BOTTOM, SAFE_Y_TOP);
       [card, j1, j2, j3, fixed].forEach(ref => ref.current?.wakeUp());
-      card.current?.setNextKinematicTranslation({ x: vec.x - dragged.x, y: vec.y - dragged.y, z: vec.z - dragged.z });
+      card.current?.setNextKinematicTranslation({ x: tx, y: ty, z: tz });
     }
     if (fixed.current) {
       [j1, j2].forEach(ref => {
