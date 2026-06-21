@@ -44,11 +44,13 @@ export function ScrambleText({
   const prefersReducedMotion = useReducedMotion();
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, amount: 0.4 });
-  const startedRef = useRef(false);
   const rafRef = useRef(0);
   const [display, setDisplay] = useState(() =>
     prefersReducedMotion ? text : scrambleAll(text),
   );
+
+  // shouldStart går endast false -> true en gång (mount eller scroll-in).
+  const shouldStart = trigger === 'mount' || inView;
 
   useEffect(() => {
     if (prefersReducedMotion) {
@@ -56,12 +58,15 @@ export function ScrambleText({
       return undefined;
     }
 
-    const shouldStart = trigger === 'mount' || inView;
-    if (!shouldStart || startedRef.current) {
+    if (!shouldStart) {
       return undefined;
     }
-    startedRef.current = true;
 
+    // Starta (om) decoden vid varje effekt-körning. Vi använder medvetet ingen
+    // "har redan startat"-spärr: React StrictMode kör mount -> cleanup -> mount
+    // i utveckling, och en sådan spärr skulle då avbryta rAF:en utan att starta
+    // om den – då frös texten på slumptecken i stället för att landa på rätt
+    // ord (A BOUT / JUIT NETSEC m.fl.). Att starta om från början är ofarligt.
     const begin = performance.now() + startDelay;
     let startTime;
     let lastTick = 0;
@@ -94,7 +99,7 @@ export function ScrambleText({
 
     rafRef.current = requestAnimationFrame(frame);
     return () => cancelAnimationFrame(rafRef.current);
-  }, [inView, prefersReducedMotion, text, trigger, durationMs, tickMs, startDelay]);
+  }, [shouldStart, prefersReducedMotion, text, durationMs, tickMs, startDelay]);
 
   if (reserveWidth) {
     return (
