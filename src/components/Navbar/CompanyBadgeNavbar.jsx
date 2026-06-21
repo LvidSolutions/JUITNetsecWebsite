@@ -45,11 +45,13 @@ const BACK_UV_RECT = { x: 0.5, y: 0, w: 0.5, h: 0.757 };
 // (ORBIT_R) från mittpunkten i ALLA riktningar inom den nedre halvan -> en äkta
 // halvcirkel. Canvasen är bred nog att rymma hela halvcirkeln så den radiella
 // gränsen är den enda som styr (SAFE_* ligger utanför radien som ren nödgräns).
-const PIVOT = { x: 0, y: 3.8, z: 0 };
-const ORBIT_R = 6.6;
-const SAFE_X = 6.7;
+const PIVOT = { x: 0, y: 4.8, z: 0 };
+const ORBIT_R = 4.5;
+// Liten hörn-canvas: halvcirkeln får inte plats fullt ut, så kortet stoppas
+// (krockar) mot väggarna i sidled — det är OK och avsiktligt här.
+const SAFE_X = 2.5;
 const SAFE_Y_TOP = 4.0;
-const SAFE_Y_BOTTOM = -4.0;
+const SAFE_Y_BOTTOM = -3.9;
 const clamp = (v, min, max) => Math.min(Math.max(v, min), max);
 
 export default function CompanyBadgeNavbar({
@@ -113,8 +115,8 @@ function Band({
   const ang = new THREE.Vector3();
   const rot = new THREE.Vector3();
   const dir = new THREE.Vector3();
-  // Låg dämpning = mer elastiskt, studsande rep som gungar längre.
-  const segmentProps = { type: 'dynamic', canSleep: true, colliders: false, angularDamping: 1.2, linearDamping: 1.2 };
+  // Mycket låg dämpning = repet studsar/flyger längre när man släpper.
+  const segmentProps = { type: 'dynamic', canSleep: true, colliders: false, angularDamping: 0.5, linearDamping: 0.5 };
   const { nodes, materials } = useGLTF(cardGLB, DRACO_PATH);
   const texture = useTexture(lanyardImage || lanyard);
   const frontTex = useTexture(frontImage || BLANK_PIXEL);
@@ -172,12 +174,12 @@ function Band({
   const [dragged, drag] = useState(false);
   const [hovered, hover] = useState(false);
 
-  useRopeJoint(fixed, j1, [[0, 0, 0], [0, 0, 0], 1.7]);
-  useRopeJoint(j1, j2, [[0, 0, 0], [0, 0, 0], 1.7]);
-  useRopeJoint(j2, j3, [[0, 0, 0], [0, 0, 0], 1.7]);
+  useRopeJoint(fixed, j1, [[0, 0, 0], [0, 0, 0], 1.1]);
+  useRopeJoint(j1, j2, [[0, 0, 0], [0, 0, 0], 1.1]);
+  useRopeJoint(j2, j3, [[0, 0, 0], [0, 0, 0], 1.1]);
   useSphericalJoint(j3, card, [
     [0, 0, 0],
-    [0, 1.5, 0],
+    [0, 1.05, 0],
   ]);
 
   useEffect(() => {
@@ -240,22 +242,22 @@ function Band({
   return (
     <>
       {/* Upphängning nära toppen så lanyarden ser ut att hänga från navbaren. */}
-      <group position={[0, 3.8, 0]}>
+      <group position={[0, 4.8, 0]}>
         <RigidBody ref={fixed} {...segmentProps} type="fixed" />
-        <RigidBody position={[0.2, -1.5, 0]} ref={j1} {...segmentProps}>
+        <RigidBody position={[0.15, -0.9, 0]} ref={j1} {...segmentProps}>
           <BallCollider args={[0.1]} />
         </RigidBody>
-        <RigidBody position={[0.35, -3.0, 0]} ref={j2} {...segmentProps}>
+        <RigidBody position={[0.25, -1.8, 0]} ref={j2} {...segmentProps}>
           <BallCollider args={[0.1]} />
         </RigidBody>
-        <RigidBody position={[0.5, -4.4, 0]} ref={j3} {...segmentProps}>
+        <RigidBody position={[0.35, -2.6, 0]} ref={j3} {...segmentProps}>
           <BallCollider args={[0.1]} />
         </RigidBody>
-        <RigidBody position={[0.6, -5.4, 0]} ref={card} {...segmentProps} type={dragged ? 'kinematicPosition' : 'dynamic'}>
-          <CuboidCollider args={[0.8, 1.125, 0.01]} />
+        <RigidBody position={[0.4, -3.3, 0]} ref={card} {...segmentProps} type={dragged ? 'kinematicPosition' : 'dynamic'}>
+          <CuboidCollider args={[0.57, 0.8, 0.01]} />
           <group
-            scale={2.25}
-            position={[0, -1.2, -0.05]}
+            scale={1.5}
+            position={[0, -0.85, -0.035]}
             onPointerOver={() => hover(true)}
             onPointerOut={() => hover(false)}
             onPointerUp={e => (e.target.releasePointerCapture(e.pointerId), drag(false))}
