@@ -36,8 +36,16 @@ const BLANK_PIXEL =
 const FRONT_UV_RECT = { x: 0, y: 0, w: 0.5, h: 0.755 };
 const BACK_UV_RECT = { x: 0.5, y: 0, w: 0.5, h: 0.757 };
 
+// Dragmålet klampas i NDC (skärmkoordinater, upplösningsoberoende) så kortet
+// aldrig kan föras närmare canvaskanten än sin egen storlek – då syns det
+// aldrig "klippas" av väggarna, hur långt man än drar musen utanför.
+const DRAG_X = 0.55;
+const DRAG_Y_MAX = 0.62;
+const DRAG_Y_MIN = -0.42;
+const clamp = (v, min, max) => Math.min(Math.max(v, min), max);
+
 export default function CompanyBadgeNavbar({
-  position = [0, 0, 26],
+  position = [0, 0, 30],
   gravity = [0, -35, 0],
   fov = 18,
   transparent = true,
@@ -172,7 +180,9 @@ function Band({
 
   useFrame((state, delta) => {
     if (dragged) {
-      vec.set(state.pointer.x, state.pointer.y, 0.5).unproject(state.camera);
+      const px = clamp(state.pointer.x, -DRAG_X, DRAG_X);
+      const py = clamp(state.pointer.y, DRAG_Y_MIN, DRAG_Y_MAX);
+      vec.set(px, py, 0.5).unproject(state.camera);
       dir.copy(vec).sub(state.camera.position).normalize();
       vec.add(dir.multiplyScalar(state.camera.position.length()));
       [card, j1, j2, j3, fixed].forEach(ref => ref.current?.wakeUp());
@@ -201,7 +211,7 @@ function Band({
   return (
     <>
       {/* Upphängning nära toppen så lanyarden ser ut att hänga från navbaren. */}
-      <group position={[0, 4.2, 0]}>
+      <group position={[0, 4.8, 0]}>
         <RigidBody ref={fixed} {...segmentProps} type="fixed" />
         <RigidBody position={[0.3, -0.5, 0]} ref={j1} {...segmentProps}>
           <BallCollider args={[0.1]} />
