@@ -10,8 +10,8 @@ import { IntroLoader } from './components/sections/IntroLoader.jsx';
 import { StatsSection } from './components/sections/StatsSection.jsx';
 import { TerminalSignalSection } from './components/sections/TerminalSignalSection.jsx';
 import { NextStepPlaceholder } from './components/sections/NextStepPlaceholder.jsx';
-import { ReferencesSection } from './components/sections/ReferencesSection.jsx';
 import { ServicesSection } from './components/sections/ServicesSection.jsx';
+import { TeamSection } from './components/sections/TeamSection.jsx';
 import { useHeroIntroProgress } from './lib/useHeroIntroProgress.js';
 
 const titles = {
@@ -19,7 +19,7 @@ const titles = {
   '/tjanster': 'Tjänster – JUIT NetSec AB',
   '/om-oss': 'Om oss – JUIT NetSec AB',
   '/about': 'Om oss – JUIT NetSec AB',
-  '/referenser': 'Referenser – JUIT NetSec AB',
+  '/team': 'Team – JUIT NetSec AB',
   '/kontakt': 'Kontakt – JUIT NetSec AB',
 };
 
@@ -47,7 +47,9 @@ function App() {
   useEffect(() => {
     function navigate(path) {
       const nextPath = titles[path] ? path : '/';
-      window.history.pushState({}, '', nextPath);
+      if (window.location.pathname !== nextPath) {
+        window.history.pushState({}, '', nextPath);
+      }
       setCurrentPath(nextPath);
       // Direkt hopp till toppen vid sidbyte: smooth scroll genom en hel,
       // tung sida kan kännas hackig och triggar onödig animation under vägen.
@@ -75,12 +77,21 @@ function App() {
       setCurrentPath(getCurrentPath());
     }
 
+    function handleAppNavigate(event) {
+      const path = event.detail?.path;
+      if (typeof path === 'string') {
+        navigate(path);
+      }
+    }
+
     document.addEventListener('click', handleClick);
     window.addEventListener('popstate', handlePopState);
+    window.addEventListener('juit:navigate', handleAppNavigate);
 
     return () => {
       document.removeEventListener('click', handleClick);
       window.removeEventListener('popstate', handlePopState);
+      window.removeEventListener('juit:navigate', handleAppNavigate);
     };
   }, []);
 
@@ -119,7 +130,7 @@ function App() {
         )}
         {currentPath === '/tjanster' && <ServicesSection />}
         {(currentPath === '/om-oss' || currentPath === '/about') && <AboutSection />}
-        {currentPath === '/referenser' && <ReferencesSection />}
+        {currentPath === '/team' && <TeamSection />}
         {currentPath === '/kontakt' && <ContactSection />}
       </main>
       <Footer />
