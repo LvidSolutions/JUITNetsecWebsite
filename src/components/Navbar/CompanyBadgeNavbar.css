@@ -1,0 +1,23 @@
+/* Kompakt navbar-variant av Lanyard. Hänger i övre högra hörnet på /about,
+   under hamburgaren och höger om CONTACT. Wrappern fångar inga pekarhändelser
+   (så navbarens knappar förblir klickbara) – bara själva canvasen är dragbar. */
+.company-badge-navbar {
+  position: absolute;
+  top: 8px;
+  right: 56px;
+  width: 150px;
+  height: 320px;
+  z-index: 20;
+  pointer-events: none;
+}
+
+.company-badge-navbar canvas {
+  pointer-events: auto;
+}
+
+/* Desktop only – döljs på mindre skärmar. */
+@media (max-width: 900px) {
+  .company-badge-navbar {
+    display: none;
+  }
+}
