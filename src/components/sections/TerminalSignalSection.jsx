@@ -1,6 +1,9 @@
-import { Component, useEffect, useState } from 'react';
-import FaultyTerminal from '../FaultyTerminal/FaultyTerminal.jsx';
+import { Component, Suspense, lazy, useEffect, useRef, useState } from 'react';
 import { Container } from '../ui';
+
+// ogl (WebGL) ligger i sin egen chunk och laddas först när sektionen behövs,
+// så att startsidans initiala JS-bundle hålls liten.
+const FaultyTerminal = lazy(() => import('../FaultyTerminal/FaultyTerminal.jsx'));
 
 // Liten felgräns: om WebGL/ogl kastar vid runtime faller vi tillbaka till en
 // statisk grön gradient + grid i stället för att krascha hela startsidan.
@@ -47,6 +50,11 @@ export function TerminalSignalSection() {
   // där musreaktionen aktiveras. På touch/mobil hålls effekten passiv och
   // lugnare. prefers-reduced-motion pausar animationen helt.
   const [env, setEnv] = useState({ ready: false, desktop: false, reducedMotion: false, webgl: true });
+  const sectionRef = useRef(null);
+  // Rendera/montera bara WebGL när sektionen är (nära) i viewporten. När man
+  // är i hero, footern eller på en annan sida rivs GL-kontexten och rAF-loopen
+  // stoppas helt – ingen GPU/CPU-kostnad när effekten inte syns.
+  const [inView, setInView] = useState(false);
 
   useEffect(() => {
     const desktopMq = window.matchMedia('(min-width: 768px) and (pointer: fine)');
@@ -69,42 +77,61 @@ export function TerminalSignalSection() {
     };
   }, []);
 
+  useEffect(() => {
+    const node = sectionRef.current;
+    if (!node || typeof IntersectionObserver === 'undefined') {
+      setInView(true);
+      return undefined;
+    }
+    const observer = new IntersectionObserver(
+      ([entry]) => setInView(entry.isIntersecting),
+      { rootMargin: '200px 0px' },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
   const { ready, desktop, reducedMotion, webgl } = env;
   const mouseReact = ready && desktop && !reducedMotion;
+  const showTerminal = ready && webgl && inView;
 
   return (
     <section
+      ref={sectionRef}
       id="signal"
       aria-label="Reaktiv signalvisualisering"
       className="relative isolate flex min-h-[600px] items-center overflow-hidden bg-brand-black py-24 sm:py-28 lg:min-h-[85vh] lg:py-32"
     >
       {/* WebGL-bakgrund (eller fallback). Ligger absolut bakom innehållet. */}
       <div className="absolute inset-0 z-0">
-        {ready && webgl ? (
-          <TerminalBoundary fallback={<TerminalFallback />}>
-            <FaultyTerminal
-              className="h-full w-full"
-              scale={1.5}
-              gridMul={[2, 1]}
-              digitSize={1.2}
-              timeScale={reducedMotion ? 0 : 0.3}
-              pause={reducedMotion}
-              scanlineIntensity={0.4}
-              glitchAmount={1}
-              flickerAmount={reducedMotion ? 0 : 0.6}
-              noiseAmp={1}
-              chromaticAberration={0}
-              curvature={0.1}
-              tint="#00C853"
-              mouseReact={mouseReact}
-              mouseStrength={0.35}
-              dpr={desktop ? undefined : 1.25}
-              pageLoadAnimation={!reducedMotion}
-              brightness={desktop ? 1.05 : 0.9}
-            />
+        {/* Statisk fallback ligger alltid kvar och syns tills WebGL ritats,
+            samt när effekten är avmonterad utanför viewporten. */}
+        <TerminalFallback />
+        {showTerminal && (
+          <TerminalBoundary fallback={null}>
+            <Suspense fallback={null}>
+              <FaultyTerminal
+                className="absolute inset-0 h-full w-full"
+                scale={1.5}
+                gridMul={[2, 1]}
+                digitSize={1.2}
+                timeScale={reducedMotion ? 0 : 0.3}
+                pause={reducedMotion}
+                scanlineIntensity={0.4}
+                glitchAmount={1}
+                flickerAmount={reducedMotion ? 0 : 0.6}
+                noiseAmp={1}
+                chromaticAberration={0}
+                curvature={0.1}
+                tint="#00C853"
+                mouseReact={mouseReact}
+                mouseStrength={0.35}
+                dpr={desktop ? 1.5 : 1}
+                pageLoadAnimation={!reducedMotion}
+                brightness={desktop ? 1.05 : 0.9}
+              />
+            </Suspense>
           </TerminalBoundary>
-        ) : (
-          <TerminalFallback />
         )}
       </div>
 

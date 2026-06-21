@@ -48,15 +48,18 @@ export function Header({ currentPath = '/', logoSlotRef, hideStaticLogo = false,
 
   // Backdropen är helt transparent högst upp över hero (ingen svart navbar-box)
   // och tonas bara in mjukt när man scrollar ned för läsbarhet.
+  // Solid, halvtransparent bakgrund i stället för animerad backdrop-blur.
+  // backdrop-filter på en sticky header samplar om bakgrunden varje frame när
+  // innehåll scrollar under den – mycket dyrare än att tona en bakgrundsfärg.
   const backdropInputRange = introProgress ? [0, HEADER_LANDED_AT] : [0, 1];
   const backdropOpacity = useTransform(activeProgress, backdropInputRange, [0, 1]);
-  const backgroundColor = useTransform(backdropOpacity, (value) => `rgba(5, 5, 5, ${value * 0.5})`);
-  const backdropFilter = useTransform(backdropOpacity, (value) => `blur(${value * 14}px)`);
+  const backgroundColor = useTransform(backdropOpacity, (value) => `rgba(5, 5, 5, ${value * 0.88})`);
+  const borderBottomColor = useTransform(backdropOpacity, (value) => `rgba(255, 255, 255, ${value * 0.1})`);
 
   return (
     <motion.header
-      className={cn('sticky top-0', isMenuOpen ? 'z-[70]' : 'z-50')}
-      style={{ backgroundColor, backdropFilter, WebkitBackdropFilter: backdropFilter }}
+      className={cn('sticky top-0 border-b border-transparent', isMenuOpen ? 'z-[70]' : 'z-50')}
+      style={{ backgroundColor, borderBottomColor }}
     >
       <Container>
         {/* Som på HackFirst: logotyp till vänster, navlänkarna utspridda
@@ -126,7 +129,7 @@ export function Header({ currentPath = '/', logoSlotRef, hideStaticLogo = false,
             isMenuOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0',
           )}
         >
-          <div className={cn('min-h-0', isMenuOpen && 'bg-brand-black/85 backdrop-blur-md')}>
+          <div className={cn('min-h-0', isMenuOpen && 'bg-brand-black/95')}>
             <nav
               aria-label="Menynavigering"
               className="flex flex-col gap-1 border-t border-brand-line px-1 py-4"

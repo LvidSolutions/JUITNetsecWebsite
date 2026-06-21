@@ -49,7 +49,9 @@ function App() {
       const nextPath = titles[path] ? path : '/';
       window.history.pushState({}, '', nextPath);
       setCurrentPath(nextPath);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      // Direkt hopp till toppen vid sidbyte: smooth scroll genom en hel,
+      // tung sida kan kännas hackig och triggar onödig animation under vägen.
+      window.scrollTo({ top: 0, behavior: 'auto' });
     }
 
     function handleClick(event) {

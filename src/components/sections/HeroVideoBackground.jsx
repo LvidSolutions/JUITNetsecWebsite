@@ -1,98 +1,55 @@
 import { useEffect, useRef, useState } from 'react';
 
-// hur lång tid innan klippets slut crossfaden till nästa varv börjar
-const CROSSFADE_S = 0.9;
-const PLAYBACK_RATE = 1;
-
+// Bakgrundsvideon är tung (~5,7 MB). För att hålla startsidan lätt och stabil:
+//  - laddas den bara på desktop (pekare av fine-typ + bredd >= 768px),
+//  - aldrig vid prefers-reduced-motion,
+//  - ett enda <video> med loop (tidigare två element som crossfadade samma
+//    klipp dubblade nätverk, avkodning och GPU-minne),
+//  - preload="metadata" så hela filen inte hämtas innan den behövs,
+//  - inga CSS-filter på videon (filter på fullskärmsvideo tvingar fram ett
+//    dyrt kompositlager som ritas om varje frame).
+// På mobil/reduced-motion visas en statisk men premiumkänslig grön gradient.
 export function HeroVideoBackground() {
-  const videoARef = useRef(null);
-  const videoBRef = useRef(null);
-  const [activeIsA, setActiveIsA] = useState(true);
+  const videoRef = useRef(null);
+  const [useVideo, setUseVideo] = useState(false);
 
   useEffect(() => {
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const videoA = videoARef.current;
-    const videoB = videoBRef.current;
+    const mq = window.matchMedia('(min-width: 768px) and (pointer: fine)');
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const sync = () => setUseVideo(mq.matches && !reduced.matches);
 
-    if (!videoA || !videoB) {
-      return undefined;
-    }
-
-    if (prefersReducedMotion) {
-      videoA.pause();
-      videoB.pause();
-      return undefined;
-    }
-
-    videoA.playbackRate = PLAYBACK_RATE;
-    videoB.playbackRate = PLAYBACK_RATE;
-
-    let isCrossfading = false;
-    let activeRef = videoA;
-    let inactiveRef = videoB;
-
-    // Ingen loop-attribut: vi triggar crossfaden själva strax innan klippet
-    // tar slut, så omstarten döljs som en mjuk tonövergång i stället för ett hopp.
-    function handleTimeUpdate() {
-      const active = activeRef;
-      const inactive = inactiveRef;
-
-      if (
-        !isCrossfading &&
-        active.duration &&
-        active.duration - active.currentTime <= CROSSFADE_S
-      ) {
-        isCrossfading = true;
-        inactive.currentTime = 0;
-        inactive.play()?.catch(() => {});
-        setActiveIsA(inactive === videoA);
-
-        window.setTimeout(() => {
-          active.pause();
-          activeRef = inactive;
-          inactiveRef = active;
-          isCrossfading = false;
-        }, CROSSFADE_S * 1000);
-      }
-    }
-
-    videoA.addEventListener('timeupdate', handleTimeUpdate);
-    videoB.addEventListener('timeupdate', handleTimeUpdate);
-
+    sync();
+    mq.addEventListener('change', sync);
+    reduced.addEventListener('change', sync);
     return () => {
-      videoA.removeEventListener('timeupdate', handleTimeUpdate);
-      videoB.removeEventListener('timeupdate', handleTimeUpdate);
+      mq.removeEventListener('change', sync);
+      reduced.removeEventListener('change', sync);
     };
   }, []);
 
-  return (
-    <div className="absolute inset-0 -z-20 overflow-hidden">
-      <video
-        ref={videoARef}
-        autoPlay
-        muted
-        playsInline
-        preload="auto"
-        className={`absolute inset-0 h-full w-full object-cover [filter:brightness(1.05)_contrast(1.08)] transition-opacity duration-[900ms] ease-linear ${
-          activeIsA ? 'opacity-100' : 'opacity-0'
-        }`}
-        aria-hidden="true"
-      >
-        <source src="/assets/go-to.mp4" type="video/mp4" />
-      </video>
+  useEffect(() => {
+    const video = videoRef.current;
+    if (useVideo && video) {
+      video.play()?.catch(() => {});
+    }
+  }, [useVideo]);
 
-      <video
-        ref={videoBRef}
-        muted
-        playsInline
-        preload="auto"
-        className={`absolute inset-0 h-full w-full object-cover [filter:brightness(1.05)_contrast(1.08)] transition-opacity duration-[900ms] ease-linear ${
-          activeIsA ? 'opacity-0' : 'opacity-100'
-        }`}
-        aria-hidden="true"
-      >
-        <source src="/assets/go-to.mp4" type="video/mp4" />
-      </video>
+  return (
+    <div className="absolute inset-0 -z-20 overflow-hidden bg-brand-black">
+      {useVideo && (
+        <video
+          ref={videoRef}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          className="absolute inset-0 h-full w-full object-cover"
+          aria-hidden="true"
+        >
+          <source src="/assets/go-to.mp4" type="video/mp4" />
+        </video>
+      )}
 
       {/* Lätt enhetlig dämpning så videon behåller liv men inte bländar */}
       <div className="absolute inset-0 bg-brand-black/20" />
