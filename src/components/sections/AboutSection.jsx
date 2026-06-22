@@ -50,9 +50,9 @@ export function AboutSection() {
             {values.map((value) => (
               <Card
                 key={value}
-                className="group min-h-40 bg-white/[0.035] hover:border-brand-green/55 hover:bg-white/[0.055]"
+                className="min-h-40 bg-white/[0.035]"
               >
-                <div className="mb-6 h-1 w-12 rounded-full bg-brand-green transition-all duration-200 group-hover:w-16" />
+                <div className="mb-6 h-1 w-12 rounded-full bg-brand-green" />
                 <h3 className="text-xl font-semibold leading-7 text-brand-white">{value}</h3>
               </Card>
             ))}
@@ -71,8 +71,8 @@ export function AboutSection() {
             <div className="absolute left-0 right-0 top-8 hidden h-px bg-gradient-to-r from-brand-green/70 via-brand-line to-transparent lg:block" />
             {processSteps.map((step, index) => (
               <div key={step.title} className="relative">
-                <Card className="group h-full bg-brand-ink hover:border-brand-green/55 hover:bg-white/[0.045]">
-                  <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-full border border-brand-green/35 bg-brand-black text-sm font-semibold text-brand-green shadow-glow transition-colors duration-200 group-hover:bg-brand-green group-hover:text-brand-black">
+                <Card className="h-full bg-brand-ink">
+                  <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-full border border-brand-green/35 bg-brand-black text-sm font-semibold text-brand-green shadow-glow">
                     {String(index + 1).padStart(2, '0')}
                   </div>
                   <h3 className="text-xl font-semibold text-brand-white">{step.title}</h3>
