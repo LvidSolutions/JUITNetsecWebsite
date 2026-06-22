@@ -1,0 +1,69 @@
+/* Contact-sidans egna stilar. Sidan är mörk (svart/grafit) med subtila
+   gridlinjer och ett svävande video-objekt som visuell mittpunkt – inspirerat
+   av referensens komposition men i JUIT NetSecs egen identitet. */
+
+.contact-page {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: #050505;
+}
+
+/* Stora, rena ytor med en tunn cyber-inspirerad grid som tonar bort uppåt
+   och nedåt så den aldrig konkurrerar med innehållet. */
+.contact-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 56px 56px;
+  -webkit-mask-image: radial-gradient(120% 80% at 70% 18%, rgba(0, 0, 0, 0.9), transparent 70%);
+  mask-image: radial-gradient(120% 80% at 70% 18%, rgba(0, 0, 0, 0.9), transparent 70%);
+}
+
+/* Premium-ljus bakom video-objektet: en mjuk, grön-tonad glöd som lyser igenom
+   videons transparenta partier och får enheten att kännas upplyst och
+   tredimensionell. Hålls subtil och koncentrerad mot enheten så den aldrig
+   tvättar ur texten bakom. */
+.contact-video-glow {
+  background: radial-gradient(
+    42% 42% at 60% 52%,
+    rgba(0, 200, 83, 0.20),
+    rgba(0, 200, 83, 0.07) 55%,
+    transparent 75%
+  );
+  filter: blur(14px);
+}
+
+/* Själva videon. Källan är keyad till äkta alpha (transparent bakgrund), så
+   bara datorn syns och svävar framför texten – inget svart block. drop-shadow
+   ger objektet fysisk tyngd. */
+.contact-video {
+  filter: drop-shadow(0 38px 55px rgba(0, 0, 0, 0.5));
+  will-change: transform;
+}
+
+/* Subtil, kontinuerlig "floating"-rörelse. Ligger på en inre wrapper så att
+   scroll-driven parallax/rotation (framer-motion, yttre lager) kan komponeras
+   ovanpå utan att kollidera. */
+.contact-float {
+  animation: contact-float 9s ease-in-out infinite;
+  transform-style: preserve-3d;
+}
+
+@keyframes contact-float {
+  0% {
+    transform: translate3d(0, 0, 0) rotateZ(0deg);
+  }
+  50% {
+    transform: translate3d(0, -14px, 0) rotateZ(0.4deg);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) rotateZ(0deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .contact-float {
+    animation: none;
+  }
+}
