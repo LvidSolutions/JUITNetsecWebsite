@@ -16,7 +16,7 @@ function Field({ id, label, type, autoComplete }) {
         name={id}
         type={type}
         autoComplete={autoComplete}
-        className="mt-2 h-12 w-full rounded-card border border-black/10 bg-brand-white px-4 text-base text-brand-ink outline-none transition-colors duration-200 placeholder:text-brand-graphite/45 focus:border-brand-green focus:ring-2 focus:ring-brand-green/20"
+        className="mt-2 h-12 w-full rounded-card border border-black/10 bg-brand-white px-4 text-base text-brand-ink outline-none placeholder:text-brand-graphite/45 focus:border-brand-green focus:ring-2 focus:ring-brand-green/20"
       />
     </label>
   );
@@ -53,7 +53,7 @@ export function ContactSection() {
             </div>
           </div>
 
-          <Card variant="light" className="border-black/10 shadow-glow">
+          <Card variant="light" className="border-black/10">
             {/* Koppla senare till Formspree, API, CMS eller annan vald formulärlösning. */}
             <form className="grid gap-5" onSubmit={(event) => event.preventDefault()}>
               <div className="grid gap-5 sm:grid-cols-2">
@@ -68,7 +68,7 @@ export function ContactSection() {
                   id="message"
                   name="message"
                   rows="6"
-                  className="mt-2 w-full resize-y rounded-card border border-black/10 bg-brand-white px-4 py-3 text-base text-brand-ink outline-none transition-colors duration-200 placeholder:text-brand-graphite/45 focus:border-brand-green focus:ring-2 focus:ring-brand-green/20"
+                  className="mt-2 w-full resize-y rounded-card border border-black/10 bg-brand-white px-4 py-3 text-base text-brand-ink outline-none placeholder:text-brand-graphite/45 focus:border-brand-green focus:ring-2 focus:ring-brand-green/20"
                 />
               </label>
 
