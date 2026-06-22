@@ -38,13 +38,15 @@ export function ContactSection() {
             <div className="mt-10 space-y-5 text-brand-graphite">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.16em] text-brand-green">E-post</p>
-                <a className="mt-1 inline-block font-semibold hover:text-brand-green" href="mailto:info@juitnetsec.se">
-                  info@juitnetsec.se
+                <a className="mt-1 inline-block font-semibold hover:text-brand-green" href="mailto:ulf.wernersson@juit.se">
+                  ulf.wernersson@juit.se
                 </a>
               </div>
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.16em] text-brand-green">Telefon</p>
-                <p className="mt-1 font-semibold">+46 70 000 00 00</p>
+                <a className="mt-1 inline-block font-semibold hover:text-brand-green" href="tel:+46708256393">
+                  +46 708-25 63 93
+                </a>
               </div>
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.16em] text-brand-green">Plats</p>
