@@ -4,7 +4,7 @@ import { Header } from './components/layout/Header.jsx';
 import { Footer } from './components/layout/Footer.jsx';
 import { AnimatedLogo } from './components/layout/AnimatedLogo.jsx';
 import { AboutSection } from './components/sections/AboutSection.jsx';
-import { ContactSection } from './components/sections/ContactSection.jsx';
+import { ContactPage } from './components/contact/ContactPage.jsx';
 import { Hero } from './components/sections/Hero.jsx';
 import { IntroLoader } from './components/sections/IntroLoader.jsx';
 import { StatsSection } from './components/sections/StatsSection.jsx';
@@ -21,6 +21,7 @@ const titles = {
   '/about': 'Om oss – JUIT NetSec AB',
   '/team': 'Team – JUIT NetSec AB',
   '/kontakt': 'Kontakt – JUIT NetSec AB',
+  '/contact': 'Kontakt – JUIT NetSec AB',
 };
 
 function getCurrentPath() {
@@ -131,7 +132,7 @@ function App() {
         {currentPath === '/tjanster' && <ServicesSection />}
         {(currentPath === '/om-oss' || currentPath === '/about') && <AboutSection />}
         {currentPath === '/team' && <TeamSection />}
-        {currentPath === '/kontakt' && <ContactSection />}
+        {(currentPath === '/kontakt' || currentPath === '/contact') && <ContactPage />}
       </main>
       <Footer />
     </>
