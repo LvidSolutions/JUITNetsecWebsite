@@ -1,13 +1,9 @@
-import { Suspense, lazy, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, useMotionValue, useTransform } from 'framer-motion';
 import { Container } from '../ui';
 import { BrandWordmark } from './BrandWordmark.jsx';
 import { ScrambleNavLink } from './ScrambleNavLink.jsx';
 import { cn } from '../../lib/cn';
-
-// Tung 3D-bricka (three/rapier/drei). Lazy-laddas i en egen chunk och bara på
-// /about + desktop, så startsidans och mobilens bundle aldrig påverkas.
-const CompanyBadgeNavbar = lazy(() => import('../Navbar/CompanyBadgeNavbar.jsx'));
 
 const HEADER_LANDED_AT = 0.45;
 
@@ -24,18 +20,6 @@ export function Header({ currentPath = '/', logoSlotRef, hideStaticLogo = false,
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const fallbackProgress = useMotionValue(0);
   const activeProgress = introProgress || fallbackProgress;
-
-  // Företagsbrickan visas bara på /about och på desktop (≥901px, fine pointer).
-  const [badgeAllowed, setBadgeAllowed] = useState(false);
-  useEffect(() => {
-    const mq = window.matchMedia('(min-width: 901px) and (pointer: fine)');
-    const sync = () => setBadgeAllowed(mq.matches);
-    sync();
-    mq.addEventListener('change', sync);
-    return () => mq.removeEventListener('change', sync);
-  }, []);
-  const isAbout = currentPath === '/om-oss' || currentPath === '/about';
-  const showBadge = isAbout && badgeAllowed;
 
   useEffect(() => {
     function handleEscape(event) {
@@ -135,14 +119,6 @@ export function Header({ currentPath = '/', logoSlotRef, hideStaticLogo = false,
               </span>
             </button>
           </div>
-
-          {/* Hängande företagsbricka (endast /about + desktop). Absolut
-              positionerad → påverkar inte navbarens layout. */}
-          {showBadge && (
-            <Suspense fallback={null}>
-              <CompanyBadgeNavbar />
-            </Suspense>
-          )}
         </div>
 
         <div
