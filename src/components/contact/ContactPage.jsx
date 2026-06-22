@@ -1,5 +1,6 @@
 import { ContactHero } from './ContactHero.jsx';
 import { ContactCards } from './ContactCards.jsx';
+import { ContactServiceGuide } from './ContactServiceGuide.jsx';
 import { ContactForm } from './ContactForm.jsx';
 import { ContactCTA } from './ContactCTA.jsx';
 import './contact.css';
@@ -16,6 +17,7 @@ export function ContactPage() {
       <div aria-hidden="true" className="contact-grid pointer-events-none absolute inset-0 -z-10" />
       <ContactHero />
       <ContactCards />
+      <ContactServiceGuide />
       <ContactForm />
       <ContactCTA />
     </div>

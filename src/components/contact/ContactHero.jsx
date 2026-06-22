@@ -1,89 +1,129 @@
+import { motion, useReducedMotion } from 'framer-motion';
 import { Container } from '../ui';
 import { ContactVideoObject } from './ContactVideoObject.jsx';
 
-// Verifierad positionering – endast tjänsteområden JUIT NetSec faktiskt erbjuder.
-const positioning = [
-  'IT-infrastruktur',
-  'Nätverk & kommunikation',
-  'Cybersäkerhet',
-  'Datordrift',
-  'IT-rådgivning',
-  'Teknisk projektledning',
-];
+// Snabb, "agency"-mässig reveal: mjuk ease-out-expo, innehåll wipas upp bakom
+// en mask precis som på referensen efter att preloadern lyft.
+const EASE = [0.16, 1, 0.3, 1];
+
+// Mask-rad: texten ligger i en overflow-hidden-behållare och glider upp från
+// 110 % → 0. Ger den exakta "wipe up"-känslan från referensen.
+function MaskReveal({ as: Tag = 'span', children, delay = 0, duration = 1, className = '', reduce }) {
+  if (reduce) return <Tag className={className}>{children}</Tag>;
+  return (
+    <span className="block overflow-hidden pb-[0.12em]">
+      <motion.span
+        className={`block ${className}`}
+        initial={{ y: '115%' }}
+        animate={{ y: '0%' }}
+        transition={{ duration, ease: EASE, delay }}
+      >
+        {children}
+      </motion.span>
+    </span>
+  );
+}
 
 /**
- * Hero med samma kompositionsprincip som referensen: en mycket stor rubrik och
- * ett svävande objekt som överlappar typografin. Datorn ligger ovanpå (z) och
- * "flyter" framför CONTACT-texten – den svarta videobakgrunden faller bort via
- * mix-blend (se contact.css) så bara själva enheten syns.
+ * Contact-hero som efterliknar referensens komposition: en enorm ordbild som är
+ * indragen från vänster och blöder ut förbi högerkanten, ett svävande objekt som
+ * bryter layouten och överlappar typografin, en fet underrubrik som tuckas in
+ * under ordet, en pill-CTA uppe till höger och en "Scroll"-cue nere till vänster.
+ * Rörelsen kopierar referensens intro: maskad wipe-up med stagger.
  */
 export function ContactHero() {
+  const reduce = useReducedMotion();
+
   return (
     <section
       aria-labelledby="contact-hero-title"
-      className="relative isolate flex min-h-[92vh] items-center pb-20 pt-32 sm:pt-36 lg:pb-28 lg:pt-40"
+      className="relative isolate flex min-h-[100svh] flex-col justify-center overflow-hidden pb-24 pt-28 sm:pt-32 lg:pb-28 lg:pt-36"
     >
-      <Container className="relative z-10">
-        <p className="font-mono text-xs font-medium uppercase tracking-[0.34em] text-brand-green sm:text-sm">
-          Kontakt / Dialog / Teknisk kontroll
-        </p>
+      {/* Pill-CTA uppe till höger – motsvarar referensens "VIEW OUR WORK". */}
+      <Container className="relative z-30">
+        <motion.div
+          className="flex justify-end"
+          initial={reduce ? false : { opacity: 0, y: -8 }}
+          animate={reduce ? undefined : { opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: EASE, delay: 0.15 }}
+        >
+          <a
+            href="#kontaktformular"
+            className="group inline-flex items-center gap-3 rounded-full border border-brand-line bg-white/[0.03] py-2 pl-6 pr-2 text-sm font-semibold uppercase tracking-[0.14em] text-brand-white backdrop-blur-sm transition-colors duration-200 hover:border-brand-green/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green"
+          >
+            Diskutera ert behov
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-green text-brand-black transition-transform duration-300 ease-smooth group-hover:translate-x-0.5">
+              <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </span>
+          </a>
+        </motion.div>
+      </Container>
 
-        {/* Rubriken är ankaret för det svävande objektet: datorn placeras absolut
-            mot rubrikens högra del och svävar framför typografin – precis som
-            referensens objekt överlappar ordet, men med kroppstexten fri nedanför. */}
-        <div className="relative mt-6">
+      {/* Hero-mitten: enorm ordbild + svävande objekt. */}
+      <Container className="relative mt-10 flex-1 sm:mt-12 lg:mt-0 lg:flex lg:items-center">
+        <div className="relative w-full">
+          {/* Ordbilden: indragen, tight, blöder ut till höger (klipps av sektionen). */}
           <h1
             id="contact-hero-title"
-            className="font-display text-[19vw] font-semibold leading-[0.86] tracking-tight text-brand-white sm:text-[15vw] lg:text-[12.5vw] xl:text-[180px]"
+            className="font-display font-bold uppercase leading-[0.8] tracking-[-0.07em] text-brand-white"
           >
-            CONTACT
+            <MaskReveal
+              reduce={reduce}
+              delay={0.05}
+              duration={1.15}
+              className="whitespace-nowrap text-[26vw] sm:text-[24vw] lg:pl-[18%] lg:text-[22vw] xl:text-[clamp(12rem,21vw,20rem)]"
+            >
+              CONTACT
+            </MaskReveal>
           </h1>
 
-          <div className="pointer-events-none absolute right-0 top-1/2 z-20 hidden w-[44%] max-w-[560px] -translate-y-1/2 translate-x-[8%] lg:block">
-            <ContactVideoObject />
+          {/* Svävande video-objekt – absolut, bryter layouten, ligger framför ordet. */}
+          <div className="pointer-events-none absolute right-[-3vw] top-1/2 z-20 hidden w-[42vw] max-w-[720px] -translate-y-[56%] lg:block">
+            <ContactVideoObject reveal />
+          </div>
+
+          {/* Underrubrik – fet, tuckad in under ordets vänstra del. */}
+          <div className="relative z-10 mt-6 max-w-xl lg:-mt-[2vw] lg:pl-[18%]">
+            <h2 className="font-display text-[7vw] font-semibold leading-[1.02] tracking-tight text-brand-white sm:text-4xl lg:text-[2.6rem]">
+              <MaskReveal reduce={reduce} delay={0.42} duration={0.9}>
+                Starta en dialog
+              </MaskReveal>
+              <MaskReveal reduce={reduce} delay={0.52} duration={0.9}>
+                om er IT-miljö.
+              </MaskReveal>
+            </h2>
+
+            <motion.p
+              className="mt-6 max-w-md text-base leading-relaxed text-brand-mist/65 sm:text-lg sm:leading-8"
+              initial={reduce ? false : { opacity: 0, y: 16 }}
+              animate={reduce ? undefined : { opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, ease: EASE, delay: 0.72 }}
+            >
+              JUIT NetSec hjälper företag att skapa stabilare infrastruktur, säkrare kommunikation och
+              bättre teknisk kontroll.
+            </motion.p>
+          </div>
+
+          {/* Objekt som flödande block på mobil (förenklat, kontrollerat). */}
+          <div className="mt-10 lg:hidden">
+            <ContactVideoObject className="mx-auto w-[78%] max-w-[420px]" reveal />
           </div>
         </div>
+      </Container>
 
-        {/* Video som flödande block på mobil/surfplatta (förenklad, fortfarande
-            synlig). Döljs på desktop där den absolut placerade versionen syns. */}
-        <div className="mt-8 lg:hidden">
-          <ContactVideoObject className="mx-auto w-[88%] max-w-[460px]" />
-        </div>
-
-        <div className="mt-10 max-w-2xl lg:mt-12">
-          <p className="font-display text-2xl font-medium leading-tight text-brand-white sm:text-3xl">
-            Starta en dialog om er IT-miljö.
-          </p>
-          <p className="mt-5 text-base leading-relaxed text-brand-mist/70 sm:text-lg sm:leading-8">
-            JUIT NetSec hjälper företag att skapa stabilare infrastruktur, säkrare kommunikation och
-            bättre teknisk kontroll.
-          </p>
-
-          <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <a
-              href="#kontaktformular"
-              className="inline-flex min-h-12 items-center justify-center rounded-card bg-brand-green px-7 text-base font-semibold text-brand-black transition-all duration-200 ease-smooth hover:bg-brand-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green"
-            >
-              Diskutera ert behov
-            </a>
-            <a
-              href="#kontaktkort"
-              className="inline-flex min-h-12 items-center justify-center rounded-card border border-brand-line bg-transparent px-7 text-base font-semibold text-brand-white transition-all duration-200 ease-smooth hover:border-brand-green hover:text-brand-green focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green"
-            >
-              Boka ett första samtal
-            </a>
-          </div>
-        </div>
-
-        {/* Positioneringsrad – tunn, cyber-inspirerad detalj. */}
-        <ul className="mt-12 flex flex-wrap gap-x-6 gap-y-3 font-mono text-[11px] uppercase tracking-[0.22em] text-brand-mist/45 sm:text-xs">
-          {positioning.map((item) => (
-            <li key={item} className="flex items-center gap-2">
-              <span aria-hidden="true" className="h-1 w-1 rounded-[1px] bg-brand-green/80" />
-              {item}
-            </li>
-          ))}
-        </ul>
+      {/* "Scroll"-cue nere till vänster. */}
+      <Container className="relative z-10">
+        <motion.div
+          className="mt-10 flex items-center gap-3 lg:mt-12"
+          initial={reduce ? false : { opacity: 0 }}
+          animate={reduce ? undefined : { opacity: 1 }}
+          transition={{ duration: 0.6, ease: EASE, delay: 1 }}
+        >
+          <span className="contact-scroll-line" aria-hidden="true" />
+          <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-brand-mist/45">Scrolla</span>
+        </motion.div>
       </Container>
     </section>
   );
