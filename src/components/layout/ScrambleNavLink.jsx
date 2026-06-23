@@ -33,19 +33,10 @@ export function ScrambleNavLink({
   const [display, setDisplay] = useState(label);
   const [scrambling, setScrambling] = useState(false);
   const [hovered, setHovered] = useState(false);
-  // Texten ligger kvar mörk tills blocket sopats bort helt, annars skulle vit
-  // text blinka mot ett ännu synligt vitt block under utsvepet.
-  const [darkText, setDarkText] = useState(false);
 
   // Det vita blocket visas så länge pekaren är kvar (HackFirst håller --anim=1
   // under hela hover) eller medan mount-decoden spelar upp.
   const blockVisible = hovered || scrambling;
-
-  useEffect(() => {
-    if (blockVisible) {
-      setDarkText(true);
-    }
-  }, [blockVisible]);
 
   const rafRef = useRef(0);
   const timersRef = useRef([]);
@@ -130,11 +121,21 @@ export function ScrambleNavLink({
       aria-current={isActive ? 'page' : undefined}
       className={cn(
         'group relative inline-flex items-center px-1 font-display text-sm font-light uppercase tracking-[0.18em] transition-colors duration-200 ease-smooth focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-green',
-        isActive ? 'text-brand-green' : 'text-brand-white/85 hover:text-brand-white',
+        isActive ? 'text-brand-green' : 'text-brand-white/85',
         className,
       )}
       {...props}
     >
+      {/* Osynlig reservbredd = slutlabel, så layouten aldrig hoppar. */}
+      <span aria-hidden="true" className="invisible">
+        {label}
+      </span>
+      {/* Vilolägets text – ärver länkens färg (grön på aktiv sida, annars vit).
+          Detta är vad som syns där det vita blocket INTE täcker, så när blocket
+          sveper ut avtäcks rätt navigationsfärg direkt – inget färgbyte på slutet. */}
+      <span aria-hidden="true" className="absolute inset-0 flex items-center justify-center whitespace-nowrap">
+        {display}
+      </span>
       {/* Vitt block runt texten. Som på HackFirst sveper det in från vänster
           (scaleX 0→1) när pekaren kommer, ligger kvar under hela hovern och
           sveper ut igen när man lämnar. Sharpa hörn. */}
@@ -144,28 +145,18 @@ export function ScrambleNavLink({
           'pointer-events-none absolute inset-y-0 -inset-x-0.5 origin-left rounded-[1px] bg-brand-white transition-transform duration-[600ms] ease-[cubic-bezier(0.16,1,0.3,1)]',
           blockVisible ? 'scale-x-100' : 'scale-x-0',
         )}
-        onTransitionEnd={() => {
-          if (!blockVisible) {
-            setDarkText(false);
-          }
-        }}
       />
-      {/* Osynlig reservbredd = slutlabel, så layouten aldrig hoppar. */}
-      <span aria-hidden="true" className="invisible">
-        {label}
-      </span>
-      {/* Synlig text (scramblad eller stabil) centrerad ovanpå reservbredden.
-          Som på HackFirst använder vi mix-blend-difference mot det vita blocket
-          i stället för en fast svart färg: pixlar som blocket täcker blir svarta,
-          pixlar utanför blir vita. När blocket sveper ut åt vänster vitnar därför
-          texten i exakt samma takt som blocket försvinner – ingen kvardröjande
-          svart text. Reservbredden påverkas inte. */}
+      {/* Mörk text ovanpå blocket. clip-path följer blockets kant med exakt
+          samma längd/easing som blockets scaleX, så den mörka texten avtäcks/
+          döljs i takt med blocket – aldrig svart text kvar utanför blocket och
+          inget hopp i färg när svepet är klart. */}
       <span
         aria-hidden="true"
-        className={cn(
-          'absolute inset-0 flex items-center justify-center whitespace-nowrap',
-          darkText && 'font-normal text-white mix-blend-difference',
-        )}
+        className="absolute inset-0 flex items-center justify-center whitespace-nowrap font-normal text-brand-black"
+        style={{
+          clipPath: blockVisible ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)',
+          transition: 'clip-path 600ms cubic-bezier(0.16,1,0.3,1)',
+        }}
       >
         {display}
       </span>
