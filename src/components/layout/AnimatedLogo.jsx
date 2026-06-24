@@ -116,7 +116,7 @@ export function AnimatedLogo({ targetRef, progress }) {
         {measureProbe}
         <a
           href="/"
-          aria-label="JUIT NetSec AB, gå till startsidan"
+          aria-label="JUIT NetSec AB, go to home page"
           className="pointer-events-auto fixed left-0 top-0 z-[60]"
           style={{
             left: geometry.endX,
@@ -136,7 +136,7 @@ export function AnimatedLogo({ targetRef, progress }) {
       {measureProbe}
       <motion.a
         href="/"
-        aria-label="JUIT NetSec AB, gå till startsidan"
+        aria-label="JUIT NetSec AB, go to home page"
         className="pointer-events-auto fixed left-0 top-0 z-[60] grid place-items-center"
         style={{
           x,

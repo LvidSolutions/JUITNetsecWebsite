@@ -1,6 +1,4 @@
 import { Suspense, lazy, useEffect, useState } from 'react';
-import { motion, useMotionValue, useTransform } from 'framer-motion';
-import { Container } from '../ui';
 import { BrandWordmark } from './BrandWordmark.jsx';
 import { ScrambleNavLink } from './ScrambleNavLink.jsx';
 import { cn } from '../../lib/cn';
@@ -8,8 +6,6 @@ import { cn } from '../../lib/cn';
 // Tung 3D-bricka (three/rapier/drei). Lazy-laddas i en egen chunk och bara på
 // /about + desktop, så startsidans och mobilens bundle aldrig påverkas.
 const CompanyBadgeNavbar = lazy(() => import('../Navbar/CompanyBadgeNavbar.jsx'));
-
-const HEADER_LANDED_AT = 0.45;
 
 // Exakt fyra länkar enligt referensen. Engelska etiketter mappas mot de
 // befintliga svenska routsen så att navigationen fortsatt fungerar.
@@ -20,10 +16,8 @@ const navigation = [
   { label: 'Contact', href: '/kontakt', delay: 210 },
 ];
 
-export function Header({ currentPath = '/', logoSlotRef, hideStaticLogo = false, introProgress }) {
+export function Header({ currentPath = '/', logoSlotRef, hideStaticLogo = false }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const fallbackProgress = useMotionValue(0);
-  const activeProgress = introProgress || fallbackProgress;
 
   // Företagsbrickan visas bara på /about och på desktop (≥901px, fine pointer).
   const [badgeAllowed, setBadgeAllowed] = useState(false);
@@ -48,42 +42,22 @@ export function Header({ currentPath = '/', logoSlotRef, hideStaticLogo = false,
     return () => window.removeEventListener('keydown', handleEscape);
   }, []);
 
-  useEffect(() => {
-    if (introProgress) {
-      return undefined;
-    }
-
-    function handleScroll() {
-      fallbackProgress.set(window.scrollY > 24 ? 1 : 0);
-    }
-
-    handleScroll();
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [introProgress, fallbackProgress]);
-
-  // Backdropen är helt transparent högst upp över hero (ingen svart navbar-box)
-  // och tonas bara in mjukt när man scrollar ned för läsbarhet.
-  // Solid, halvtransparent bakgrund i stället för animerad backdrop-blur.
-  // backdrop-filter på en sticky header samplar om bakgrunden varje frame när
-  // innehåll scrollar under den – mycket dyrare än att tona en bakgrundsfärg.
-  const backdropInputRange = introProgress ? [0, HEADER_LANDED_AT] : [0, 1];
-  const backdropOpacity = useTransform(activeProgress, backdropInputRange, [0, 1]);
-  const backgroundColor = useTransform(backdropOpacity, (value) => `rgba(5, 5, 5, ${value * 0.88})`);
-  const borderBottomColor = useTransform(backdropOpacity, (value) => `rgba(255, 255, 255, ${value * 0.1})`);
-
+  // Som på HackFirst är headern alltid helt transparent – ingen svart navbar-box.
+  // Navlänkarna hålls läsbara mot innehållet under via mix-blend-mode: difference
+  // (vit text inverteras till svart över ljusa partier, se referensen), så ingen
+  // bakgrundston eller backdrop-blur behövs.
   return (
-    <motion.header
-      className={cn('sticky top-0 border-b border-transparent', isMenuOpen ? 'z-[70]' : 'z-50')}
-      style={{ backgroundColor, borderBottomColor }}
-    >
-      <Container>
+    <header className={cn('sticky top-0', isMenuOpen ? 'z-[70]' : 'z-50')}>
+      {/* Full-bleed rad (ingen centrerad max-width-container): loggan hamnar
+          längst ut i vänster hörn och hamburgaren längst ut till höger,
+          precis som HackFirst. */}
+      <div className="px-4 sm:px-6 lg:px-8">
         {/* Som på HackFirst: logotyp till vänster, navlänkarna utspridda
             (space-between) i ett centrerat band, hamburgaren längst till höger. */}
         <div className="relative flex h-20 items-center">
           <a
             href="/"
-            aria-label="JUIT NetSec AB, gå till startsidan"
+            aria-label="JUIT NetSec AB, go to home page"
             ref={logoSlotRef}
             className={cn(
               'shrink-0 text-[20px] transition-opacity duration-200 hover:opacity-80',
@@ -95,8 +69,11 @@ export function Header({ currentPath = '/', logoSlotRef, hideStaticLogo = false,
           </a>
 
           <nav
-            aria-label="Huvudnavigering"
-            className="absolute left-1/2 z-30 hidden w-[clamp(360px,34vw,520px)] -translate-x-1/2 items-center justify-between lg:flex"
+            aria-label="Main navigation"
+            // Centreras med auto-marginaler (inte translate): en transform skapar
+            // en isolerad blend-grupp, vilket skulle hindra länkarnas
+            // mix-blend-difference från att blanda mot sidan bakom headern.
+            className="absolute inset-x-0 z-30 mx-auto hidden w-[clamp(520px,54vw,1000px)] items-center justify-between lg:flex"
           >
             {navigation.map((item) => (
               <ScrambleNavLink
@@ -109,12 +86,13 @@ export function Header({ currentPath = '/', logoSlotRef, hideStaticLogo = false,
             ))}
           </nav>
 
-          <div className="relative z-30 ml-auto flex items-center">
-            {/* Minimalistisk hamburger – två tunna vita linjer, ingen knappruta. */}
+          <div className="relative z-30 ml-auto flex items-center lg:hidden">
+            {/* Minimalistisk hamburger – två tunna vita linjer, ingen knappruta.
+                Visas bara på mobil/tablet; på desktop används den vanliga navbaren. */}
             <button
               type="button"
-              className="inline-flex h-10 w-8 items-center justify-center text-brand-white/85 transition-colors duration-200 hover:text-brand-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-green"
-              aria-label={isMenuOpen ? 'Stäng meny' : 'Öppna meny'}
+              className="inline-flex h-11 w-11 items-center justify-center text-brand-white/85 transition-colors duration-200 hover:text-brand-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-green"
+              aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
               aria-expanded={isMenuOpen}
               aria-controls="huvudmeny"
               onClick={() => setIsMenuOpen((open) => !open)}
@@ -149,13 +127,13 @@ export function Header({ currentPath = '/', logoSlotRef, hideStaticLogo = false,
           id="huvudmeny"
           aria-hidden={!isMenuOpen}
           className={cn(
-            'grid overflow-hidden transition-[grid-template-rows,opacity] duration-300 ease-smooth',
+            'grid overflow-hidden transition-[grid-template-rows,opacity] duration-300 ease-smooth lg:hidden',
             isMenuOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0',
           )}
         >
           <div className={cn('min-h-0', isMenuOpen && 'bg-brand-black/95')}>
             <nav
-              aria-label="Menynavigering"
+              aria-label="Menu navigation"
               className="flex flex-col gap-1 border-t border-brand-line px-1 py-4"
             >
               {navigation.map((item) => (
@@ -176,7 +154,7 @@ export function Header({ currentPath = '/', logoSlotRef, hideStaticLogo = false,
             </nav>
           </div>
         </div>
-      </Container>
-    </motion.header>
+      </div>
+    </header>
   );
 }

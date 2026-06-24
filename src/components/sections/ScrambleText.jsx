@@ -6,8 +6,8 @@ import { cn } from '../../lib/cn';
 // siffra) så att decoden ser ut som i referensen (gustaffurusten.se/about):
 // bokstäver churnar som bokstäver, siffror som siffror, mellanslag/"/"/"-"/"."
 // står still.
-const UPPER = 'ABCDEFGHIJKLMNOPQRSTUVWXYZÅÄÖ';
-const LOWER = 'abcdefghijklmnopqrstuvwxyzåäö';
+const UPPER = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+const LOWER = 'abcdefghijklmnopqrstuvwxyz';
 const DIGITS = '0123456789';
 
 function randomFor(ch) {

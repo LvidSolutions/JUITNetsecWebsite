@@ -7,14 +7,14 @@ export function CTAButtons() {
         href="/kontakt"
         className="font-display text-sm uppercase tracking-[0.14em] shadow-[0_0_0_1px_rgba(0,200,83,0.4),0_0_24px_rgba(0,200,83,0.35)] hover:shadow-[0_0_0_1px_rgba(0,200,83,0.6),0_0_36px_rgba(0,200,83,0.55)]"
       >
-        Boka konsultation
+        Book a consultation
       </Button>
       <Button
         href="#risklandskapet"
         variant="secondary"
         className="font-display text-sm uppercase tracking-[0.14em] hover:shadow-[0_0_24px_rgba(0,200,83,0.25)]"
       >
-        Utforska riskerna
+        Explore the risks
       </Button>
     </div>
   );

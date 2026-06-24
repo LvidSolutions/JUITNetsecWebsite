@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import { AnimatePresence } from 'framer-motion';
 import { Header } from './components/layout/Header.jsx';
 import { Footer } from './components/layout/Footer.jsx';
 import { AnimatedLogo } from './components/layout/AnimatedLogo.jsx';
@@ -7,25 +6,44 @@ import { AboutSection } from './components/sections/AboutSection.jsx';
 import { ContactPage } from './components/contact/ContactPage.jsx';
 import { Hero } from './components/sections/Hero.jsx';
 import { IntroLoader } from './components/sections/IntroLoader.jsx';
+import { IntroSequence } from './components/intro/IntroSequence.jsx';
 import { StatsSection } from './components/sections/StatsSection.jsx';
 import { TerminalSignalSection } from './components/sections/TerminalSignalSection.jsx';
 import { NextStepPlaceholder } from './components/sections/NextStepPlaceholder.jsx';
 import { ServicesSection } from './components/sections/ServicesSection.jsx';
-import { TeamSection } from './components/sections/TeamSection.jsx';
 import { useHeroIntroProgress } from './lib/useHeroIntroProgress.js';
 
 const titles = {
-  '/': 'JUIT NetSec AB – IT-säkerhet, nätverk och infrastruktur',
-  '/tjanster': 'Tjänster – JUIT NetSec AB',
-  '/om-oss': 'Om oss – JUIT NetSec AB',
-  '/about': 'Om oss – JUIT NetSec AB',
-  '/team': 'Team – JUIT NetSec AB',
-  '/kontakt': 'Kontakt – JUIT NetSec AB',
-  '/contact': 'Kontakt – JUIT NetSec AB',
+  '/': 'JUIT NetSec AB – IT security, networking and infrastructure',
+  '/tjanster': 'Services – JUIT NetSec AB',
+  '/om-oss': 'About – JUIT NetSec AB',
+  '/about': 'About – JUIT NetSec AB',
+  '/kontakt': 'Contact – JUIT NetSec AB',
+  '/contact': 'Contact – JUIT NetSec AB',
 };
+
+const INTRO_SEEN_KEY = 'juit:introSeen';
 
 function getCurrentPath() {
   return window.location.pathname === '' ? '/' : window.location.pathname;
+}
+
+// Intro-loadern visas bara första gången webbplatsen öppnas under en session –
+// inte varje gång man kommer tillbaka till startsidan.
+function hasSeenIntro() {
+  try {
+    return window.sessionStorage.getItem(INTRO_SEEN_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+function markIntroSeen() {
+  try {
+    window.sessionStorage.setItem(INTRO_SEEN_KEY, '1');
+  } catch {
+    /* sessionStorage otillgängligt (privat läge e.d.) – strunta i det */
+  }
 }
 
 function App() {
@@ -34,7 +52,11 @@ function App() {
   const logoSlotRef = useRef(null);
   const title = titles[currentPath] || titles['/'];
   const { scrollYProgress: introProgress, heroRef } = useHeroIntroProgress();
-  const [introDone, setIntroDone] = useState(() => getCurrentPath() !== '/');
+  // Intro i två steg: 'loader' (0–100%-uppstart) → 'reveal' (CRT-curtain) → 'done'.
+  const [introPhase, setIntroPhase] = useState(() =>
+    getCurrentPath() !== '/' || hasSeenIntro() ? 'done' : 'loader',
+  );
+  const introDone = introPhase === 'done';
 
   // Lås scroll medan intro-loadern visas så hero inte kan scrollas bakom den.
   useEffect(() => {
@@ -102,22 +124,28 @@ function App() {
 
   return (
     <>
-      <AnimatePresence>
-        {isHome && !introDone && (
-          <IntroLoader key="intro" onComplete={() => setIntroDone(true)} />
-        )}
-      </AnimatePresence>
+      {isHome && introPhase === 'loader' && (
+        <IntroLoader key="loader" onComplete={() => setIntroPhase('reveal')} />
+      )}
+      {isHome && introPhase === 'reveal' && (
+        <IntroSequence
+          key="reveal"
+          onComplete={() => {
+            markIntroSeen();
+            setIntroPhase('done');
+          }}
+        />
+      )}
       <a
         href="#huvudinnehall"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-card focus:bg-brand-green focus:px-4 focus:py-3 focus:font-semibold focus:text-brand-black"
       >
-        Hoppa till huvudinnehåll
+        Skip to main content
       </a>
       <Header
         currentPath={currentPath}
         logoSlotRef={logoSlotRef}
         hideStaticLogo={isHome}
-        introProgress={isHome ? introProgress : undefined}
       />
       {isHome && <AnimatedLogo targetRef={logoSlotRef} progress={introProgress} />}
       <main id="huvudinnehall" className="min-h-screen bg-brand-black text-brand-white" tabIndex="-1">
@@ -131,7 +159,6 @@ function App() {
         )}
         {currentPath === '/tjanster' && <ServicesSection />}
         {(currentPath === '/om-oss' || currentPath === '/about') && <AboutSection />}
-        {currentPath === '/team' && <TeamSection />}
         {(currentPath === '/kontakt' || currentPath === '/contact') && <ContactPage />}
       </main>
       <Footer />

@@ -1,20 +1,20 @@
 import { Container } from '../ui';
 
 const fields = [
-  { id: 'name', label: 'Namn', type: 'text', autoComplete: 'name', placeholder: 'För- och efternamn' },
-  { id: 'company', label: 'Företag', type: 'text', autoComplete: 'organization', placeholder: 'Organisation' },
-  { id: 'email', label: 'E-post', type: 'email', autoComplete: 'email', placeholder: 'namn@foretag.se' },
-  { id: 'phone', label: 'Telefon', type: 'tel', autoComplete: 'tel', placeholder: '+46 ...' },
+  { id: 'name', label: 'Name', type: 'text', autoComplete: 'name', placeholder: 'First and last name' },
+  { id: 'company', label: 'Company', type: 'text', autoComplete: 'organization', placeholder: 'Organization' },
+  { id: 'email', label: 'Email', type: 'email', autoComplete: 'email', placeholder: 'name@company.com' },
+  { id: 'phone', label: 'Phone', type: 'tel', autoComplete: 'tel', placeholder: '+46 ...' },
 ];
 
 const needs = [
-  'IT-infrastruktur',
-  'Nätverk & kommunikation',
-  'Cybersäkerhet',
-  'Datordrift',
-  'IT-rådgivning',
-  'Teknisk projektledning',
-  'Annat',
+  'IT infrastructure',
+  'Networking & communication',
+  'Cybersecurity',
+  'Computer operations',
+  'IT advisory',
+  'Technical project management',
+  'Other',
 ];
 
 const inputClass =
@@ -43,22 +43,22 @@ export function ContactForm() {
         <div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:items-start lg:gap-16">
           <div>
             <p className="font-mono text-xs font-medium uppercase tracking-[0.32em] text-brand-green sm:text-sm">
-              Skriv till oss
+              Write to us
             </p>
             <h2
               id="contact-form-title"
               className="mt-5 font-display text-3xl font-semibold leading-tight text-brand-white sm:text-4xl"
             >
-              Berätta kort om ert behov
+              Tell us briefly about your needs
             </h2>
             <p className="mt-5 text-base leading-relaxed text-brand-mist/65 sm:text-lg sm:leading-8">
-              Beskriv nuläge, behov eller projekt så återkommer vi för en första dialog. Ju mer
-              sammanhang, desto bättre kan vi förbereda samtalet.
+              Describe your current situation, needs or project and we'll get back to you for a first
+              conversation. The more context, the better we can prepare.
             </p>
 
             <div className="mt-10 space-y-6">
               <div>
-                <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-brand-green/80">E-post</p>
+                <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-brand-green/80">Email</p>
                 <a
                   href="mailto:ulf.wernersson@juit.se"
                   className="mt-2 inline-block font-display text-lg font-medium text-brand-white transition-colors hover:text-brand-green"
@@ -67,7 +67,7 @@ export function ContactForm() {
                 </a>
               </div>
               <div>
-                <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-brand-green/80">Telefon</p>
+                <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-brand-green/80">Phone</p>
                 <a
                   href="tel:+46708256393"
                   className="mt-2 inline-block font-display text-lg font-medium text-brand-white transition-colors hover:text-brand-green"
@@ -88,10 +88,10 @@ export function ContactForm() {
               </div>
 
               <label className="block" htmlFor="need">
-                <span className="text-sm font-medium text-brand-mist/80">Typ av behov</span>
+                <span className="text-sm font-medium text-brand-mist/80">Type of need</span>
                 <select id="need" name="need" defaultValue="" className={inputClass}>
                   <option value="" disabled>
-                    Välj område …
+                    Choose an area …
                   </option>
                   {needs.map((option) => (
                     <option key={option} value={option} className="bg-brand-black text-brand-white">
@@ -102,12 +102,12 @@ export function ContactForm() {
               </label>
 
               <label className="block" htmlFor="message">
-                <span className="text-sm font-medium text-brand-mist/80">Meddelande</span>
+                <span className="text-sm font-medium text-brand-mist/80">Message</span>
                 <textarea
                   id="message"
                   name="message"
                   rows="6"
-                  placeholder="Beskriv nuläge, behov eller projekt …"
+                  placeholder="Describe your current situation, needs or project …"
                   className="mt-2 w-full resize-y rounded-card border border-brand-line bg-white/[0.02] px-4 py-3 text-base text-brand-white outline-none transition-colors duration-200 placeholder:text-brand-mist/35 focus:border-brand-green focus:ring-2 focus:ring-brand-green/20"
                 />
               </label>
@@ -116,7 +116,7 @@ export function ContactForm() {
                 type="submit"
                 className="inline-flex min-h-12 items-center justify-center rounded-card bg-brand-green px-7 text-base font-semibold text-brand-black transition-all duration-200 ease-smooth hover:bg-brand-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green sm:w-auto sm:justify-self-start"
               >
-                Skicka förfrågan
+                Send request
               </button>
             </form>
           </div>

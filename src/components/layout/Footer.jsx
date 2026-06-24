@@ -1,19 +1,18 @@
 import { Container } from '../ui';
 
 const quickLinks = [
-  { label: 'Hem', href: '/' },
-  { label: 'Tjänster', href: '/tjanster' },
-  { label: 'Om oss', href: '/om-oss' },
-  { label: 'Referenser', href: '/referenser' },
-  { label: 'Kontakt', href: '/kontakt' },
+  { label: 'Home', href: '/' },
+  { label: 'Services', href: '/tjanster' },
+  { label: 'About', href: '/om-oss' },
+  { label: 'Contact', href: '/kontakt' },
 ];
 
 const services = [
-  'Nätverk & infrastruktur',
-  'Cybersäkerhet',
-  'Brandväggar',
-  'Moln & datacenter',
-  'IT-konsulting',
+  'Networking & infrastructure',
+  'Cybersecurity',
+  'Firewalls',
+  'Cloud & data centers',
+  'IT consulting',
 ];
 
 function FooterLink({ href, children, ...props }) {
@@ -36,12 +35,12 @@ export function Footer() {
           <div>
             <p className="text-lg font-semibold">JUIT NetSec AB</p>
             <p className="mt-4 max-w-sm leading-7 text-brand-mist">
-              Säker IT-infrastruktur, nätverk och cybersäkerhet för moderna företag.
+              Secure IT infrastructure, networking and cybersecurity for modern companies.
             </p>
             <a
               href="https://www.linkedin.com/"
               className="mt-6 inline-flex rounded-card border border-brand-line px-4 py-2 text-sm font-semibold text-brand-mist transition-colors duration-200 hover:border-brand-green hover:text-brand-green focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-green"
-              aria-label="JUIT NetSec AB på LinkedIn, placeholder-länk"
+              aria-label="JUIT NetSec AB on LinkedIn, placeholder link"
               rel="noreferrer"
               target="_blank"
             >
@@ -49,8 +48,8 @@ export function Footer() {
             </a>
           </div>
 
-          <nav aria-label="Snabblänkar">
-            <p className="text-sm font-semibold uppercase tracking-[0.16em] text-brand-green">Snabblänkar</p>
+          <nav aria-label="Quick links">
+            <p className="text-sm font-semibold uppercase tracking-[0.16em] text-brand-green">Quick links</p>
             <ul className="mt-5 space-y-3">
               {quickLinks.map((link) => (
                 <li key={link.href}>
@@ -61,7 +60,7 @@ export function Footer() {
           </nav>
 
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.16em] text-brand-green">Tjänster</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.16em] text-brand-green">Services</p>
             <ul className="mt-5 space-y-3 text-sm text-brand-mist">
               {services.map((service) => (
                 <li key={service}>{service}</li>
@@ -70,16 +69,16 @@ export function Footer() {
           </div>
 
           <address className="not-italic">
-            <p className="text-sm font-semibold uppercase tracking-[0.16em] text-brand-green">Kontakt</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.16em] text-brand-green">Contact</p>
             <div className="mt-5 space-y-3">
               <FooterLink href="mailto:info@juitnetsec.se">info@juitnetsec.se</FooterLink>
-              <p className="text-sm text-brand-mist">Sverige</p>
+              <p className="text-sm text-brand-mist">Sweden</p>
             </div>
           </address>
         </div>
 
         <div className="mt-12 border-t border-brand-line pt-6 text-sm text-brand-mist">
-          <p>© {new Date().getFullYear()} JUIT NetSec AB. Alla rättigheter förbehållna.</p>
+          <p>© {new Date().getFullYear()} JUIT NetSec AB. All rights reserved.</p>
         </div>
       </Container>
     </footer>

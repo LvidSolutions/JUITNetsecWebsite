@@ -1,30 +1,30 @@
 import { Container } from '../ui';
 
 const areas = [
-  { id: '01', title: 'IT-infrastruktur', text: 'Stabil grund: servrar, lagring, virtualisering och daglig drift.' },
-  { id: '02', title: 'Nätverk & kommunikation', text: 'Trådbundet och trådlöst, segmentering och säker uppkoppling mellan platser.' },
-  { id: '03', title: 'Cybersäkerhet', text: 'Härdning, åtkomstkontroll och rutiner som höjer er motståndskraft.' },
-  { id: '04', title: 'Datordrift', text: 'Klienter, uppdateringar och support som håller vardagen i gång.' },
-  { id: '05', title: 'IT-rådgivning', text: 'Ett bollplank för vägval, prioriteringar och teknisk riktning.' },
-  { id: '06', title: 'Teknisk projektledning', text: 'Struktur och tempo från idé till driftsatt lösning.' },
+  { id: '01', title: 'IT infrastructure', text: 'A stable foundation: servers, storage, virtualization and day-to-day operations.' },
+  { id: '02', title: 'Networking & communication', text: 'Wired and wireless, segmentation and secure connectivity between sites.' },
+  { id: '03', title: 'Cybersecurity', text: 'Hardening, access control and routines that raise your resilience.' },
+  { id: '04', title: 'Computer operations', text: 'Clients, updates and support that keep everyday work running.' },
+  { id: '05', title: 'IT advisory', text: 'A sounding board for choices, priorities and technical direction.' },
+  { id: '06', title: 'Technical project management', text: 'Structure and pace from idea to deployed solution.' },
 ];
 
 export function ContactServiceGuide() {
   return (
-    <section id="service-guide" aria-label="Områden vi arbetar inom" className="relative py-20 lg:py-28">
+    <section id="service-guide" aria-label="Areas we work in" className="relative py-20 lg:py-28">
       <Container>
         <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
           <div>
             <p className="font-mono text-xs font-medium uppercase tracking-[0.32em] text-brand-green sm:text-sm">
-              Vad gäller det?
+              What's it about?
             </p>
             <h2 className="mt-5 font-display text-4xl font-semibold leading-[1.04] tracking-tight text-brand-white sm:text-5xl">
-              Hitta ert område
+              Find your area
             </h2>
           </div>
           <p className="text-base leading-relaxed text-brand-mist/65 sm:text-lg sm:leading-8">
-            Vi arbetar brett inom IT-miljöns kärna. Känn igen er i ett område nedan så är det en bra
-            startpunkt för dialogen – vi hjälper er att reda ut resten.
+            We work broadly across the core of the IT environment. Recognize yourself in an area below —
+            it's a good starting point for the conversation, and we'll help you sort out the rest.
           </p>
         </div>
 

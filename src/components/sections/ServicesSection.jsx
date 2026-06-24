@@ -2,38 +2,38 @@ import { Container } from '../ui';
 
 const services = [
   {
-    title: 'Nätverk & infrastruktur',
-    text: 'Design, implementation och optimering av stabila och säkra nätverksmiljöer för verksamheter där tillgänglighet och kontroll är avgörande.',
+    title: 'Networking & infrastructure',
+    text: 'Design, implementation and optimization of stable, secure network environments for organizations where availability and control are critical.',
     symbol: 'NI',
     tag: 'Infrastructure',
   },
   {
-    title: 'Cybersäkerhet',
-    text: 'Skydd av system, användare och data genom moderna säkerhetslösningar, riskreducering och tydliga tekniska processer.',
+    title: 'Cybersecurity',
+    text: 'Protecting systems, users and data through modern security solutions, risk reduction and clear technical processes.',
     symbol: 'CS',
     tag: 'Security',
   },
   {
-    title: 'Brandväggar & säkerhetsarkitektur',
-    text: 'Rådgivning, implementation och förvaltning av brandväggar, segmentering och zero-trust-principer.',
+    title: 'Firewalls & security architecture',
+    text: 'Advisory, implementation and management of firewalls, segmentation and zero-trust principles.',
     symbol: 'SA',
     tag: 'Architecture',
   },
   {
-    title: 'Moln & datacenter',
-    text: 'Säkra och skalbara lösningar för moln, hybridmiljöer och datacenter med fokus på långsiktig driftbarhet.',
+    title: 'Cloud & data centers',
+    text: 'Secure and scalable solutions for cloud, hybrid environments and data centers with a focus on long-term operability.',
     symbol: 'MD',
     tag: 'Cloud',
   },
   {
     title: 'Automation',
-    text: 'Effektivisera drift, dokumentation och konfiguration med smarta arbetsflöden som minskar manuella risker.',
+    text: 'Streamline operations, documentation and configuration with smart workflows that reduce manual risk.',
     symbol: 'AU',
     tag: 'Ops',
   },
   {
-    title: 'IT-konsulting',
-    text: 'Senior teknisk expertis för projekt, upphandlingar, implementationer och strategiska beslut inom IT och säkerhet.',
+    title: 'IT consulting',
+    text: 'Senior technical expertise for projects, procurement, implementations and strategic decisions across IT and security.',
     symbol: 'IT',
     tag: 'Advisory',
   },
@@ -42,7 +42,7 @@ const services = [
 const vendorCategories = [
   {
     name: 'New',
-    description: 'Produkter, plattformar och leverantörer som kan ingå i moderna infrastruktur-, moln- och säkerhetsmiljöer.',
+    description: 'Products, platforms and vendors that can be part of modern infrastructure, cloud and security environments.',
     vendors: [
       { name: 'VMware', url: 'https://www.vmware.com/', symbol: 'VM' },
       { name: 'Veeam', symbol: 'VE' },
@@ -65,9 +65,9 @@ const vendorCategories = [
 ];
 
 const serviceStats = [
-  { value: '24/7', label: 'säkerhetsmedveten drift' },
-  { value: 'ZERO', label: 'onödig komplexitet' },
-  { value: 'END', label: 'to-end ansvar' },
+  { value: '24/7', label: 'security-aware operations' },
+  { value: 'ZERO', label: 'unnecessary complexity' },
+  { value: 'END', label: 'to-end ownership' },
 ];
 
 function MonoLabel({ children, className = '' }) {
@@ -133,7 +133,7 @@ function VendorCard({ vendor }) {
       <div className="mt-8">
         <h4 className="text-lg font-semibold leading-7 text-brand-white">{vendor.name}</h4>
         <p className="mt-2 text-sm leading-6 text-brand-mist/55">
-          {vendor.url ? 'Öppna leverantör' : 'Visas utan extern länk'}
+          {vendor.url ? 'Open vendor' : 'Shown without external link'}
         </p>
       </div>
     </div>
@@ -148,7 +148,7 @@ function VendorCard({ vendor }) {
       href={vendor.url}
       target="_blank"
       rel="noreferrer"
-      aria-label={`Öppna ${vendor.name} i en ny flik`}
+      aria-label={`Open ${vendor.name} in a new tab`}
       className="block h-full focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-green focus-visible:ring-offset-4 focus-visible:ring-offset-brand-black"
     >
       {content}
@@ -177,11 +177,11 @@ export function ServicesSection() {
             <div>
               <p className="font-mono text-[11px] uppercase tracking-[0.32em] text-brand-mist/45">JUIT NetSec AB</p>
               <h1 className="mt-5 max-w-5xl font-display text-[clamp(3.4rem,10vw,8.4rem)] font-semibold uppercase leading-[0.84] tracking-[-0.05em] text-brand-white">
-                Secure<br />systems.<span className="text-brand-green">Real</span><br />operations.
+                Secure<br />systems. <span className="text-brand-green">Real</span><br />operations.
               </h1>
               <p className="mt-8 max-w-3xl text-lg leading-8 text-brand-mist/78 sm:text-xl sm:leading-9">
-                Vi bygger, säkrar och förvaltar IT-miljöer med samma praktiska fokus som angripare utnyttjar:
-                infrastruktur, åtkomst, segmentering, moln och driftbarhet måste fungera tillsammans.
+                We build, secure and manage IT environments with the same practical focus attackers
+                exploit: infrastructure, access, segmentation, cloud and operability have to work together.
               </p>
             </div>
           </div>
@@ -210,11 +210,11 @@ export function ServicesSection() {
             <div className="lg:sticky lg:top-28">
               <MonoLabel>Core services</MonoLabel>
               <h2 className="mt-6 max-w-xl font-display text-3xl font-semibold leading-tight tracking-tight text-brand-white sm:text-5xl">
-                Från teknisk risk till fungerande skydd i produktion.
+                From technical risk to working protection in production.
               </h2>
               <p className="mt-6 max-w-md text-base leading-7 text-brand-mist/68">
-                Servicesidan är uppbyggd som ett operativt system: varje block representerar en del av miljön som måste
-                analyseras, härdas och fungera långsiktigt.
+                The services page is built like an operational system: each block represents a part of
+                the environment that has to be analyzed, hardened and work over the long term.
               </p>
             </div>
 
@@ -258,11 +258,11 @@ export function ServicesSection() {
             <div>
               <MonoLabel>Execution model</MonoLabel>
               <h2 className="mt-6 max-w-2xl font-display text-3xl font-semibold leading-tight tracking-tight text-brand-white sm:text-5xl">
-                Analysera. Designa. Implementera. Förvalta.
+                Analyze. Design. Implement. Manage.
               </h2>
             </div>
             <div className="grid gap-0 border-t border-brand-line font-mono text-sm text-brand-mist/70 sm:grid-cols-2 lg:border-t-0">
-              {['01 / Nuläge och risk', '02 / Arkitektur och vägval', '03 / Implementation', '04 / Dokumenterad förvaltning'].map((step, index) => (
+              {['01 / Current state and risk', '02 / Architecture and direction', '03 / Implementation', '04 / Documented management'].map((step, index) => (
                 <div
                   key={step}
                   className={`border-b border-brand-line py-5 sm:px-5 ${index % 2 === 0 ? 'sm:border-r' : ''}`}

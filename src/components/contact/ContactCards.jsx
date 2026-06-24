@@ -3,34 +3,34 @@ import { Container } from '../ui';
 const cards = [
   {
     index: '01',
-    title: 'Diskutera ett behov',
-    text: 'Ett första samtal om nuläge, utmaningar och vart ni vill. Vi lyssnar in miljön innan vi föreslår något.',
-    action: 'Starta dialogen',
+    title: 'Discuss a need',
+    text: 'A first conversation about where you are, your challenges and where you want to go. We listen to the environment before suggesting anything.',
+    action: 'Start the conversation',
   },
   {
     index: '02',
-    title: 'Boka analys',
-    text: 'En strukturerad genomgång av infrastruktur, nätverk och drift för att hitta risker och förbättringar.',
-    action: 'Boka en tid',
+    title: 'Book an assessment',
+    text: 'A structured review of infrastructure, networking and operations to find risks and improvements.',
+    action: 'Book a time',
   },
   {
     index: '03',
-    title: 'Projekt eller specialistinsats',
-    text: 'Behöver ni teknisk projektledning eller punktinsats? Vi går in där kompetensen behövs.',
-    action: 'Beskriv projektet',
+    title: 'Project or specialist support',
+    text: 'Need technical project management or a focused effort? We step in where the expertise is needed.',
+    action: 'Describe the project',
   },
 ];
 
 export function ContactCards() {
   return (
-    <section id="kontaktkort" aria-label="Sätt att starta en dialog" className="relative py-20 lg:py-28">
+    <section id="kontaktkort" aria-label="Ways to start a conversation" className="relative py-20 lg:py-28">
       <Container>
         <div className="max-w-2xl">
           <p className="font-mono text-xs font-medium uppercase tracking-[0.32em] text-brand-green sm:text-sm">
-            Tre vägar in
+            Three ways in
           </p>
           <h2 className="mt-5 font-display text-3xl font-semibold leading-tight text-brand-white sm:text-4xl">
-            Välj det som passar er situation
+            Choose what fits your situation
           </h2>
         </div>
 

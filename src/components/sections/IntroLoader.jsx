@@ -50,7 +50,7 @@ export function IntroLoader({ onComplete }) {
       initial={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: prefersReducedMotion ? 0.25 : 0.7, ease: [0.22, 1, 0.36, 1] }}
-      aria-label="Laddar"
+      aria-label="Loading"
       role="status"
     >
       <video
@@ -96,7 +96,7 @@ export function IntroLoader({ onComplete }) {
           </div>
 
           <p className="mt-5 font-mono text-[0.65rem] uppercase tracking-[0.35em] text-brand-mist/55">
-            Initierar säker miljö
+            Initializing secure environment
           </p>
 
           {/* tick-rad / progress */}

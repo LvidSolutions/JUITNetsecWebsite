@@ -99,7 +99,7 @@ export function TerminalSignalSection() {
     <section
       ref={sectionRef}
       id="signal"
-      aria-label="Reaktiv signalvisualisering"
+      aria-label="Reactive signal visualization"
       className="relative isolate flex min-h-[600px] items-center overflow-hidden bg-brand-black py-24 sm:py-28 lg:min-h-[85vh] lg:py-32"
     >
       {/* WebGL-bakgrund (eller fallback). Ligger absolut bakom innehållet. */}
@@ -150,18 +150,18 @@ export function TerminalSignalSection() {
           canvasen bakom (det finns inga klickbara element här att blockera). */}
       <Container className="pointer-events-none relative z-10">
         <p className="font-mono text-xs font-medium uppercase tracking-[0.32em] text-brand-green sm:text-sm">
-          Signal / Infrastruktur / Kontroll
+          Signal / Infrastructure / Control
         </p>
         <h2 className="mt-6 max-w-4xl font-display text-4xl font-semibold leading-[1.05] tracking-tight text-brand-white sm:text-5xl lg:text-6xl">
-          Bakom varje stabil IT-miljö finns teknisk kontroll.
+          Behind every stable IT environment is technical control.
         </h2>
         <p className="mt-6 max-w-2xl text-base leading-relaxed text-brand-mist/80 sm:text-lg sm:leading-8">
-          JUIT NetSec hjälper organisationer att skapa ordning i komplexa miljöer — från nätverk och
-          säker kommunikation till drift, dokumentation och långsiktig förvaltning.
+          JUIT NetSec helps organizations create order in complex environments — from networking and
+          secure communication to operations, documentation and long-term management.
         </p>
         <p className="mt-10 flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.28em] text-brand-mist/50 sm:text-xs">
           <span aria-hidden="true" className="h-1.5 w-1.5 rounded-[1px] bg-brand-green" />
-          Reaktiv visualisering: nätverk, signaler och driftlager.
+          Reactive visualization: networks, signals and operations layers.
         </p>
       </Container>
     </section>

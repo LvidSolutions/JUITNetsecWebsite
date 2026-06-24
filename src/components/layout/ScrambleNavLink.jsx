@@ -120,8 +120,12 @@ export function ScrambleNavLink({
       aria-label={label}
       aria-current={isActive ? 'page' : undefined}
       className={cn(
-        'group relative inline-flex items-center px-1 font-display text-sm font-light uppercase tracking-[0.18em] transition-colors duration-200 ease-smooth focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-green',
-        isActive ? 'text-brand-green' : 'text-brand-white/85',
+        'group relative inline-flex items-center px-1 font-display text-[15px] font-medium uppercase tracking-[0.14em] transition-colors duration-200 ease-smooth focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-green',
+        // Inverteringseffekten (mix-blend-difference) läggs bara på de vita,
+        // inaktiva länkarna. Den aktiva länken hålls UTANFÖR blandningen så att
+        // den alltid är ren brand-green i stället för att slå om till magenta
+        // när den råkar ligga över vit text.
+        isActive ? 'text-brand-green' : 'text-brand-white mix-blend-difference',
         className,
       )}
       {...props}
@@ -152,7 +156,7 @@ export function ScrambleNavLink({
           inget hopp i färg när svepet är klart. */}
       <span
         aria-hidden="true"
-        className="absolute inset-0 flex items-center justify-center whitespace-nowrap font-normal text-brand-black"
+        className="absolute inset-0 flex items-center justify-center whitespace-nowrap font-medium text-brand-black"
         style={{
           clipPath: blockVisible ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)',
           transition: 'clip-path 600ms cubic-bezier(0.16,1,0.3,1)',

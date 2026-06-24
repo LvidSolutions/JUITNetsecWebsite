@@ -29,14 +29,14 @@ export function Hero({ heroRef, introProgress }) {
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
           >
             <p className="mb-6 inline-flex items-center rounded-full border border-brand-green/30 bg-brand-green/10 px-4 py-2 font-mono text-xs font-medium uppercase tracking-[0.28em] text-brand-green shadow-glow">
-              Cybersäkerhet • Nätverk • Infrastruktur
+              Cybersecurity • Networking • Infrastructure
             </p>
             <h1 className="max-w-5xl font-display text-4xl font-bold uppercase leading-[0.98] tracking-[-0.02em] text-brand-white sm:text-6xl lg:text-7xl">
-              Bygg en säkrare IT-miljö innan nästa incident testar den
+              Build a safer IT environment before the next incident tests it
             </h1>
             <p className="mt-7 max-w-2xl text-lg leading-8 text-brand-mist sm:text-xl sm:leading-9">
-              JUIT NetSec hjälper företag att stärka nätverk, brandväggar, identitet, moln och kritisk
-              infrastruktur med senior teknisk expertis.
+              JUIT NetSec helps companies strengthen networks, firewalls, identity, cloud and critical
+              infrastructure with senior technical expertise.
             </p>
 
             <CTAButtons />

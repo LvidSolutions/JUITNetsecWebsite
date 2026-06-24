@@ -6,11 +6,11 @@ export function NextStepPlaceholder() {
       <Container>
         <div className="max-w-2xl">
           <h2 className="text-2xl font-semibold text-brand-white sm:text-3xl">
-            Nästa steg: exponering, identitet och nätverk
+            Next step: exposure, identity and networking
           </h2>
           <p className="mt-4 text-base leading-7 text-brand-mist">
-            Placeholder för kommande scrollsektioner om attackyta, MFA, segmentering, brandväggar, moln
-            och robust drift.
+            Placeholder for upcoming scroll sections on attack surface, MFA, segmentation, firewalls,
+            cloud and resilient operations.
           </p>
         </div>
       </Container>

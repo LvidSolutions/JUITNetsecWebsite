@@ -39,7 +39,7 @@ export function ContactHero() {
             href="#kontaktformular"
             className="group inline-flex items-center gap-3 rounded-full border border-brand-line bg-white/[0.03] py-2 pl-6 pr-2 text-sm font-semibold uppercase tracking-[0.14em] text-brand-white backdrop-blur-sm transition-colors duration-200 hover:border-brand-green/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green"
           >
-            Diskutera ert behov
+            Discuss your needs
             <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-green text-brand-black transition-transform duration-300 ease-smooth group-hover:translate-x-0.5">
               <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                 <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
@@ -72,10 +72,10 @@ export function ContactHero() {
           <div className="relative z-10 mt-6 max-w-xl lg:-mt-[2vw] lg:pl-[18%]">
             <h2 className="font-display text-[7vw] font-semibold leading-[1.02] tracking-tight text-brand-white sm:text-4xl lg:text-[2.6rem]">
               <MaskReveal reduce={reduce} delay={0.42} duration={0.9}>
-                Starta en dialog
+                Start a conversation
               </MaskReveal>
               <MaskReveal reduce={reduce} delay={0.52} duration={0.9}>
-                om er IT-miljö.
+                about your IT environment.
               </MaskReveal>
             </h2>
 
@@ -85,8 +85,8 @@ export function ContactHero() {
               animate={reduce ? undefined : { opacity: 1, y: 0 }}
               transition={{ duration: 0.8, ease: EASE, delay: 0.72 }}
             >
-              JUIT NetSec hjälper företag att skapa stabilare infrastruktur, säkrare kommunikation och
-              bättre teknisk kontroll.
+              JUIT NetSec helps companies build more stable infrastructure, more secure communication
+              and better technical control.
             </motion.p>
           </div>
 
@@ -104,7 +104,7 @@ export function ContactHero() {
           transition={{ duration: 0.6, ease: EASE, delay: 1 }}
         >
           <span className="contact-scroll-line" aria-hidden="true" />
-          <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-brand-mist/45">Scrolla</span>
+          <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-brand-mist/45">Scroll</span>
         </motion.div>
       </Container>
     </section>

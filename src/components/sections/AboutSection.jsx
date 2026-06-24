@@ -14,21 +14,21 @@ import { cn } from '../../lib/cn';
 
 // Editoriella fakta-block – endast bekräftade uppgifter.
 const facts = [
-  { label: 'Plats', value: 'STHLM', sub: 'Stockholm, Sverige' },
-  { label: 'Org.nr', value: '559243-2727', sub: 'Svenskt aktiebolag' },
-  { label: 'Inriktning', value: 'IT / SEC', sub: 'Infrastruktur, kommunikation och säkerhet' },
-  { label: 'Fokus', value: 'DRIFT', sub: 'Datakonsultverksamhet och datordrifttjänster' },
+  { label: 'Location', value: 'STHLM', sub: 'Stockholm, Sweden' },
+  { label: 'Reg. no.', value: '559243-2727', sub: 'Swedish limited company' },
+  { label: 'Focus', value: 'IT / SEC', sub: 'Infrastructure, communication and security' },
+  { label: 'Discipline', value: 'OPS', sub: 'IT consulting and computer operations services' },
 ];
 
 const values = [
-  'Säkerhet',
-  'Stabilitet',
-  'Tydlighet',
-  'Ansvar',
-  'Långsiktighet',
-  'Teknisk precision',
-  'Praktisk expertis',
-  'Förtroende',
+  'Security',
+  'Stability',
+  'Clarity',
+  'Responsibility',
+  'Longevity',
+  'Technical precision',
+  'Practical expertise',
+  'Trust',
 ];
 
 const contactProfile = {
@@ -40,36 +40,36 @@ const contactProfile = {
 };
 
 const companyContact = [
-  { k: 'Bolag', v: 'JUIT NetSec AB' },
-  { k: 'Adress', v: 'Fatburs kvarngata 26, 118 64 Stockholm' },
-  { k: 'Webb', v: 'www.juit.se', href: 'https://www.juit.se' },
+  { k: 'Company', v: 'JUIT NetSec AB' },
+  { k: 'Address', v: 'Fatburs kvarngata 26, 118 64 Stockholm' },
+  { k: 'Web', v: 'www.juit.se', href: 'https://www.juit.se' },
 ];
 
 // Ersätter referensens "Awards & Recognition" – inga påhittade priser.
 const principles = [
   {
-    title: 'Säkerhet före komplexitet',
-    description: 'Lösningar ska minska risk utan att skapa onödig teknisk tyngd.',
+    title: 'Security before complexity',
+    description: 'Solutions should reduce risk without adding unnecessary technical weight.',
     area: 'Security',
   },
   {
-    title: 'Stabilitet före kortsiktiga lösningar',
-    description: 'Tekniska beslut ska fungera i drift, inte bara i presentationer.',
+    title: 'Stability before short-term fixes',
+    description: 'Technical decisions should work in production, not just in presentations.',
     area: 'Operations',
   },
   {
-    title: 'Praktisk expertis före buzzwords',
-    description: 'Rådgivning ska vara tekniskt förankrad och möjlig att genomföra.',
+    title: 'Practical expertise before buzzwords',
+    description: 'Advice should be technically grounded and possible to execute.',
     area: 'Consulting',
   },
   {
-    title: 'Tydlig rådgivning',
-    description: 'Kunden ska förstå risker, vägval och nästa steg.',
+    title: 'Clear guidance',
+    description: 'The client should understand the risks, the options and the next steps.',
     area: 'Advisory',
   },
   {
-    title: 'Långsiktig funktion',
-    description: 'Miljöer ska vara dokumenterade, förvaltningsbara och hållbara över tid.',
+    title: 'Long-term function',
+    description: 'Environments should be documented, maintainable and sustainable over time.',
     area: 'Management',
   },
 ];
@@ -77,46 +77,46 @@ const principles = [
 // Ersätter referensens "Experience" – kompetens-/tjänsteområden.
 const competencies = [
   {
-    title: 'IT-infrastruktur',
+    title: 'IT infrastructure',
     description:
-      'Planering, förbättring och förvaltning av stabila IT-miljöer med fokus på säkerhet, driftsäkerhet och skalbarhet.',
+      'Planning, improvement and management of stable IT environments with a focus on security, reliability and scalability.',
     area: 'Infrastructure',
   },
   {
-    title: 'Nätverk & säker kommunikation',
+    title: 'Networking & secure communication',
     description:
-      'Design och optimering av säkra kommunikationslösningar för användare, kontor, system och externa anslutningar.',
+      'Design and optimization of secure communication solutions for users, offices, systems and external connections.',
     area: 'Network',
   },
   {
-    title: 'Cybersäkerhet',
+    title: 'Cybersecurity',
     description:
-      'Praktisk rådgivning, teknisk granskning och implementation av säkerhetslösningar som minskar risk.',
+      'Practical guidance, technical review and implementation of security solutions that reduce risk.',
     area: 'Security',
   },
   {
-    title: 'Datordrift & förvaltning',
+    title: 'Computer operations & management',
     description:
-      'Tekniskt stöd, driftkompetens och förvaltning för företag som behöver stabila och säkra IT-system över tid.',
+      'Technical support, operations expertise and management for companies that need stable, secure IT systems over time.',
     area: 'Operations',
   },
   {
-    title: 'IT-management & rådgivning',
+    title: 'IT management & advisory',
     description:
-      'Teknisk rådgivning, kravställning, projektledning och strategiska vägval inom IT och säkerhet.',
+      'Technical advice, requirements definition, project management and strategic choices across IT and security.',
     area: 'Advisory',
   },
 ];
 
 const trustPoints = [
-  'Fokus på infrastruktur, kommunikation och säkerhet',
-  'Erfarenhet av praktiska IT-miljöer',
-  'Teknisk rådgivning från analys till implementation',
-  'Säkerhetsmedvetet arbetssätt',
-  'Tydlig dokumentation',
-  'Långsiktigt förvaltningsperspektiv',
-  'Baserat i Stockholm',
-  'Registrerat svenskt aktiebolag',
+  'Focused on infrastructure, communication and security',
+  'Experience with real-world IT environments',
+  'Technical guidance from analysis to implementation',
+  'A security-aware way of working',
+  'Clear documentation',
+  'A long-term management perspective',
+  'Based in Stockholm',
+  'Registered Swedish limited company',
 ];
 
 // Liten mono-label med grön bullet (återkommer genom hela sidan).
@@ -188,7 +188,7 @@ export function AboutSection() {
               <p className="text-brand-white/90">JUIT</p>
               <p className="text-brand-white/90">NETSEC</p>
               <p className="mt-6 flex items-center gap-2 text-brand-green">
-                <span aria-hidden="true">[</span> scroll ned <span aria-hidden="true">]</span>
+                <span aria-hidden="true">[</span> scroll down <span aria-hidden="true">]</span>
               </p>
             </div>
             <span
@@ -264,33 +264,33 @@ export function AboutSection() {
       <section className="border-b border-brand-line py-24 sm:py-28 lg:py-36">
         <Container>
           <Reveal>
-            <Label>[ Om JUIT NetSec ]</Label>
+            <Label>[ About JUIT NetSec ]</Label>
           </Reveal>
           <div className="mt-10 grid gap-x-12 gap-y-12 lg:grid-cols-[1.15fr_0.85fr]">
             <Reveal>
               <h2
-                lang="sv"
                 className="max-w-3xl hyphens-auto break-words font-display text-3xl font-semibold leading-[1.05] tracking-tight text-brand-white sm:text-5xl lg:text-6xl"
               >
-                Senior IT- och säkerhetskompetens för stabila tekniska miljöer
+                Senior IT and security expertise for stable technical environments
               </h2>
             </Reveal>
             <Reveal delay={0.08} className="space-y-6 text-lg leading-8 text-brand-mist/85">
               <p>
-                JUIT NetSec AB är ett IT-konsultbolag baserat i Stockholm med inriktning mot
-                infrastruktur, kommunikation och säkerhet. Bolaget hjälper företag att skapa stabila,
-                säkra och välfungerande IT-miljöer genom teknisk expertis, rådgivning och praktisk
+                JUIT NetSec AB is an IT consulting company based in Stockholm, focused on infrastructure,
+                communication and security. The company helps businesses build stable, secure and
+                well-functioning IT environments through technical expertise, advisory and hands-on
                 implementation.
               </p>
               <p>
-                Med fokus på nätverk, drift, säkerhet och management fungerar JUIT NetSec som en erfaren
-                partner för organisationer som behöver pålitlig IT-kompetens utan onödig komplexitet.
+                With a focus on networking, operations, security and management, JUIT NetSec acts as an
+                experienced partner for organizations that need reliable IT expertise without unnecessary
+                complexity.
               </p>
               <p className="text-brand-mist/65">
-                JUIT NetSec är byggt kring senior teknisk kompetens och praktisk erfarenhet från
-                IT-miljöer där säkerhet, stabilitet och tydlig kommunikation är avgörande. Arbetet utgår
-                från verkliga behov, befintliga miljöer och lösningar som ska fungera i praktiken — inte
-                bara på papper.
+                JUIT NetSec is built around senior technical expertise and practical experience from IT
+                environments where security, stability and clear communication are critical. The work
+                starts from real needs, existing environments and solutions that have to work in
+                practice — not just on paper.
               </p>
             </Reveal>
           </div>
@@ -316,9 +316,9 @@ export function AboutSection() {
       <section className="border-b border-brand-line py-24 sm:py-28 lg:py-32">
         <Container>
           <Reveal>
-            <Label>Principer</Label>
+            <Label>Principles</Label>
             <h2 className="mt-6 max-w-2xl font-display text-3xl font-semibold leading-tight tracking-tight text-brand-white sm:text-4xl">
-              Vad vi sätter främst
+              What we put first
             </h2>
           </Reveal>
 
@@ -326,9 +326,9 @@ export function AboutSection() {
             {/* kolumnrubriker – syns på lg */}
             <div className="hidden border-b border-brand-line pb-3 font-mono text-[10px] uppercase tracking-[0.28em] text-brand-mist/45 lg:grid lg:grid-cols-[3rem_minmax(0,1fr)_minmax(0,1.1fr)_8rem] lg:gap-6">
               <span>Idx</span>
-              <span>Princip</span>
-              <span>Förklaring</span>
-              <span className="text-right">Område</span>
+              <span>Principle</span>
+              <span>Explanation</span>
+              <span className="text-right">Area</span>
             </div>
 
             <ul>
@@ -367,7 +367,7 @@ export function AboutSection() {
       <section className="border-b border-brand-line py-24 sm:py-28 lg:py-32">
         <Container>
           <Reveal>
-            <Label>Kompetensområden</Label>
+            <Label>Areas of expertise</Label>
           </Reveal>
 
           <ul className="mt-12">
@@ -409,14 +409,14 @@ export function AboutSection() {
         <Container>
           <div className="grid gap-x-12 gap-y-12 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
             <Reveal>
-              <Label>Trovärdighet</Label>
+              <Label>Credibility</Label>
               <h2 className="mt-6 max-w-xl font-display text-3xl font-semibold leading-[1.1] tracking-tight text-brand-white sm:text-4xl lg:text-[2.75rem]">
-                Erfaren IT-kompetens med fokus på säkerhet och stabilitet
+                Experienced IT expertise focused on security and stability
               </h2>
               <p className="mt-6 max-w-xl text-lg leading-8 text-brand-mist/80">
-                När IT-miljön är affärskritisk behövs teknisk kompetens som kombinerar säkerhetstänk,
-                praktisk erfarenhet och tydlig rådgivning. JUIT NetSec arbetar med lösningar som ska vara
-                robusta, begripliga och möjliga att förvalta över tid.
+                When the IT environment is business-critical, you need technical expertise that combines
+                security thinking, practical experience and clear guidance. JUIT NetSec works with
+                solutions that are robust, understandable and maintainable over time.
               </p>
             </Reveal>
 
@@ -454,16 +454,16 @@ export function AboutSection() {
                 JUIT <span className="text-brand-mist/60">NetSec AB</span>
               </div>
               <p className="mt-4 max-w-xs text-sm leading-6 text-brand-mist/60">
-                IT-konsulting inom infrastruktur, kommunikation, säkerhet och datordrift.
+                IT consulting in infrastructure, communication, security and computer operations.
               </p>
             </Reveal>
 
             <Reveal delay={0.08}>
-              <Label>Kontaktperson</Label>
+              <Label>Contact person</Label>
               <div className="mt-8 grid gap-8 lg:grid-cols-[0.95fr_1.05fr]">
                 <div className="rounded-[2px] border border-brand-line bg-white/[0.025] p-6 transition-colors duration-200 hover:border-brand-green/40 sm:p-8">
                   <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-brand-green">
-                    Senior kontakt
+                    Senior contact
                   </p>
                   <h2 className="mt-5 font-display text-3xl font-semibold leading-tight tracking-tight text-brand-white sm:text-4xl">
                     {contactProfile.name}
