@@ -93,8 +93,8 @@ function PremiumVideo() {
       playsInline
       preload="metadata"
     >
-      <source src="/assets/go-to.mp4" type="video/mp4" />
-      <source src="/assets/brus.mp4" type="video/mp4" />
+      <source src="/videos/contact-hero.webm" type="video/webm" />
+      <source src="/videos/contact-hero.mp4" type="video/mp4" />
     </video>
   );
 }
