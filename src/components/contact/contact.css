@@ -28,6 +28,75 @@
   );
 }
 
+/* Stor, mjuk "full-bleed"-panel i SOHub-anda: en enda sammanhållen yta med
+   stor radie, mjuk mörk/grön bakgrund och diskret kant istället för ett hårt,
+   smalt kort. Den inre toppglansen + djupskuggan ger en premium, redaktionell
+   känsla där formuläret läses som en del av panelen, inte som en separat box. */
+.contact-panel {
+  position: relative;
+  isolation: isolate;
+  background:
+    radial-gradient(125% 105% at 50% -18%, rgba(0, 200, 83, 0.13), transparent 56%),
+    radial-gradient(90% 80% at 92% 8%, rgba(0, 200, 83, 0.06), transparent 60%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.022) 45%, rgba(255, 255, 255, 0.032));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    inset 0 0 0 1px rgba(0, 200, 83, 0.04),
+    0 50px 140px rgba(0, 0, 0, 0.55),
+    0 0 90px rgba(0, 200, 83, 0.05);
+}
+
+/* Diskret topphögdager som mjukar upp den övre kanten ytterligare. */
+.contact-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 18%);
+  z-index: -1;
+}
+
+/* Mjuka, "pill-lika" fält: stor radie, låg kontrast i vila, lyfter vid fokus. */
+.contact-field {
+  height: 3.5rem;
+  width: 100%;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.032);
+  padding: 0 1.25rem;
+  color: #fff;
+  font-size: 15px;
+  outline: none;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.contact-field::placeholder {
+  color: rgba(229, 231, 235, 0.32);
+}
+
+.contact-field:hover {
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+.contact-field:focus {
+  border-color: rgba(0, 200, 83, 0.55);
+  background: rgba(255, 255, 255, 0.045);
+  box-shadow: 0 0 0 4px rgba(0, 200, 83, 0.14);
+}
+
+.contact-field--area {
+  height: auto;
+  min-height: 9.5rem;
+  padding: 1rem 1.25rem;
+  resize: vertical;
+  line-height: 1.6;
+}
+
 .contact-video-glow {
   background: radial-gradient(
     42% 42% at 60% 52%,
