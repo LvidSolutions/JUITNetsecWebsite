@@ -23,7 +23,7 @@ const facts = [
 const contactProfile = {
   name: 'Ulf Wernersson',
   role: 'CEO',
-  email: 'ulf.wernersson@juit.se',
+  email: 'contact@juit.se',
   phone: '+46 708-25 63 93',
   phoneHref: 'tel:+46708256393',
 };
