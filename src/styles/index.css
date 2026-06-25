@@ -55,6 +55,36 @@
 }
 
 @layer utilities {
+  /* Partnerremsa (LogoLoop): rendera alla logotyper i ren vit monokrom så de
+     matchar den mörka identiteten, med dämpad vila och full styrka vid hover.
+     brightness(0) invert(1) gör vilken enfärgad/flerfärgad logotyp som helst vit
+     och bevarar formen (igenkänning intakt). */
+  .partners-strip .logoloop__item img {
+    filter: brightness(0) invert(1);
+    opacity: 0.6;
+    transition:
+      opacity 0.3s ease,
+      transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .partners-strip .logoloop__item:hover img {
+    opacity: 1;
+  }
+
+  /* Optisk balansering efter tight viewBox-beskärning: breda ordmärken dämpas
+     något i höjd så att deras versalhöjd väger jämnt mot de kvadratiska ikon-
+     märkena (konvention: wordmark-höjd < ikon-höjd). */
+  .partners-strip .logoloop__item img[alt='VMware'],
+  .partners-strip .logoloop__item img[alt='Veeam'],
+  .partners-strip .logoloop__item img[alt='Microsoft'],
+  .partners-strip .logoloop__item img[alt='Smart Cloud Solutions'] {
+    height: calc(var(--logoloop-logoHeight) * 0.7);
+  }
+
+  .partners-strip .logoloop__item img[alt='Amazon Web Services'] {
+    height: calc(var(--logoloop-logoHeight) * 0.86);
+  }
+
   .hero-grid {
     background-image:
       linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),

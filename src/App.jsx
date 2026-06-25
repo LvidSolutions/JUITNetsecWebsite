@@ -7,6 +7,7 @@ import { ContactPage } from './components/contact/ContactPage.jsx';
 import { Hero } from './components/sections/Hero.jsx';
 import { IntroLoader } from './components/sections/IntroLoader.jsx';
 import { IntroSequence } from './components/intro/IntroSequence.jsx';
+import { PartnersSection } from './components/sections/PartnersSection.jsx';
 import { StatsSection } from './components/sections/StatsSection.jsx';
 import { TerminalSignalSection } from './components/sections/TerminalSignalSection.jsx';
 import { NextStepPlaceholder } from './components/sections/NextStepPlaceholder.jsx';
@@ -152,6 +153,7 @@ function App() {
         {isHome && (
           <>
             <Hero heroRef={heroRef} introProgress={introProgress} />
+            <PartnersSection />
             <StatsSection />
             <TerminalSignalSection />
             <NextStepPlaceholder />

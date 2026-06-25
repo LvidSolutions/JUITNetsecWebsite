@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  TEXT FALLBACK LOGO.
+  No reliable, verifiable official logo could be found for "Smart Cloud Solutions"
+  (the name maps to several unrelated companies, with no authoritative brand asset).
+  Per the brief, this is a simple text-based lockup styled to match the partner strip
+  (white, uppercase, Space Grotesk-style sans) rather than an invented brand mark.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 64" role="img" aria-label="Smart Cloud Solutions">
+  <title>Smart Cloud Solutions</title>
+  <g fill="#ffffff" font-family="'Space Grotesk','Segoe UI',Arial,sans-serif" font-weight="700" text-anchor="middle">
+    <text x="130" y="28" font-size="21" letter-spacing="2">SMART CLOUD</text>
+    <text x="130" y="53" font-size="21" letter-spacing="6">SOLUTIONS</text>
+  </g>
+</svg>
