@@ -20,17 +20,6 @@ const facts = [
   { label: 'Discipline', value: 'OPS', sub: 'IT consulting and computer operations services' },
 ];
 
-const values = [
-  'Security',
-  'Stability',
-  'Clarity',
-  'Responsibility',
-  'Longevity',
-  'Technical precision',
-  'Practical expertise',
-  'Trust',
-];
-
 const contactProfile = {
   name: 'Ulf Wernersson',
   role: 'Senior Infrastructure Architect',
@@ -259,7 +248,7 @@ export function AboutSection() {
       </section>
 
       {/* ---------------------------------------------------------------- */}
-      {/* OM JUIT NETSEC – stor rubrik + brödtext + värdeord               */}
+      {/* OM JUIT NETSEC – stor rubrik + brödtext                          */}
       {/* ---------------------------------------------------------------- */}
       <section className="border-b border-brand-line py-24 sm:py-28 lg:py-36">
         <Container>
@@ -294,19 +283,6 @@ export function AboutSection() {
               </p>
             </Reveal>
           </div>
-
-          <Reveal delay={0.1} className="mt-14">
-            <div className="flex flex-wrap gap-x-3 gap-y-3 border-t border-brand-line pt-8">
-              {values.map((value) => (
-                <span
-                  key={value}
-                  className="rounded-[2px] border border-brand-line px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.2em] text-brand-mist/70 transition-colors duration-200 hover:border-brand-green/50 hover:text-brand-white"
-                >
-                  {value}
-                </span>
-              ))}
-            </div>
-          </Reveal>
         </Container>
       </section>
 
