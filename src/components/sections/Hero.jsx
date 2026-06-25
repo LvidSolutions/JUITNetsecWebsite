@@ -21,19 +21,23 @@ export function Hero({ heroRef, introProgress }) {
       <div className="sticky top-0 h-screen w-full overflow-hidden bg-brand-black">
         <HeroVideoBackground />
 
-        <Container className="relative z-20 flex h-full flex-col justify-end pb-24 sm:pb-28 lg:pb-32">
+        <Container className="relative z-20 flex h-full flex-col items-center justify-center pb-10 pt-24 text-center sm:pb-12 sm:pt-28 lg:pb-14 lg:pt-32">
           <motion.div
-            className="max-w-4xl"
+            className="mx-auto max-w-5xl"
             initial={false}
             animate={{ opacity: copyVisible ? 1 : 0, y: copyVisible ? 0 : 24 }}
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
           >
-            <h1 className="max-w-5xl font-display text-4xl font-bold uppercase leading-[0.98] tracking-[-0.02em] text-brand-white sm:text-6xl lg:text-7xl">
-              Build a safer IT environment before the next incident tests it
+            <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-brand-mist/60">
+              Secure IT environments
+            </p>
+            <h1 className="mt-6 font-display text-5xl font-bold uppercase leading-[0.9] tracking-[-0.03em] sm:text-7xl lg:text-8xl">
+              <span className="block text-brand-green">Ready to secure</span>
+              <span className="block text-brand-white">your IT environment?</span>
             </h1>
-            <p className="mt-7 max-w-2xl text-lg leading-8 text-brand-mist sm:text-xl sm:leading-9">
-              JUIT NetSec helps companies strengthen networks, firewalls, identity, cloud and critical
-              infrastructure with senior technical expertise.
+            <p className="mx-auto mt-7 max-w-2xl text-base leading-7 text-brand-mist sm:text-lg sm:leading-8">
+              Infrastructure, secure communication and cybersecurity advisory for organizations that
+              depend on control, uptime and trust.
             </p>
 
             <CTAButtons />
