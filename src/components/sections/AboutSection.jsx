@@ -276,94 +276,101 @@ export function AboutSection() {
       </section>
 
       {/* ---------------------------------------------------------------- */}
-      {/* PRINCIPER – tabell-lik lista (ersätter awards)                    */}
+      {/* PRINCIPLES & EXPERTISE – sammanhållen princip-/kompetenssektion   */}
       {/* ---------------------------------------------------------------- */}
-      <section className="border-b border-brand-line py-24 sm:py-28 lg:py-32">
-        <Container>
+      <section className="relative overflow-hidden border-b border-brand-line py-24 sm:py-28 lg:py-36">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_10%,rgba(0,200,83,0.10),transparent_34%),linear-gradient(90deg,rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(180deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[auto,72px_72px,72px_72px]" />
+        <Container className="relative">
           <Reveal>
-            <Label>Principles</Label>
-            <h2 className="mt-6 max-w-2xl font-display text-3xl font-semibold leading-tight tracking-tight text-brand-white sm:text-4xl">
-              What we put first
-            </h2>
+            <Label>Principles & Expertise</Label>
+            <div className="mt-7 grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
+              <h2 className="max-w-3xl font-display text-3xl font-semibold leading-[1.06] tracking-tight text-brand-white sm:text-5xl lg:text-6xl">
+                Technical principles connected to hands-on delivery
+              </h2>
+              <p className="max-w-2xl text-base leading-7 text-brand-mist/70 sm:text-lg sm:leading-8 lg:justify-self-end">
+                JUIT NetSec combines security-conscious working principles with practical expertise
+                across infrastructure, networking, operations and advisory. The focus is on technical
+                decisions that can be understood, implemented and maintained over time.
+              </p>
+            </div>
           </Reveal>
 
-          <div className="mt-12">
-            {/* kolumnrubriker – syns på lg */}
-            <div className="hidden border-b border-brand-line pb-3 font-mono text-[10px] uppercase tracking-[0.28em] text-brand-mist/45 lg:grid lg:grid-cols-[3rem_minmax(0,1fr)_minmax(0,1.1fr)_8rem] lg:gap-6">
-              <span>Idx</span>
-              <span>Principle</span>
-              <span>Explanation</span>
-              <span className="text-right">Area</span>
-            </div>
-
-            <ul>
-              {principles.map((item, index) => (
-                <li key={item.title}>
-                  <Reveal delay={index * 0.04}>
-                    <div className="group grid grid-cols-1 gap-2 border-b border-brand-line py-6 transition-colors duration-200 hover:bg-white/[0.025] lg:grid-cols-[3rem_minmax(0,1fr)_minmax(0,1.1fr)_8rem] lg:items-baseline lg:gap-6">
-                      <ScrambleText
-                        as="span"
-                        text={String(index + 1).padStart(2, '0')}
-                        durationMs={500}
-                        className="font-mono text-xs tracking-[0.2em] text-brand-green"
-                      />
+          <div className="mt-14 grid gap-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
+            <Reveal delay={0.06} className="rounded-[2px] border border-brand-line bg-white/[0.025]">
+              <div className="border-b border-brand-line p-6 sm:p-8">
+                <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-brand-green">
+                  Working principles
+                </p>
+                <p className="mt-4 max-w-md text-sm leading-6 text-brand-mist/65">
+                  A compact decision framework for secure, stable and maintainable IT environments.
+                </p>
+              </div>
+              <ol className="divide-y divide-brand-line">
+                {principles.map((item, index) => (
+                  <li key={item.title}>
+                    <div className="group p-6 transition-colors duration-200 hover:bg-white/[0.025] sm:p-8">
+                      <div className="flex items-center justify-between gap-4">
+                        <ScrambleText
+                          as="span"
+                          text={String(index + 1).padStart(2, '0')}
+                          durationMs={500}
+                          className="font-mono text-xs tracking-[0.24em] text-brand-green"
+                        />
+                        <span className="font-mono text-[10px] uppercase tracking-[0.24em] text-brand-mist/45">
+                          {item.area}
+                        </span>
+                      </div>
                       <ScrambleText
                         as="h3"
                         text={item.title}
                         durationMs={850}
-                        className="font-display text-xl font-medium leading-snug text-brand-white transition-transform duration-200 group-hover:translate-x-1 sm:text-2xl"
+                        className="mt-5 font-display text-xl font-medium leading-snug text-brand-white transition-transform duration-200 group-hover:translate-x-1 sm:text-2xl"
                       />
-                      <p className="max-w-xl text-sm leading-6 text-brand-mist/65">{item.description}</p>
-                      <span className="font-mono text-[11px] uppercase tracking-[0.24em] text-brand-mist/55 lg:text-right">
-                        {item.area}
-                      </span>
+                      <p className="mt-3 max-w-xl text-sm leading-6 text-brand-mist/65">
+                        {item.description}
+                      </p>
                     </div>
-                  </Reveal>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </Container>
-      </section>
+                  </li>
+                ))}
+              </ol>
+            </Reveal>
 
-      {/* ---------------------------------------------------------------- */}
-      {/* KOMPETENSOMRÅDEN – stora rubriker (ersätter experience)           */}
-      {/* ---------------------------------------------------------------- */}
-      <section className="border-b border-brand-line py-24 sm:py-28 lg:py-32">
-        <Container>
-          <Reveal>
-            <Label>Areas of expertise</Label>
-          </Reveal>
-
-          <ul className="mt-12">
-            {competencies.map((item, index) => (
-              <li key={item.title}>
-                <Reveal delay={index * 0.04}>
-                  <div className="group border-t border-brand-line py-9 transition-colors duration-200 hover:bg-white/[0.02] sm:py-10">
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-baseline sm:justify-between sm:gap-8">
+            <Reveal delay={0.12}>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {competencies.map((item, index) => (
+                  <article
+                    key={item.title}
+                    className={cn(
+                      'group flex min-h-[15rem] flex-col justify-between rounded-[2px] border border-brand-line bg-brand-black/70 p-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-green/45 hover:bg-white/[0.035] sm:p-7',
+                      index === 0 && 'sm:col-span-2',
+                    )}
+                  >
+                    <div>
+                      <div className="flex items-center justify-between gap-4">
+                        <ScrambleText
+                          as="span"
+                          text={`${String(index + 1).padStart(2, '0')} / ${item.area}`}
+                          durationMs={700}
+                          startDelay={100}
+                          className="font-mono text-[10px] uppercase tracking-[0.28em] text-brand-green/90"
+                        />
+                        <span aria-hidden="true" className="h-1.5 w-1.5 shrink-0 rounded-[1px] bg-brand-green" />
+                      </div>
                       <ScrambleText
                         as="h3"
                         text={item.title}
                         durationMs={950}
-                        className="font-display text-3xl font-semibold leading-[1.02] tracking-tight text-brand-white transition-transform duration-200 group-hover:translate-x-1 sm:text-4xl lg:text-5xl"
-                      />
-                      <ScrambleText
-                        as="span"
-                        text={`${String(index + 1).padStart(2, '0')} / ${item.area}`}
-                        durationMs={750}
-                        startDelay={120}
-                        className="shrink-0 font-mono text-[11px] uppercase tracking-[0.3em] text-brand-green/90"
+                        className="mt-7 font-display text-2xl font-semibold leading-tight tracking-tight text-brand-white transition-transform duration-200 group-hover:translate-x-1 sm:text-3xl"
                       />
                     </div>
-                    <p className="mt-5 max-w-3xl text-base leading-7 text-brand-mist/70 sm:text-lg sm:leading-8">
+                    <p className="mt-8 text-sm leading-6 text-brand-mist/68 sm:text-base sm:leading-7">
                       {item.description}
                     </p>
-                  </div>
-                </Reveal>
-              </li>
-            ))}
-            <li aria-hidden="true" className="border-t border-brand-line" />
-          </ul>
+                  </article>
+                ))}
+              </div>
+            </Reveal>
+          </div>
         </Container>
       </section>
 
