@@ -64,12 +64,6 @@ const vendorCategories = [
   },
 ];
 
-const serviceStats = [
-  { value: '24/7', label: 'security-aware operations' },
-  { value: 'ZERO', label: 'unnecessary complexity' },
-  { value: 'END', label: 'to-end ownership' },
-];
-
 function MonoLabel({ children, className = '' }) {
   return (
     <p className={`flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.28em] text-brand-green ${className}`}>
@@ -159,7 +153,7 @@ function VendorCard({ vendor }) {
 export function ServicesSection() {
   return (
     <div id="tjanster" className="overflow-hidden bg-brand-black text-brand-white">
-      <section className="relative border-b border-brand-line pt-28 sm:pt-32 lg:pt-40">
+      <section className="relative border-b border-brand-line pt-28 pb-20 sm:pt-32 sm:pb-24 lg:pt-40 lg:pb-32">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_78%_8%,rgba(0,200,83,0.18),transparent_34%),radial-gradient(circle_at_10%_20%,rgba(255,255,255,0.07),transparent_28%)]" />
         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.035)_1px,transparent_1px)] bg-[size:72px_72px] opacity-35" />
         <Container className="relative">
@@ -184,22 +178,6 @@ export function ServicesSection() {
                 exploit: infrastructure, access, segmentation, cloud and operability have to work together.
               </p>
             </div>
-          </div>
-
-          <div className="mt-16 grid border-t border-brand-line sm:grid-cols-3">
-            {serviceStats.map((stat, index) => (
-              <div
-                key={stat.value}
-                className={`border-b border-brand-line py-7 sm:border-b-0 sm:px-6 ${index > 0 ? 'sm:border-l' : ''}`}
-              >
-                <p className="font-display text-4xl font-semibold leading-none tracking-tight text-brand-white sm:text-5xl">
-                  {stat.value}
-                </p>
-                <p className="mt-3 max-w-xs font-mono text-[11px] uppercase leading-5 tracking-[0.2em] text-brand-mist/50">
-                  {stat.label}
-                </p>
-              </div>
-            ))}
           </div>
         </Container>
       </section>
