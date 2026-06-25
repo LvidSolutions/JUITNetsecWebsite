@@ -276,100 +276,107 @@ export function AboutSection() {
       </section>
 
       {/* ---------------------------------------------------------------- */}
-      {/* PRINCIPLES & EXPERTISE – sammanhållen princip-/kompetenssektion   */}
+      {/* PRINCIPLES – fristående principsektion                            */}
       {/* ---------------------------------------------------------------- */}
-      <section className="relative overflow-hidden border-b border-brand-line py-24 sm:py-28 lg:py-36">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_10%,rgba(0,200,83,0.10),transparent_34%),linear-gradient(90deg,rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(180deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[auto,72px_72px,72px_72px]" />
-        <Container className="relative">
+      <section className="border-b border-brand-line py-24 sm:py-28 lg:py-32">
+        <Container>
           <Reveal>
-            <Label>Principles & Expertise</Label>
-            <div className="mt-7 grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
-              <h2 className="max-w-3xl font-display text-3xl font-semibold leading-[1.06] tracking-tight text-brand-white sm:text-5xl lg:text-6xl">
-                Technical principles connected to hands-on delivery
-              </h2>
+            <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
+              <div>
+                <Label>Principles</Label>
+                <h2 className="mt-6 max-w-3xl font-display text-3xl font-semibold leading-[1.08] tracking-tight text-brand-white sm:text-5xl">
+                  Principles that guide technical decisions
+                </h2>
+              </div>
               <p className="max-w-2xl text-base leading-7 text-brand-mist/70 sm:text-lg sm:leading-8 lg:justify-self-end">
-                JUIT NetSec combines security-conscious working principles with practical expertise
-                across infrastructure, networking, operations and advisory. The focus is on technical
-                decisions that can be understood, implemented and maintained over time.
+                JUIT NetSec works from a clear set of technical principles: reduce risk, keep
+                environments understandable and make decisions that can survive real operations.
               </p>
             </div>
           </Reveal>
 
-          <div className="mt-14 grid gap-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
-            <Reveal delay={0.06} className="rounded-[2px] border border-brand-line bg-white/[0.025]">
-              <div className="border-b border-brand-line p-6 sm:p-8">
-                <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-brand-green">
-                  Working principles
-                </p>
-                <p className="mt-4 max-w-md text-sm leading-6 text-brand-mist/65">
-                  A compact decision framework for secure, stable and maintainable IT environments.
-                </p>
-              </div>
-              <ol className="divide-y divide-brand-line">
-                {principles.map((item, index) => (
-                  <li key={item.title}>
-                    <div className="group p-6 transition-colors duration-200 hover:bg-white/[0.025] sm:p-8">
-                      <div className="flex items-center justify-between gap-4">
-                        <ScrambleText
-                          as="span"
-                          text={String(index + 1).padStart(2, '0')}
-                          durationMs={500}
-                          className="font-mono text-xs tracking-[0.24em] text-brand-green"
-                        />
-                        <span className="font-mono text-[10px] uppercase tracking-[0.24em] text-brand-mist/45">
-                          {item.area}
-                        </span>
-                      </div>
-                      <ScrambleText
-                        as="h3"
-                        text={item.title}
-                        durationMs={850}
-                        className="mt-5 font-display text-xl font-medium leading-snug text-brand-white transition-transform duration-200 group-hover:translate-x-1 sm:text-2xl"
-                      />
-                      <p className="mt-3 max-w-xl text-sm leading-6 text-brand-mist/65">
-                        {item.description}
-                      </p>
-                    </div>
-                  </li>
-                ))}
-              </ol>
-            </Reveal>
-
-            <Reveal delay={0.12}>
-              <div className="grid gap-4 sm:grid-cols-2">
-                {competencies.map((item, index) => (
-                  <article
-                    key={item.title}
-                    className={cn(
-                      'group flex min-h-[15rem] flex-col justify-between rounded-[2px] border border-brand-line bg-brand-black/70 p-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-green/45 hover:bg-white/[0.035] sm:p-7',
-                      index === 0 && 'sm:col-span-2',
-                    )}
-                  >
-                    <div>
-                      <div className="flex items-center justify-between gap-4">
-                        <ScrambleText
-                          as="span"
-                          text={`${String(index + 1).padStart(2, '0')} / ${item.area}`}
-                          durationMs={700}
-                          startDelay={100}
-                          className="font-mono text-[10px] uppercase tracking-[0.28em] text-brand-green/90"
-                        />
-                        <span aria-hidden="true" className="h-1.5 w-1.5 shrink-0 rounded-[1px] bg-brand-green" />
-                      </div>
-                      <ScrambleText
-                        as="h3"
-                        text={item.title}
-                        durationMs={950}
-                        className="mt-7 font-display text-2xl font-semibold leading-tight tracking-tight text-brand-white transition-transform duration-200 group-hover:translate-x-1 sm:text-3xl"
-                      />
-                    </div>
-                    <p className="mt-8 text-sm leading-6 text-brand-mist/68 sm:text-base sm:leading-7">
+          <ol className="mt-14 overflow-hidden rounded-[2px] border border-brand-line bg-white/[0.02]">
+            {principles.map((item, index) => (
+              <li key={item.title} className="border-b border-brand-line last:border-b-0">
+                <Reveal delay={index * 0.04}>
+                  <div className="group grid gap-4 p-6 transition-colors duration-200 hover:bg-white/[0.025] sm:p-8 lg:grid-cols-[4rem_minmax(0,0.9fr)_minmax(0,1.25fr)_8rem] lg:items-baseline lg:gap-8">
+                    <ScrambleText
+                      as="span"
+                      text={String(index + 1).padStart(2, '0')}
+                      durationMs={500}
+                      className="font-mono text-xs tracking-[0.24em] text-brand-green"
+                    />
+                    <ScrambleText
+                      as="h3"
+                      text={item.title}
+                      durationMs={850}
+                      className="font-display text-xl font-medium leading-snug text-brand-white transition-transform duration-200 group-hover:translate-x-1 sm:text-2xl"
+                    />
+                    <p className="max-w-2xl text-sm leading-6 text-brand-mist/65 sm:text-base sm:leading-7">
                       {item.description}
                     </p>
-                  </article>
-                ))}
-              </div>
-            </Reveal>
+                    <span className="font-mono text-[10px] uppercase tracking-[0.24em] text-brand-mist/45 lg:text-right">
+                      {item.area}
+                    </span>
+                  </div>
+                </Reveal>
+              </li>
+            ))}
+          </ol>
+        </Container>
+      </section>
+
+      {/* ---------------------------------------------------------------- */}
+      {/* AREAS OF EXPERTISE – fristående kompetenssektion                  */}
+      {/* ---------------------------------------------------------------- */}
+      <section className="border-b border-brand-line py-24 sm:py-28 lg:py-32">
+        <Container>
+          <Reveal>
+            <Label>Areas of Expertise</Label>
+            <div className="mt-6 grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-end">
+              <h2 className="max-w-3xl font-display text-3xl font-semibold leading-[1.08] tracking-tight text-brand-white sm:text-5xl">
+                Expertise for secure infrastructure and operations
+              </h2>
+              <p className="max-w-xl text-base leading-7 text-brand-mist/70 sm:text-lg sm:leading-8 lg:justify-self-end">
+                Practical senior expertise across the technical areas that shape stable, secure and
+                maintainable IT environments.
+              </p>
+            </div>
+          </Reveal>
+
+          <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {competencies.map((item, index) => (
+              <Reveal key={item.title} delay={index * 0.04}>
+                <article
+                  className={cn(
+                    'group flex min-h-[17rem] flex-col justify-between rounded-[2px] border border-brand-line bg-white/[0.02] p-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-green/45 hover:bg-white/[0.035] sm:p-7',
+                    index === 0 && 'lg:col-span-2',
+                  )}
+                >
+                  <div>
+                    <div className="flex items-center justify-between gap-4">
+                      <ScrambleText
+                        as="span"
+                        text={`${String(index + 1).padStart(2, '0')} / ${item.area}`}
+                        durationMs={700}
+                        startDelay={100}
+                        className="font-mono text-[10px] uppercase tracking-[0.28em] text-brand-green/90"
+                      />
+                      <span aria-hidden="true" className="h-1.5 w-1.5 shrink-0 rounded-[1px] bg-brand-green" />
+                    </div>
+                    <ScrambleText
+                      as="h3"
+                      text={item.title}
+                      durationMs={950}
+                      className="mt-8 font-display text-2xl font-semibold leading-tight tracking-tight text-brand-white transition-transform duration-200 group-hover:translate-x-1 sm:text-3xl"
+                    />
+                  </div>
+                  <p className="mt-8 text-sm leading-6 text-brand-mist/68 sm:text-base sm:leading-7">
+                    {item.description}
+                  </p>
+                </article>
+              </Reveal>
+            ))}
           </div>
         </Container>
       </section>
