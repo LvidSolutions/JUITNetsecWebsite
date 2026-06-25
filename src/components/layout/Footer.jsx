@@ -71,7 +71,7 @@ export function Footer() {
           <address className="not-italic">
             <p className="text-sm font-semibold uppercase tracking-[0.16em] text-brand-green">Contact</p>
             <div className="mt-5 space-y-3">
-              <FooterLink href="mailto:info@juitnetsec.se">info@juitnetsec.se</FooterLink>
+              <FooterLink href="mailto:contact@juit.se">contact@juit.se</FooterLink>
               <p className="text-sm text-brand-mist">Sweden</p>
             </div>
           </address>
