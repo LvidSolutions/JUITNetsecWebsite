@@ -97,17 +97,6 @@ const competencies = [
   },
 ];
 
-const trustPoints = [
-  'Focused on infrastructure, communication and security',
-  'Experience with real-world IT environments',
-  'Technical guidance from analysis to implementation',
-  'A security-aware way of working',
-  'Clear documentation',
-  'A long-term management perspective',
-  'Based in Stockholm',
-  'Registered Swedish limited company',
-];
-
 // Liten mono-label med grön bullet (återkommer genom hela sidan).
 function Label({ children, className = '' }) {
   return (
@@ -375,47 +364,6 @@ export function AboutSection() {
             ))}
             <li aria-hidden="true" className="border-t border-brand-line" />
           </ul>
-        </Container>
-      </section>
-
-      {/* ---------------------------------------------------------------- */}
-      {/* TRUST / CREDIBILITY                                               */}
-      {/* ---------------------------------------------------------------- */}
-      <section className="border-b border-brand-line py-24 sm:py-28 lg:py-32">
-        <Container>
-          <div className="grid gap-x-12 gap-y-12 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
-            <Reveal>
-              <Label>Credibility</Label>
-              <h2 className="mt-6 max-w-xl font-display text-3xl font-semibold leading-[1.1] tracking-tight text-brand-white sm:text-4xl lg:text-[2.75rem]">
-                Experienced IT expertise focused on security and stability
-              </h2>
-              <p className="mt-6 max-w-xl text-lg leading-8 text-brand-mist/80">
-                When the IT environment is business-critical, you need technical expertise that combines
-                security thinking, practical experience and clear guidance. JUIT NetSec works with
-                solutions that are robust, understandable and maintainable over time.
-              </p>
-            </Reveal>
-
-            <Reveal delay={0.08}>
-              <ul className="grid grid-cols-1 border-t border-brand-line sm:grid-cols-2">
-                {trustPoints.map((point, index) => (
-                  <li
-                    key={point}
-                    className={cn(
-                      'flex items-start gap-3 border-b border-brand-line py-5 pr-4 sm:py-6',
-                      index % 2 === 0 && 'sm:border-r sm:pr-8',
-                    )}
-                  >
-                    <span
-                      aria-hidden="true"
-                      className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-[1px] bg-brand-green"
-                    />
-                    <span className="text-sm leading-6 text-brand-mist/85 sm:text-base">{point}</span>
-                  </li>
-                ))}
-              </ul>
-            </Reveal>
-          </div>
         </Container>
       </section>
 
