@@ -229,29 +229,6 @@ export function ServicesSection() {
           </Container>
         </section>
       ))}
-
-      <section className="relative py-20 sm:py-24 lg:py-32">
-        <Container>
-          <div className="grid gap-10 border-y border-brand-line py-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
-            <div>
-              <MonoLabel>Execution model</MonoLabel>
-              <h2 className="mt-6 max-w-2xl font-display text-3xl font-semibold leading-tight tracking-tight text-brand-white sm:text-5xl">
-                Analyze. Design. Implement. Manage.
-              </h2>
-            </div>
-            <div className="grid gap-0 border-t border-brand-line font-mono text-sm text-brand-mist/70 sm:grid-cols-2 lg:border-t-0">
-              {['01 / Current state and risk', '02 / Architecture and direction', '03 / Implementation', '04 / Documented management'].map((step, index) => (
-                <div
-                  key={step}
-                  className={`border-b border-brand-line py-5 sm:px-5 ${index % 2 === 0 ? 'sm:border-r' : ''}`}
-                >
-                  <span className="text-brand-green">{step.split(' / ')[0]}</span> / {step.split(' / ')[1]}
-                </div>
-              ))}
-            </div>
-          </div>
-        </Container>
-      </section>
     </div>
   );
 }
