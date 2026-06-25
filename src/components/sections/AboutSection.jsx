@@ -22,7 +22,7 @@ const facts = [
 
 const contactProfile = {
   name: 'Ulf Wernersson',
-  role: 'Senior Infrastructure Architect',
+  role: 'CEO',
   email: 'ulf.wernersson@juit.se',
   phone: '+46 708-25 63 93',
   phoneHref: 'tel:+46708256393',
@@ -30,7 +30,7 @@ const contactProfile = {
 
 const companyContact = [
   { k: 'Company', v: 'JUIT NetSec AB' },
-  { k: 'Address', v: 'Fatburs kvarngata 26, 118 64 Stockholm' },
+  { k: 'Location', v: 'Södermalm, Stockholm' },
   { k: 'Web', v: 'www.juit.se', href: 'https://www.juit.se' },
 ];
 
@@ -130,11 +130,11 @@ function Reveal({ children, className = '', delay = 0 }) {
 
 function ContactRow({ row }) {
   return (
-    <div className="flex flex-col gap-1 border-b border-brand-line py-4 sm:flex-row sm:items-center sm:gap-8">
-      <dt className="w-28 shrink-0 text-[11px] uppercase tracking-[0.24em] text-brand-mist/45">
+    <div className="grid gap-1 border-b border-brand-line py-5 last:border-b-0 sm:grid-cols-[8rem_minmax(0,1fr)] sm:gap-8">
+      <dt className="text-[11px] uppercase tracking-[0.24em] text-brand-mist/45">
         {row.k}
       </dt>
-      <dd className="text-brand-white/90">
+      <dd className="text-sm leading-6 text-brand-white/90 sm:text-base">
         {row.href ? (
           <a
             href={row.href}
@@ -386,44 +386,49 @@ export function AboutSection() {
       {/* ---------------------------------------------------------------- */}
       <section className="relative overflow-hidden pt-24 sm:pt-28 lg:pt-32">
         <Container>
-          <div className="grid gap-x-12 gap-y-12 lg:grid-cols-[0.8fr_1.2fr]">
+          <div className="grid gap-x-12 gap-y-12 lg:grid-cols-[0.75fr_1.25fr]">
             <Reveal>
-              <div className="font-display text-2xl font-semibold tracking-tight text-brand-white">
+              <Label>Contact</Label>
+              <div className="mt-7 font-display text-3xl font-semibold tracking-tight text-brand-white sm:text-4xl">
                 JUIT <span className="text-brand-mist/60">NetSec AB</span>
               </div>
-              <p className="mt-4 max-w-xs text-sm leading-6 text-brand-mist/60">
-                IT consulting in infrastructure, communication, security and computer operations.
+              <p className="mt-5 max-w-sm text-base leading-7 text-brand-mist/65">
+                Direct senior contact for infrastructure, communication, security and computer
+                operations.
               </p>
             </Reveal>
 
             <Reveal delay={0.08}>
-              <Label>Contact person</Label>
-              <div className="mt-8 grid gap-8 lg:grid-cols-[0.95fr_1.05fr]">
-                <div className="rounded-[2px] border border-brand-line bg-white/[0.025] p-6 transition-colors duration-200 hover:border-brand-green/40 sm:p-8">
-                  <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-brand-green">
-                    Senior contact
-                  </p>
-                  <h2 className="mt-5 font-display text-3xl font-semibold leading-tight tracking-tight text-brand-white sm:text-4xl">
-                    {contactProfile.name}
-                  </h2>
-                  <p className="mt-3 text-base leading-7 text-brand-mist/70">{contactProfile.role}</p>
-                  <div className="mt-8 space-y-3 text-sm leading-6 text-brand-mist/85">
+              <div className="rounded-[2px] border border-brand-line bg-white/[0.025] transition-colors duration-200 hover:border-brand-green/40">
+                <div className="flex flex-col gap-8 border-b border-brand-line p-6 sm:p-8 lg:flex-row lg:items-start lg:justify-between">
+                  <div>
+                    <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-brand-green">
+                      Contact person
+                    </p>
+                    <h2 className="mt-5 font-display text-3xl font-semibold leading-tight tracking-tight text-brand-white sm:text-4xl">
+                      {contactProfile.name}
+                    </h2>
+                    <p className="mt-3 text-base leading-7 text-brand-mist/70">{contactProfile.role}</p>
+                  </div>
+                  <div className="flex flex-col gap-3 text-sm leading-6 text-brand-mist/85 sm:min-w-[17rem]">
                     <a
                       href={`mailto:${contactProfile.email}`}
-                      className="block transition-colors duration-200 hover:text-brand-green"
+                      className="group flex items-center justify-between gap-4 border border-brand-line px-4 py-3 transition-colors duration-200 hover:border-brand-green/45 hover:text-brand-green"
                     >
-                      {contactProfile.email}
+                      <span>{contactProfile.email}</span>
+                      <span aria-hidden="true" className="text-brand-green">-&gt;</span>
                     </a>
                     <a
                       href={contactProfile.phoneHref}
-                      className="block transition-colors duration-200 hover:text-brand-green"
+                      className="group flex items-center justify-between gap-4 border border-brand-line px-4 py-3 transition-colors duration-200 hover:border-brand-green/45 hover:text-brand-green"
                     >
-                      {contactProfile.phone}
+                      <span>{contactProfile.phone}</span>
+                      <span aria-hidden="true" className="text-brand-green">-&gt;</span>
                     </a>
                   </div>
                 </div>
 
-                <dl className="space-y-0 border-t border-brand-line font-mono text-sm">
+                <dl className="px-6 font-mono sm:px-8">
                   {companyContact.map((row) => (
                     <ContactRow key={row.k} row={row} />
                   ))}
