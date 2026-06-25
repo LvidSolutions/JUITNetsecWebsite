@@ -21,7 +21,7 @@ export function ContactCTA() {
           <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <a
               href="#kontaktformular"
-              className="inline-flex min-h-12 items-center justify-center rounded-card bg-brand-green px-7 text-base font-semibold text-brand-black transition-all duration-200 ease-smooth hover:bg-brand-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green"
+              className="inline-flex min-h-12 items-center justify-center rounded-card bg-brand-green px-7 text-sm font-semibold uppercase tracking-[0.14em] text-brand-black transition-all duration-200 ease-smooth hover:bg-brand-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green"
             >
               Discuss your needs
             </a>

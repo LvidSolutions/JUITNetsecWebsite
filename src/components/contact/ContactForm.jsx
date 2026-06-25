@@ -23,7 +23,7 @@ const inputClass =
 function Field({ id, label, type, autoComplete, placeholder }) {
   return (
     <label className="block" htmlFor={id}>
-      <span className="text-sm font-medium text-brand-mist/80">{label}</span>
+      <span className="text-xs font-medium uppercase tracking-[0.16em] text-brand-mist/70">{label}</span>
       <input
         id={id}
         name={id}
@@ -88,7 +88,7 @@ export function ContactForm() {
               </div>
 
               <label className="block" htmlFor="need">
-                <span className="text-sm font-medium text-brand-mist/80">Type of need</span>
+                <span className="text-xs font-medium uppercase tracking-[0.16em] text-brand-mist/70">Type of need</span>
                 <select id="need" name="need" defaultValue="" className={inputClass}>
                   <option value="" disabled>
                     Choose an area …
@@ -102,7 +102,7 @@ export function ContactForm() {
               </label>
 
               <label className="block" htmlFor="message">
-                <span className="text-sm font-medium text-brand-mist/80">Message</span>
+                <span className="text-xs font-medium uppercase tracking-[0.16em] text-brand-mist/70">Message</span>
                 <textarea
                   id="message"
                   name="message"
@@ -114,7 +114,7 @@ export function ContactForm() {
 
               <button
                 type="submit"
-                className="inline-flex min-h-12 items-center justify-center rounded-card bg-brand-green px-7 text-base font-semibold text-brand-black transition-all duration-200 ease-smooth hover:bg-brand-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green sm:w-auto sm:justify-self-start"
+                className="inline-flex min-h-12 items-center justify-center rounded-card bg-brand-green px-7 text-sm font-semibold uppercase tracking-[0.14em] text-brand-black transition-all duration-200 ease-smooth hover:bg-brand-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green sm:w-auto sm:justify-self-start"
               >
                 Send request
               </button>

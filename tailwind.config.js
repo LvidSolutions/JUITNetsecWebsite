@@ -23,8 +23,12 @@ export default {
         },
       },
       fontFamily: {
-        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-        display: ['"Space Grotesk"', 'Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        // Space Grotesk är navbar-/varumärkesfonten och används nu som primär
+        // font för hela sajten (rubriker, navigation, knappar, etiketter, kort,
+        // formulär, brödtext och sidfot) för en sammanhållen, redaktionell känsla
+        // i HackFirst-anda. `sans` och `display` pekar därför på samma familj.
+        sans: ['"Space Grotesk"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        display: ['"Space Grotesk"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Consolas', 'monospace'],
       },
       boxShadow: {

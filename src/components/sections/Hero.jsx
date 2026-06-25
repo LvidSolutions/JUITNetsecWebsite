@@ -28,9 +28,6 @@ export function Hero({ heroRef, introProgress }) {
             animate={{ opacity: copyVisible ? 1 : 0, y: copyVisible ? 0 : 24 }}
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
           >
-            <p className="mb-6 inline-flex items-center rounded-full border border-brand-green/30 bg-brand-green/10 px-4 py-2 font-mono text-xs font-medium uppercase tracking-[0.28em] text-brand-green shadow-glow">
-              Cybersecurity • Networking • Infrastructure
-            </p>
             <h1 className="max-w-5xl font-display text-4xl font-bold uppercase leading-[0.98] tracking-[-0.02em] text-brand-white sm:text-6xl lg:text-7xl">
               Build a safer IT environment before the next incident tests it
             </h1>
