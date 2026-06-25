@@ -1,86 +1,110 @@
-import { Container } from '../ui';
+import { BrandWordmark } from './BrandWordmark.jsx';
+import { FooterStatsPanel } from './FooterStatsPanel.jsx';
 
-const quickLinks = [
+// Navigation – samma fyra destinationer som i headern. Engelska etiketter mot
+// de befintliga routsen så att appens klient-navigation (a[href^="/"]) fungerar.
+const navigation = [
   { label: 'Home', href: '/' },
   { label: 'Services', href: '/tjanster' },
   { label: 'About', href: '/om-oss' },
   { label: 'Contact', href: '/kontakt' },
 ];
 
-const services = [
-  'Networking & infrastructure',
-  'Cybersecurity',
-  'Firewalls',
-  'Cloud & data centers',
-  'IT consulting',
-];
-
-function FooterLink({ href, children, ...props }) {
-  return (
-    <a
-      href={href}
-      className="inline-flex text-sm text-brand-mist transition-colors duration-200 hover:text-brand-green focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-green"
-      {...props}
-    >
-      {children}
-    </a>
-  );
-}
+// Verifierad kontaktinformation från projektet (Stockholm-adress från About-
+// sidan, e-post från tidigare footer). Inga påhittade uppgifter.
+const company = {
+  email: 'contact@juit.se',
+  addressLines: ['Fatburs kvarngata 26', '118 64 Stockholm', 'Sweden'],
+};
 
 export function Footer() {
   return (
-    <footer className="border-t border-brand-line bg-brand-black text-brand-white">
-      <Container className="py-14 sm:py-16">
-        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-[1.25fr_0.8fr_0.9fr_0.8fr]">
-          <div>
-            <p className="text-lg font-semibold">JUIT NetSec AB</p>
-            <p className="mt-4 max-w-sm leading-7 text-brand-mist">
-              Secure IT infrastructure, networking and cybersecurity for modern companies.
+    <footer className="relative isolate overflow-hidden bg-brand-black">
+      <svg
+        aria-hidden="true"
+        focusable="false"
+        width="0"
+        height="0"
+        style={{ position: 'absolute', width: 0, height: 0 }}
+      >
+        <filter id="footerCutout" colorInterpolationFilters="sRGB">
+          <feColorMatrix
+            type="matrix"
+            values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0.33 0.5 0.16 0 0"
+          />
+          <feComponentTransfer>
+            <feFuncA type="table" tableValues="0 0 0.72 1 1 1" />
+          </feComponentTransfer>
+        </filter>
+      </svg>
+
+      {/* Full-bleed grön glow + animerat filmkorn – kant-till-kant, ingen ram. */}
+      <div aria-hidden="true" className="footer-glow pointer-events-none absolute inset-0 -z-10" />
+      <div
+        aria-hidden="true"
+        className="footer-noise footer-noise--animated pointer-events-none absolute inset-[-25%] -z-10"
+      />
+
+      {/* Desktop följer referensens scen: övre datafält, stor tom mitt,
+          varumärke och kontakt lågt placerade. Mobil/tablet staplar tryggt. */}
+      <div className="relative mx-auto flex w-full max-w-[1380px] flex-col px-6 py-12 sm:px-10 sm:py-14 lg:min-h-[716px] lg:px-0 lg:py-0">
+        {/* ÖVRE band: radar-grafik (vänster) + skarp statistikpanel (höger). */}
+        <div className="flex flex-col items-center gap-12 lg:absolute lg:left-4 lg:top-7 lg:items-start lg:gap-0">
+          <div className="flex shrink-0 flex-col items-center lg:items-start">
+            <img
+              src="/assets/footer-radar.png"
+              alt=""
+              aria-hidden="true"
+              className="footer-cutout footer-radar-graphic w-[clamp(220px,24vw,300px)] select-none lg:w-[286px]"
+              loading="lazy"
+              decoding="async"
+            />
+            <p className="mt-3 w-[clamp(220px,24vw,300px)] text-center font-mono text-[11px] uppercase leading-relaxed tracking-[0.24em] text-brand-mist/75 lg:w-[286px]">
+              You cannot defend
+              <br />
+              what you cannot map.
             </p>
-            <a
-              href="https://www.linkedin.com/"
-              className="mt-6 inline-flex rounded-card border border-brand-line px-4 py-2 text-sm font-semibold text-brand-mist transition-colors duration-200 hover:border-brand-green hover:text-brand-green focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-green"
-              aria-label="JUIT NetSec AB on LinkedIn, placeholder link"
-              rel="noreferrer"
-              target="_blank"
-            >
-              LinkedIn
-            </a>
           </div>
-
-          <nav aria-label="Quick links">
-            <p className="text-sm font-semibold uppercase tracking-[0.16em] text-brand-green">Quick links</p>
-            <ul className="mt-5 space-y-3">
-              {quickLinks.map((link) => (
-                <li key={link.href}>
-                  <FooterLink href={link.href}>{link.label}</FooterLink>
-                </li>
-              ))}
-            </ul>
-          </nav>
-
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.16em] text-brand-green">Services</p>
-            <ul className="mt-5 space-y-3 text-sm text-brand-mist">
-              {services.map((service) => (
-                <li key={service}>{service}</li>
-              ))}
-            </ul>
-          </div>
-
-          <address className="not-italic">
-            <p className="text-sm font-semibold uppercase tracking-[0.16em] text-brand-green">Contact</p>
-            <div className="mt-5 space-y-3">
-              <FooterLink href="mailto:contact@juit.se">contact@juit.se</FooterLink>
-              <p className="text-sm text-brand-mist">Sweden</p>
-            </div>
-          </address>
         </div>
 
-        <div className="mt-12 border-t border-brand-line pt-6 text-sm text-brand-mist">
-          <p>© {new Date().getFullYear()} JUIT NetSec AB. All rights reserved.</p>
+        <FooterStatsPanel className="mt-12 w-full max-w-[820px] self-center lg:absolute lg:right-0 lg:top-6 lg:mt-0 lg:w-[600px] lg:max-w-none" />
+
+        {/* NEDRE band: stor logotyp till vänster, navigation + kontakt till höger. */}
+        <div className="mt-14 flex flex-col gap-10 lg:absolute lg:bottom-[58px] lg:left-0 lg:right-0 lg:mt-0 lg:flex-row lg:items-end lg:justify-between lg:gap-16">
+          <BrandWordmark className="text-[clamp(2.25rem,4vw,3.8rem)]" />
+
+          <div className="grid grid-cols-1 gap-y-8 sm:grid-cols-[82px_210px] sm:gap-x-[46px] sm:gap-y-0">
+            <nav aria-label="Footer navigation" className="flex flex-col">
+              {navigation.map((item) => (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  className="flex h-9 items-center font-display text-[13px] uppercase tracking-[0.22em] text-brand-white/85 transition-colors duration-200 hover:text-brand-green focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-green"
+                >
+                  {item.label}
+                </a>
+              ))}
+            </nav>
+
+            <address className="flex flex-col not-italic">
+              {company.addressLines.map((line) => (
+                <span
+                  key={line}
+                  className="flex h-9 items-center font-mono text-[12px] uppercase tracking-[0.16em] text-brand-mist/55"
+                >
+                  {line}
+                </span>
+              ))}
+              <a
+                href={`mailto:${company.email}`}
+                className="flex h-9 items-center font-mono text-[12px] uppercase tracking-[0.16em] text-brand-white underline decoration-brand-green/50 underline-offset-4 transition-colors duration-200 hover:text-brand-green hover:decoration-brand-green focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-green"
+              >
+                {company.email}
+              </a>
+            </address>
+          </div>
         </div>
-      </Container>
+      </div>
     </footer>
   );
 }
