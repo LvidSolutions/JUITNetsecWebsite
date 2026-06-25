@@ -26,10 +26,10 @@ export function ContactCTA() {
               Discuss your needs
             </a>
             <a
-              href="mailto:ulf.wernersson@juit.se"
+              href="mailto:contact@juit.se"
               className="inline-flex min-h-12 items-center justify-center rounded-card border border-brand-line bg-transparent px-7 text-base font-semibold text-brand-white transition-all duration-200 ease-smooth hover:border-brand-green hover:text-brand-green focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green"
             >
-              ulf.wernersson@juit.se
+              contact@juit.se
             </a>
           </div>
         </div>
