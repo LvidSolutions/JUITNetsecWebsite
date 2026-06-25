@@ -12,14 +12,6 @@ import { cn } from '../../lib/cn';
 // Inga påhittade partnerskap, certifieringar, awards, kundcase eller siffror.
 // ---------------------------------------------------------------------------
 
-// Editoriella fakta-block – endast bekräftade uppgifter.
-const facts = [
-  { label: 'Location', value: 'STHLM', sub: 'Stockholm, Sweden' },
-  { label: 'Reg. no.', value: '559243-2727', sub: 'Swedish limited company' },
-  { label: 'Focus', value: 'IT / SEC', sub: 'Infrastructure, communication and security' },
-  { label: 'Discipline', value: 'OPS', sub: 'IT consulting and computer operations services' },
-];
-
 const contactProfile = {
   name: 'Ulf Wernersson',
   role: 'CEO',
@@ -156,9 +148,9 @@ export function AboutSection() {
   return (
     <div id="om-oss" className="bg-brand-black text-brand-white">
       {/* ---------------------------------------------------------------- */}
-      {/* HERO – stor typografisk ABOUT-komposition + fakta-block          */}
+      {/* HERO – stor typografisk ABOUT-komposition                         */}
       {/* ---------------------------------------------------------------- */}
-      <section className="relative overflow-hidden border-b border-brand-line pt-28 sm:pt-32 lg:pt-40">
+      <section className="relative overflow-hidden border-b border-brand-line pt-28 pb-24 sm:pt-32 sm:pb-28 lg:pt-40 lg:pb-36">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_85%_-10%,rgba(0,200,83,0.12),transparent_45%)]" />
         <Container className="relative">
           <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
@@ -206,33 +198,6 @@ export function AboutSection() {
               </span>
             </span>
           </h1>
-
-          {/* Fakta-block – editoriella data-points, inte vanliga cards. */}
-          <div className="mt-16 grid grid-cols-1 border-t border-brand-line sm:mt-20 sm:grid-cols-2 lg:grid-cols-4">
-            {facts.map((fact, index) => (
-              <Reveal
-                key={fact.label}
-                delay={index * 0.06}
-                className={cn(
-                  'border-brand-line px-1 py-7 sm:px-6',
-                  // tunna avdelare mellan kolumnerna på större skärmar
-                  index !== 0 && 'sm:border-t-0',
-                  'border-t sm:border-t',
-                  'lg:border-l lg:first:border-l-0',
-                )}
-              >
-                <Label>{fact.label}</Label>
-                <ScrambleText
-                  as="p"
-                  text={fact.value}
-                  durationMs={900}
-                  startDelay={index * 90}
-                  className="mt-5 font-display text-[clamp(1.75rem,3.4vw,2.75rem)] font-medium leading-none tracking-tight tabular-nums text-brand-white"
-                />
-                <p className="mt-3 max-w-[16rem] text-sm leading-6 text-brand-mist/55">{fact.sub}</p>
-              </Reveal>
-            ))}
-          </div>
         </Container>
       </section>
 
