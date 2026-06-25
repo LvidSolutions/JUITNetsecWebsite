@@ -16,6 +16,18 @@
   mask-image: radial-gradient(120% 80% at 70% 18%, rgba(0, 0, 0, 0.9), transparent 70%);
 }
 
+/* Subtil grön ambiens bakom det enspaltiga kontaktformuläret – håller kortet
+   förankrat i den mörka sidan utan att tävla med fältens läsbarhet. */
+.contact-form-glow {
+  height: 760px;
+  background: radial-gradient(
+    50% 50% at 50% 50%,
+    rgba(0, 200, 83, 0.12),
+    rgba(0, 200, 83, 0.04) 48%,
+    transparent 72%
+  );
+}
+
 .contact-video-glow {
   background: radial-gradient(
     42% 42% at 60% 52%,
