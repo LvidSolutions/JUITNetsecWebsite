@@ -3,7 +3,7 @@ import { Container } from '../ui';
 const fields = [
   { id: 'name', label: 'Name', type: 'text', autoComplete: 'name', placeholder: 'First and last name' },
   { id: 'company', label: 'Company', type: 'text', autoComplete: 'organization', placeholder: 'Organization' },
-  { id: 'email', label: 'Email', type: 'email', autoComplete: 'email', placeholder: 'name@company.com' },
+  { id: 'email', label: 'Email', type: 'email', autoComplete: 'email', placeholder: 'Your email address' },
   { id: 'phone', label: 'Phone', type: 'tel', autoComplete: 'tel', placeholder: '+46 ...' },
 ];
 
@@ -60,10 +60,10 @@ export function ContactForm() {
               <div>
                 <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-brand-green/80">Email</p>
                 <a
-                  href="mailto:ulf.wernersson@juit.se"
+                  href="mailto:contact@juit.se"
                   className="mt-2 inline-block font-display text-lg font-medium text-brand-white transition-colors hover:text-brand-green"
                 >
-                  ulf.wernersson@juit.se
+                  contact@juit.se
                 </a>
               </div>
               <div>
