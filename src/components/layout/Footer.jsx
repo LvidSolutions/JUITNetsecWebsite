@@ -43,6 +43,17 @@ export function Footer() {
   const graphicsOpacity = useTransform(revealProgress, [0, 0.38, 1], [0.74, 0.96, 1]);
   const contentOpacity = useTransform(revealProgress, [0, 0.42, 1], [0.8, 0.97, 1]);
 
+  // Flyward "frame-out": efter inglidningen ramas footern in mot JÄMNA vita
+  // marginaler (lika på alla sidor, relativt viewportens kant) under senare delen
+  // av scrollen. En enda 0→1-progress (--ff) driver padding (=jämn marginal),
+  // hörnradie och skugga via CSS (responsivt med clamp). Padding ger lika
+  // marginaler utan att skala/förvränga grafiken. Respekterar reduced-motion.
+  const frameProgress = useTransform(revealProgress, [0.45, 1], [0, 1]);
+  const glowOpacity = useTransform(frameProgress, [0, 0.45], [1, 0]);
+
+  const frameVar = reduceMotion ? 0 : frameProgress;
+  const glowStyle = reduceMotion ? undefined : { opacity: glowOpacity };
+
   const footerStyle = reduceMotion ? undefined : { y: footerY, opacity: footerOpacity };
   const backgroundStyle = reduceMotion ? undefined : { y: backgroundY };
   const noiseStyle = reduceMotion ? undefined : { y: noiseY };
@@ -53,8 +64,13 @@ export function Footer() {
 
   return (
     <motion.div ref={footerRef} style={footerStyle} className="footer-reveal-layer relative">
-      <div aria-hidden="true" className="footer-upstream-glow pointer-events-none relative z-10" />
-      <footer className="relative isolate overflow-hidden bg-brand-black">
+      <motion.div
+        aria-hidden="true"
+        style={glowStyle}
+        className="footer-upstream-glow pointer-events-none relative z-10"
+      />
+      <motion.div className="footer-frame" style={{ '--ff': frameVar }}>
+      <footer className="footer-frame__card relative isolate overflow-hidden bg-brand-black">
       <svg
         aria-hidden="true"
         focusable="false"
@@ -159,6 +175,7 @@ export function Footer() {
         </div>
       </div>
       </footer>
+      </motion.div>
     </motion.div>
   );
 }

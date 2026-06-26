@@ -209,6 +209,24 @@
     transform: translateZ(0);
     will-change: transform, opacity;
   }
+
+  /* Flyward-style "frame-out": footern börjar full-bleed och ramas in mot vita
+     marginaler när man scrollar ned. Den vita ytan ligger bakom footern; själva
+     footern skalas/rundas via scroll-driven transform (transform = ingen
+     omflödning och inget dokumenthöjd-hopp). Den vita ramen syns bara på desktop
+     – på mobil/tablet behåller vi full-bleed (scale 1) för läsbarhet. */
+  .footer-frame {
+    background: #ffffff;
+    /* Marginal mätt från Flyward-videon: ~48px jämn inramning på desktop, skalas
+       ned på mindre skärmar (3.75vw → 48px-tak vid ≥1280px). */
+    padding: calc(var(--ff, 0) * clamp(14px, 3.75vw, 48px));
+  }
+
+  .footer-frame__card {
+    /* Crisp kant (videon visar ingen skugga) + ~30px hörnradie likt referensen. */
+    border-radius: calc(var(--ff, 0) * clamp(14px, 2.2vw, 32px));
+    will-change: border-radius;
+  }
 }
 
 @keyframes footer-noise {
