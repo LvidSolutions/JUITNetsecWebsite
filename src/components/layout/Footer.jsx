@@ -52,17 +52,9 @@ export function Footer() {
   const navStyle = reduceMotion ? undefined : { y: navY, opacity: contentOpacity };
 
   return (
-    <>
-      <motion.div
-        aria-hidden="true"
-        style={footerStyle}
-        className="footer-upstream-glow pointer-events-none relative z-10"
-      />
-      <motion.footer
-        ref={footerRef}
-        style={footerStyle}
-        className="footer-reveal-layer relative isolate overflow-hidden bg-brand-black"
-      >
+    <motion.div ref={footerRef} style={footerStyle} className="footer-reveal-layer relative">
+      <div aria-hidden="true" className="footer-upstream-glow pointer-events-none relative z-10" />
+      <footer className="relative isolate overflow-hidden bg-brand-black">
       <svg
         aria-hidden="true"
         focusable="false"
@@ -166,7 +158,7 @@ export function Footer() {
           </motion.div>
         </div>
       </div>
-      </motion.footer>
-    </>
+      </footer>
+    </motion.div>
   );
 }
