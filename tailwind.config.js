@@ -14,6 +14,10 @@ export default {
       colors: {
         brand: {
           green: '#00C853',
+          // Pastellgrön aktiv-färg för Services-sidans Shift5-inspirerade
+          // funktioner (ersätter Shift5:s röda). Mjukare än brand-green.
+          pastel: '#A9E8B4',
+          'pastel-soft': '#B8F2C2',
           black: '#050505',
           ink: '#0A0A0A',
           white: '#FFFFFF',
