@@ -123,8 +123,9 @@ export function ScrambleNavLink({
         'group relative inline-flex items-center px-1 font-display text-[15px] font-medium uppercase tracking-[0.14em] transition-colors duration-200 ease-smooth focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-green',
         // Inverteringseffekten (mix-blend-difference) läggs bara på de vita,
         // inaktiva länkarna. Den aktiva länken hålls UTANFÖR blandningen så att
-        // den alltid är ren brand-green i stället för att slå om till magenta
-        // när den råkar ligga över vit text.
+        // den alltid är ren brand-green. När footerns vita frame-out-ram ligger
+        // bakom navbaren byts vit text mot mörk via CSS (body.nav-over-light),
+        // eftersom mix-blend-difference inte räcker i headerns stacking-kontext.
         isActive ? 'text-brand-green' : 'text-brand-white mix-blend-difference',
         className,
       )}

@@ -44,7 +44,7 @@ export function Header({ currentPath = '/', logoSlotRef, hideStaticLogo = false 
             aria-label="JUIT NetSec AB, go to home page"
             ref={logoSlotRef}
             className={cn(
-              'shrink-0 text-[20px] transition-opacity duration-200 hover:opacity-80',
+              'header-logo shrink-0 text-[20px] transition-opacity duration-200 hover:opacity-80',
               hideStaticLogo && 'invisible',
             )}
             onClick={() => setIsMenuOpen(false)}

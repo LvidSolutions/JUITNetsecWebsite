@@ -117,7 +117,7 @@ export function AnimatedLogo({ targetRef, progress }) {
         <a
           href="/"
           aria-label="JUIT NetSec AB, go to home page"
-          className="pointer-events-auto fixed left-0 top-0 z-[60]"
+          className="header-logo pointer-events-auto fixed left-0 top-0 z-[60]"
           style={{
             left: geometry.endX,
             top: geometry.endY,
@@ -137,7 +137,7 @@ export function AnimatedLogo({ targetRef, progress }) {
       <motion.a
         href="/"
         aria-label="JUIT NetSec AB, go to home page"
-        className="pointer-events-auto fixed left-0 top-0 z-[60] grid place-items-center"
+        className="header-logo pointer-events-auto fixed left-0 top-0 z-[60] grid place-items-center"
         style={{
           x,
           y,

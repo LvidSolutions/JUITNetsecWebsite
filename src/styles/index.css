@@ -218,14 +218,33 @@
   .footer-frame {
     background: #ffffff;
     /* Marginal mätt från Flyward-videon: ~48px jämn inramning på desktop, skalas
-       ned på mindre skärmar (3.75vw → 48px-tak vid ≥1280px). */
+       ned på mindre skärmar (3.75vw → 48px-tak vid ≥1280px). Lika på alla sidor. */
     padding: calc(var(--ff, 0) * clamp(14px, 3.75vw, 48px));
+    will-change: padding;
   }
 
   .footer-frame__card {
-    /* Crisp kant (videon visar ingen skugga) + ~30px hörnradie likt referensen. */
-    border-radius: calc(var(--ff, 0) * clamp(14px, 2.2vw, 32px));
-    will-change: border-radius;
+    /* Skarpa kanter OCH hörn likt Flyward – ingen radie, ingen skugga. */
+    border-radius: 0;
+  }
+
+  /* Navlänkarna (vita, mix-blend) inverteras till mörkt när den vita ramen ligger
+     bakom navbaren. Den aktiva länken (aria-current) lämnas grön – syns mot vitt. */
+  body.nav-over-light header nav a:not([aria-current='page']) {
+    color: #050505 !important;
+    mix-blend-mode: normal !important;
+  }
+
+  /* När footerns vita frame-out-ram ligger bakom navbaren inverteras headerns
+     logga (vit→mörk) så den förblir läsbar mot det vita. Scoped till .header-logo
+     så footerns stora wordmark (på mörkt kort) påverkas inte. Grön accentkvadrat
+     lämnas grön (syns mot vitt). */
+  body.nav-over-light .header-logo .bw-juit {
+    color: #050505;
+  }
+
+  body.nav-over-light .header-logo .bw-netsec {
+    color: rgba(5, 5, 5, 0.62);
   }
 }
 

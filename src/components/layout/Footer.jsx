@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { motion, useReducedMotion, useScroll, useSpring, useTransform } from 'framer-motion';
 import { BrandWordmark } from './BrandWordmark.jsx';
 import { FooterStatsPanel } from './FooterStatsPanel.jsx';
@@ -54,6 +54,33 @@ export function Footer() {
   const frameVar = reduceMotion ? 0 : frameProgress;
   const glowStyle = reduceMotion ? undefined : { opacity: glowOpacity };
 
+  // När den vita frame-out-ramen hinner bakom navbaren (navbar-mitten ligger i
+  // ramens vita topp-marginal) sätts body.nav-over-light, så navbarens text/logga
+  // inverteras till mörkt via CSS. Drivs av frameProgress (kontinuerligt även när
+  // scroll-fjädern landar) + scroll/resize, så vi missar inte det inramade läget.
+  const frameRef = useRef(null);
+  useEffect(() => {
+    const update = () => {
+      const frame = frameRef.current;
+      if (!frame) return;
+      const rect = frame.getBoundingClientRect();
+      const pad = parseFloat(getComputedStyle(frame).paddingTop) || 0;
+      const navMid = 40;
+      const over = pad > 8 && rect.top <= navMid && navMid <= rect.top + pad;
+      document.body.classList.toggle('nav-over-light', over);
+    };
+    const unsub = frameProgress.on('change', update);
+    window.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+    update();
+    return () => {
+      unsub();
+      window.removeEventListener('scroll', update);
+      window.removeEventListener('resize', update);
+      document.body.classList.remove('nav-over-light');
+    };
+  }, [frameProgress]);
+
   const footerStyle = reduceMotion ? undefined : { y: footerY, opacity: footerOpacity };
   const backgroundStyle = reduceMotion ? undefined : { y: backgroundY };
   const noiseStyle = reduceMotion ? undefined : { y: noiseY };
@@ -69,7 +96,7 @@ export function Footer() {
         style={glowStyle}
         className="footer-upstream-glow pointer-events-none relative z-10"
       />
-      <motion.div className="footer-frame" style={{ '--ff': frameVar }}>
+      <motion.div ref={frameRef} className="footer-frame" style={{ '--ff': frameVar }}>
       <footer className="footer-frame__card relative isolate overflow-hidden bg-brand-black">
       <svg
         aria-hidden="true"
@@ -103,7 +130,7 @@ export function Footer() {
 
       {/* Desktop följer referensens scen: övre datafält, stor tom mitt,
           varumärke och kontakt lågt placerade. Mobil/tablet staplar tryggt. */}
-      <div className="relative mx-auto flex w-full max-w-[1380px] flex-col px-6 py-12 sm:px-10 sm:py-14 lg:min-h-[716px] lg:px-0 lg:py-0">
+      <div className="relative mx-auto flex w-full max-w-[1380px] flex-col px-6 py-12 sm:px-10 sm:py-14 lg:min-h-[calc(100svh-96px)] lg:px-0 lg:py-0">
         {/* ÖVRE band: radar-grafik (vänster) + skarp statistikpanel (höger). */}
         <motion.div
           style={radarStyle}
