@@ -1,3 +1,5 @@
+import { useRef } from 'react';
+import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion';
 import { BrandWordmark } from './BrandWordmark.jsx';
 import { FooterStatsPanel } from './FooterStatsPanel.jsx';
 
@@ -18,8 +20,38 @@ const company = {
 };
 
 export function Footer() {
+  const footerRef = useRef(null);
+  const reduceMotion = useReducedMotion();
+  const { scrollYProgress } = useScroll({
+    target: footerRef,
+    offset: ['start end', 'start start'],
+  });
+
+  const footerY = useTransform(scrollYProgress, [0, 1], [104, 0]);
+  const footerOpacity = useTransform(scrollYProgress, [0, 0.35, 1], [0.96, 0.985, 1]);
+  const backgroundY = useTransform(scrollYProgress, [0, 1], [-14, 0]);
+  const noiseY = useTransform(scrollYProgress, [0, 1], [-6, 0]);
+  const radarY = useTransform(scrollYProgress, [0, 1], [-34, 0]);
+  const statsY = useTransform(scrollYProgress, [0, 1], [-42, 0]);
+  const logoY = useTransform(scrollYProgress, [0, 1], [-72, 0]);
+  const navY = useTransform(scrollYProgress, [0, 1], [-66, 0]);
+  const graphicsOpacity = useTransform(scrollYProgress, [0, 0.22, 1], [0.95, 0.985, 1]);
+  const contentOpacity = useTransform(scrollYProgress, [0, 0.32, 1], [0.94, 0.985, 1]);
+
+  const footerStyle = reduceMotion ? undefined : { y: footerY, opacity: footerOpacity };
+  const backgroundStyle = reduceMotion ? undefined : { y: backgroundY };
+  const noiseStyle = reduceMotion ? undefined : { y: noiseY };
+  const radarStyle = reduceMotion ? undefined : { y: radarY, opacity: graphicsOpacity };
+  const statsStyle = reduceMotion ? undefined : { y: statsY, opacity: graphicsOpacity };
+  const logoStyle = reduceMotion ? undefined : { y: logoY, opacity: contentOpacity };
+  const navStyle = reduceMotion ? undefined : { y: navY, opacity: contentOpacity };
+
   return (
-    <footer className="relative isolate overflow-hidden bg-brand-black">
+    <motion.footer
+      ref={footerRef}
+      style={footerStyle}
+      className="footer-reveal-layer relative isolate overflow-hidden bg-brand-black"
+    >
       <svg
         aria-hidden="true"
         focusable="false"
@@ -39,17 +71,25 @@ export function Footer() {
       </svg>
 
       {/* Full-bleed grön glow + animerat filmkorn – kant-till-kant, ingen ram. */}
-      <div aria-hidden="true" className="footer-glow pointer-events-none absolute inset-0 -z-10" />
-      <div
+      <motion.div
         aria-hidden="true"
-        className="footer-noise footer-noise--animated pointer-events-none absolute inset-[-25%] -z-10"
+        style={backgroundStyle}
+        className="footer-glow footer-reveal-layer pointer-events-none absolute inset-0 -z-10"
+      />
+      <motion.div
+        aria-hidden="true"
+        style={noiseStyle}
+        className="footer-noise footer-noise--animated footer-reveal-layer pointer-events-none absolute inset-[-25%] -z-10"
       />
 
       {/* Desktop följer referensens scen: övre datafält, stor tom mitt,
           varumärke och kontakt lågt placerade. Mobil/tablet staplar tryggt. */}
       <div className="relative mx-auto flex w-full max-w-[1380px] flex-col px-6 py-12 sm:px-10 sm:py-14 lg:min-h-[716px] lg:px-0 lg:py-0">
         {/* ÖVRE band: radar-grafik (vänster) + skarp statistikpanel (höger). */}
-        <div className="flex flex-col items-center gap-12 lg:absolute lg:left-4 lg:top-7 lg:items-start lg:gap-0">
+        <motion.div
+          style={radarStyle}
+          className="footer-reveal-layer flex flex-col items-center gap-12 lg:absolute lg:left-4 lg:top-7 lg:items-start lg:gap-0"
+        >
           <div className="flex shrink-0 flex-col items-center lg:items-start">
             <img
               src="/assets/footer-radar.png"
@@ -65,15 +105,25 @@ export function Footer() {
               what you cannot map.
             </p>
           </div>
-        </div>
+        </motion.div>
 
-        <FooterStatsPanel className="mt-12 w-full max-w-[820px] self-center lg:absolute lg:right-0 lg:top-6 lg:mt-0 lg:w-[600px] lg:max-w-none" />
+        <motion.div
+          style={statsStyle}
+          className="footer-reveal-layer mt-12 w-full max-w-[820px] self-center lg:absolute lg:right-0 lg:top-6 lg:mt-0 lg:w-[600px] lg:max-w-none"
+        >
+          <FooterStatsPanel className="w-full" />
+        </motion.div>
 
         {/* NEDRE band: stor logotyp till vänster, navigation + kontakt till höger. */}
         <div className="mt-14 flex flex-col gap-10 lg:absolute lg:bottom-[58px] lg:left-0 lg:right-0 lg:mt-0 lg:flex-row lg:items-end lg:justify-between lg:gap-16">
-          <BrandWordmark className="text-[clamp(2.25rem,4vw,3.8rem)]" />
+          <motion.div style={logoStyle} className="footer-reveal-layer">
+            <BrandWordmark className="text-[clamp(2.25rem,4vw,3.8rem)]" />
+          </motion.div>
 
-          <div className="grid grid-cols-1 gap-y-8 sm:grid-cols-[82px_210px] sm:gap-x-[46px] sm:gap-y-0">
+          <motion.div
+            style={navStyle}
+            className="footer-reveal-layer grid grid-cols-1 gap-y-8 sm:grid-cols-[82px_210px] sm:gap-x-[46px] sm:gap-y-0"
+          >
             <nav aria-label="Footer navigation" className="flex flex-col">
               {navigation.map((item) => (
                 <a
@@ -102,9 +152,9 @@ export function Footer() {
                 {company.email}
               </a>
             </address>
-          </div>
+          </motion.div>
         </div>
       </div>
-    </footer>
+    </motion.footer>
   );
 }

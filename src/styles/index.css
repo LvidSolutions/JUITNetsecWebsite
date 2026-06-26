@@ -185,6 +185,12 @@
   .footer-stats-panel__rule {
     background: linear-gradient(90deg, transparent, rgba(229, 231, 235, 0.18) 8%, rgba(229, 231, 235, 0.18) 92%, transparent);
   }
+
+  .footer-reveal-layer {
+    backface-visibility: hidden;
+    transform: translateZ(0);
+    will-change: transform, opacity;
+  }
 }
 
 @keyframes footer-noise {
