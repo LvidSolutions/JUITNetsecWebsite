@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion';
+import { motion, useReducedMotion, useScroll, useSpring, useTransform } from 'framer-motion';
 import { BrandWordmark } from './BrandWordmark.jsx';
 import { FooterStatsPanel } from './FooterStatsPanel.jsx';
 
@@ -24,19 +24,24 @@ export function Footer() {
   const reduceMotion = useReducedMotion();
   const { scrollYProgress } = useScroll({
     target: footerRef,
-    offset: ['start end', 'start start'],
+    offset: ['start end', 'end end'],
+  });
+  const revealProgress = useSpring(scrollYProgress, {
+    stiffness: 120,
+    damping: 28,
+    mass: 0.45,
   });
 
-  const footerY = useTransform(scrollYProgress, [0, 1], [104, 0]);
-  const footerOpacity = useTransform(scrollYProgress, [0, 0.35, 1], [0.96, 0.985, 1]);
-  const backgroundY = useTransform(scrollYProgress, [0, 1], [-14, 0]);
-  const noiseY = useTransform(scrollYProgress, [0, 1], [-6, 0]);
-  const radarY = useTransform(scrollYProgress, [0, 1], [-34, 0]);
-  const statsY = useTransform(scrollYProgress, [0, 1], [-42, 0]);
-  const logoY = useTransform(scrollYProgress, [0, 1], [-72, 0]);
-  const navY = useTransform(scrollYProgress, [0, 1], [-66, 0]);
-  const graphicsOpacity = useTransform(scrollYProgress, [0, 0.22, 1], [0.95, 0.985, 1]);
-  const contentOpacity = useTransform(scrollYProgress, [0, 0.32, 1], [0.94, 0.985, 1]);
+  const footerY = useTransform(revealProgress, [0, 1], [132, 0]);
+  const footerOpacity = useTransform(revealProgress, [0, 0.42, 1], [0.9, 0.975, 1]);
+  const backgroundY = useTransform(revealProgress, [0, 1], [18, 0]);
+  const noiseY = useTransform(revealProgress, [0, 1], [10, 0]);
+  const radarY = useTransform(revealProgress, [0, 1], [58, 0]);
+  const statsY = useTransform(revealProgress, [0, 1], [50, 0]);
+  const logoY = useTransform(revealProgress, [0, 1], [22, 0]);
+  const navY = useTransform(revealProgress, [0, 1], [24, 0]);
+  const graphicsOpacity = useTransform(revealProgress, [0, 0.38, 1], [0.74, 0.96, 1]);
+  const contentOpacity = useTransform(revealProgress, [0, 0.42, 1], [0.8, 0.97, 1]);
 
   const footerStyle = reduceMotion ? undefined : { y: footerY, opacity: footerOpacity };
   const backgroundStyle = reduceMotion ? undefined : { y: backgroundY };
