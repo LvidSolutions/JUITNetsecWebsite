@@ -23,7 +23,7 @@ const contactProfile = {
 
 const companyContact = [
   { k: 'Company', v: 'JUIT NetSec AB' },
-  { k: 'Location', v: 'Södermalm, Stockholm' },
+  { k: 'Location', v: 'Stockholm, Sweden' },
   { k: 'Web', v: 'www.juit.se', href: 'https://www.juit.se' },
 ];
 

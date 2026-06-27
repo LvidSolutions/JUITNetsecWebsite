@@ -20,7 +20,7 @@ const partnerLogos = [
     src: '/assets/partners/smart-cloud-solutions.svg',
     alt: 'Smart Cloud Solutions',
     title: 'Smart Cloud Solutions',
-    href: '#',
+    href: 'https://smartcloudsolutions.se/',
   },
   {
     src: '/assets/partners/microsoft-azure.svg',

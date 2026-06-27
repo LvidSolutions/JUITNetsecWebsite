@@ -15,7 +15,7 @@ const navigation = [
 // sidan, e-post från tidigare footer). Inga påhittade uppgifter.
 const company = {
   email: 'contact@juit.se',
-  addressLines: ['Fatburs kvarngata 26', '118 64 Stockholm', 'Sweden'],
+  addressLines: ['Stockholm, Sweden'],
 };
 
 export function Footer() {

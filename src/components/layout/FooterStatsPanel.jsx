@@ -78,7 +78,7 @@ export function FooterStatsPanel({ className = '' }) {
       <div className="relative z-10">
         <div className="grid grid-cols-[1fr_auto] items-center gap-4 sm:grid-cols-[1fr_auto_1fr]">
           <p className="footer-stats-panel__green font-mono text-[12px] font-semibold uppercase leading-none tracking-[0.24em] text-brand-green sm:text-[14px] lg:text-[9px]">
-            Stockholm, SE
+            Stockholm, Sweden
             <LocationCaret />
           </p>
           <p className="justify-self-end font-mono text-[13px] font-semibold uppercase leading-none tracking-[0.18em] text-brand-white sm:justify-self-center sm:text-[15px] lg:text-[10px]">

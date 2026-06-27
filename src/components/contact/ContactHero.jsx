@@ -49,17 +49,17 @@ export function ContactHero() {
         </motion.div>
       </Container>
 
-      <Container className="relative mt-10 flex-1 sm:mt-12 lg:mt-0 lg:flex lg:items-center">
+      <Container className="relative mt-10 flex-1 sm:mt-12 lg:mt-0 lg:flex lg:max-w-[96rem] lg:items-center">
         <div className="relative w-full">
           <h1
             id="contact-hero-title"
-            className="font-display font-bold uppercase leading-[0.8] tracking-[-0.07em] text-brand-white"
+            className="font-display font-bold uppercase leading-[0.82] tracking-[-0.04em] text-brand-white"
           >
             <MaskReveal
               reduce={reduce}
               delay={0.05}
               duration={1.15}
-              className="whitespace-nowrap text-[26vw] sm:text-[24vw] lg:pl-[18%] lg:text-[22vw] xl:text-[clamp(12rem,21vw,20rem)]"
+              className="whitespace-nowrap text-[clamp(4.4rem,25vw,10rem)] sm:text-[clamp(7.5rem,22vw,15rem)] lg:text-[clamp(12rem,17vw,20rem)]"
             >
               CONTACT
             </MaskReveal>
@@ -69,7 +69,7 @@ export function ContactHero() {
             <ContactVideoObject reveal />
           </div>
 
-          <div className="relative z-10 mt-6 max-w-xl lg:-mt-[2vw] lg:pl-[18%]">
+          <div className="relative z-10 mt-7 max-w-2xl lg:-mt-[1vw] lg:ml-[8%] xl:ml-[10%]">
             <h2 className="font-display text-[7vw] font-semibold leading-[1.02] tracking-tight text-brand-white sm:text-4xl lg:text-[2.6rem]">
               <MaskReveal reduce={reduce} delay={0.42} duration={0.9}>
                 Start a conversation
@@ -80,7 +80,7 @@ export function ContactHero() {
             </h2>
 
             <motion.p
-              className="mt-6 max-w-md text-base leading-relaxed text-brand-mist/65 sm:text-lg sm:leading-8"
+              className="mt-6 max-w-xl text-base leading-relaxed text-brand-mist/65 sm:text-lg sm:leading-8"
               initial={reduce ? false : { opacity: 0, y: 16 }}
               animate={reduce ? undefined : { opacity: 1, y: 0 }}
               transition={{ duration: 0.8, ease: EASE, delay: 0.72 }}
