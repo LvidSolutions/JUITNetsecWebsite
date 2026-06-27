@@ -1,6 +1,7 @@
 import { motion, useReducedMotion } from 'framer-motion';
 import { Container } from '../ui';
 import { ScrambleText } from './ScrambleText.jsx';
+import { ScrollFeatureSection } from './ScrollFeatureSection.jsx';
 import { cn } from '../../lib/cn';
 
 // ---------------------------------------------------------------------------
@@ -202,43 +203,9 @@ export function AboutSection() {
       </section>
 
       {/* ---------------------------------------------------------------- */}
-      {/* OM JUIT NETSEC – stor rubrik + brödtext                          */}
+      {/* SCROLL FEATURE - infrastructure, communication and expertise      */}
       {/* ---------------------------------------------------------------- */}
-      <section className="border-b border-brand-line py-24 sm:py-28 lg:py-36">
-        <Container>
-          <Reveal>
-            <Label>[ About JUIT NetSec ]</Label>
-          </Reveal>
-          <div className="mt-10 grid gap-x-12 gap-y-12 lg:grid-cols-[1.15fr_0.85fr]">
-            <Reveal>
-              <h2
-                className="max-w-3xl hyphens-auto break-words font-display text-3xl font-semibold leading-[1.05] tracking-tight text-brand-white sm:text-5xl lg:text-6xl"
-              >
-                Senior IT and security expertise for stable technical environments
-              </h2>
-            </Reveal>
-            <Reveal delay={0.08} className="space-y-6 text-lg leading-8 text-brand-mist/85">
-              <p>
-                JUIT NetSec AB is an IT consulting company based in Stockholm, focused on infrastructure,
-                communication and security. The company helps businesses build stable, secure and
-                well-functioning IT environments through technical expertise, advisory and hands-on
-                implementation.
-              </p>
-              <p>
-                With a focus on networking, operations, security and management, JUIT NetSec acts as an
-                experienced partner for organizations that need reliable IT expertise without unnecessary
-                complexity.
-              </p>
-              <p className="text-brand-mist/65">
-                JUIT NetSec is built around senior technical expertise and practical experience from IT
-                environments where security, stability and clear communication are critical. The work
-                starts from real needs, existing environments and solutions that have to work in
-                practice — not just on paper.
-              </p>
-            </Reveal>
-          </div>
-        </Container>
-      </section>
+      <ScrollFeatureSection />
 
       {/* ---------------------------------------------------------------- */}
       {/* PRINCIPLES – fristående principsektion                            */}
