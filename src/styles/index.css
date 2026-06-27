@@ -150,29 +150,11 @@
   /* Grön ambiens som matchar referensens komposition: ljusast uppe till vänster
      (bakom radarn) och mörkare åt höger (bakom statistik-grafiken) så att den
      mörka, screen-inblandade panelens text förblir skarp. */
+  /* Shift5:s mörka yta är platt #202020 (rgb 32,32,32) utan gradient/grönt – här
+     en aning mörkare (#181818) efter önskemål. Fortfarande platt, neutral och
+     utan grön ambiens. Det animerade bruset (footer-noise) är orört. */
   .footer-glow {
-    background:
-      linear-gradient(to bottom, rgba(0, 200, 83, 0.11), transparent 18%),
-      radial-gradient(55% 85% at 24% 40%, rgba(0, 200, 83, 0.40), transparent 62%),
-      radial-gradient(42% 60% at 50% 122%, rgba(0, 200, 83, 0.10), transparent 70%),
-      radial-gradient(135% 135% at 22% 38%, #06180d 0%, #02100a 72%);
-  }
-
-  .footer-upstream-glow {
-    --footer-upstream-height: clamp(44px, 5vw, 72px);
-    height: var(--footer-upstream-height);
-    margin-top: calc(var(--footer-upstream-height) * -1);
-    margin-bottom: -8px;
-    background:
-      radial-gradient(54% 160% at 22% 100%, rgba(0, 200, 83, 0.27), transparent 64%),
-      radial-gradient(46% 140% at 72% 108%, rgba(0, 200, 83, 0.11), transparent 62%),
-      linear-gradient(90deg, transparent 0%, rgba(0, 200, 83, 0.07) 18%, transparent 34%, rgba(0, 200, 83, 0.05) 52%, transparent 72%),
-      linear-gradient(to top, rgba(0, 200, 83, 0.18), rgba(0, 200, 83, 0.055) 38%, transparent 100%);
-    mix-blend-mode: screen;
-    opacity: 0.98;
-    box-shadow: 0 18px 28px rgba(0, 200, 83, 0.18);
-    -webkit-mask-image: linear-gradient(to top, #000, rgba(0, 0, 0, 0.42) 44%, transparent 100%);
-    mask-image: linear-gradient(to top, #000, rgba(0, 0, 0, 0.42) 44%, transparent 100%);
+    background: #181818;
   }
 
   .footer-noise {
@@ -241,6 +223,57 @@
     backface-visibility: hidden;
     transform: translateZ(0);
     will-change: transform, opacity;
+  }
+
+  /* Flyward-stil "golv-logga": en överdimensionerad wordmark förankrad i
+     footerns underkant. Nederdelen trycks ned under kortets kant (kortet är
+     overflow-hidden) så loggan beskärs av footer-gränsen, och eftersom den är
+     vit möter den den vita frame-marginalen och smälter in – exakt som i
+     Flyward-referensen. Allt skalar responsivt via clamp()/vw. */
+  .footer-floor-logo {
+    line-height: 0;
+  }
+  .footer-floor-wordmark {
+    font-size: clamp(2.6rem, 13vw, 15rem);
+    line-height: 0.82;
+    white-space: nowrap;
+    transform: translateY(26%);
+  }
+  /* Den gröna accent-kvadraten behåller sin form men tappar den stora halo-skuggan
+     på golv-skala (annars blir det en oönskad grön glow). Endast golv-varianten. */
+  .footer-floor-wordmark span[aria-hidden='true'] {
+    box-shadow: none;
+  }
+
+  /* Responsiv scen för radar (vänster) + dashboard (höger): på breda skärmar
+     dras de mot mitten (växande --edge), på smala separerar de naturligt mot
+     kanterna. Helt clamp()/calc-/vw-baserat – ingen fixed positionering. */
+  @media (min-width: 1024px) {
+    .footer-stage {
+      /* halv klusterbredd: styr hur långt isär radar/dashboard hamnar */
+      --half: clamp(560px, 30vw, 730px);
+      /* kant-inset = håll klustret centrerat på breda skärmar, kanta på smala */
+      --edge: max(16px, calc(50% - var(--half)));
+    }
+    .footer-floor-wordmark {
+      font-size: clamp(7rem, 16vw, 19rem);
+    }
+    .footer-pos-radar {
+      position: absolute;
+      top: clamp(24px, 2.4vw, 46px);
+      left: var(--edge);
+    }
+    .footer-pos-stats {
+      position: absolute;
+      top: clamp(20px, 2.2vw, 42px);
+      right: var(--edge);
+      width: clamp(520px, 31vw, 668px);
+    }
+    .footer-pos-nav {
+      position: absolute;
+      right: var(--edge);
+      bottom: clamp(184px, 17vh, 300px);
+    }
   }
 
   /* Flyward-style "frame-out": footern börjar full-bleed och ramas in mot vita

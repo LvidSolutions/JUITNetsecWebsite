@@ -49,10 +49,8 @@ export function Footer() {
   // hörnradie och skugga via CSS (responsivt med clamp). Padding ger lika
   // marginaler utan att skala/förvränga grafiken. Respekterar reduced-motion.
   const frameProgress = useTransform(revealProgress, [0.45, 1], [0, 1]);
-  const glowOpacity = useTransform(frameProgress, [0, 0.45], [1, 0]);
 
   const frameVar = reduceMotion ? 0 : frameProgress;
-  const glowStyle = reduceMotion ? undefined : { opacity: glowOpacity };
 
   // När den vita frame-out-ramen hinner bakom navbaren (navbar-mitten ligger i
   // ramens vita topp-marginal) sätts body.nav-over-light, så navbarens text/logga
@@ -91,11 +89,6 @@ export function Footer() {
 
   return (
     <motion.div ref={footerRef} style={footerStyle} className="footer-reveal-layer relative">
-      <motion.div
-        aria-hidden="true"
-        style={glowStyle}
-        className="footer-upstream-glow pointer-events-none relative z-10"
-      />
       <motion.div ref={frameRef} className="footer-frame" style={{ '--ff': frameVar }}>
       <footer className="footer-frame__card relative isolate overflow-hidden bg-brand-black">
       <svg
@@ -130,22 +123,32 @@ export function Footer() {
 
       {/* Desktop följer referensens scen: övre datafält, stor tom mitt,
           varumärke och kontakt lågt placerade. Mobil/tablet staplar tryggt. */}
-      <div className="relative mx-auto flex w-full max-w-[1380px] flex-col px-6 py-12 sm:px-10 sm:py-14 lg:min-h-[calc(100svh-96px)] lg:px-0 lg:py-0">
+      <div className="footer-stage relative mx-auto flex w-full max-w-[1380px] flex-col px-6 pt-12 pb-[clamp(104px,26vw,150px)] sm:px-10 sm:pt-14 lg:min-h-[calc(100svh-96px)] lg:max-w-none lg:px-0 lg:pt-0 lg:pb-0">
+        {/* GOLV-LOGGA: överdimensionerad wordmark förankrad i underkanten,
+            beskuren av footer-gränsen så den smälter in i den vita ramen. */}
+        <motion.div
+          style={logoStyle}
+          aria-hidden="true"
+          className="footer-floor-logo footer-reveal-layer pointer-events-none absolute inset-x-0 bottom-0 z-0 flex justify-center overflow-hidden"
+        >
+          <BrandWordmark className="footer-floor-wordmark" />
+        </motion.div>
+
         {/* ÖVRE band: radar-grafik (vänster) + skarp statistikpanel (höger). */}
         <motion.div
           style={radarStyle}
-          className="footer-reveal-layer flex flex-col items-center gap-12 lg:absolute lg:left-4 lg:top-7 lg:items-start lg:gap-0"
+          className="footer-reveal-layer footer-pos-radar z-10 flex flex-col items-center gap-12 lg:items-start lg:gap-0"
         >
           <div className="flex shrink-0 flex-col items-center lg:items-start">
             <img
               src="/assets/footer-radar.png"
               alt=""
               aria-hidden="true"
-              className="footer-cutout footer-radar-graphic w-[clamp(220px,24vw,300px)] select-none lg:w-[286px]"
+              className="footer-cutout footer-radar-graphic w-[clamp(220px,24vw,300px)] select-none lg:w-[clamp(260px,16vw,340px)]"
               loading="lazy"
               decoding="async"
             />
-            <p className="mt-3 w-[clamp(220px,24vw,300px)] text-center font-mono text-[11px] uppercase leading-relaxed tracking-[0.24em] text-brand-mist/75 lg:w-[286px]">
+            <p className="mt-3 w-[clamp(220px,24vw,300px)] text-center font-mono text-[11px] uppercase leading-relaxed tracking-[0.24em] text-brand-mist/75 lg:w-[clamp(260px,16vw,340px)]">
               You cannot defend
               <br />
               what you cannot map.
@@ -155,17 +158,13 @@ export function Footer() {
 
         <motion.div
           style={statsStyle}
-          className="footer-reveal-layer mt-12 w-full max-w-[820px] self-center lg:absolute lg:right-0 lg:top-6 lg:mt-0 lg:w-[600px] lg:max-w-none"
+          className="footer-reveal-layer footer-pos-stats z-10 mt-12 w-full max-w-[820px] self-center lg:mt-0 lg:max-w-none"
         >
           <FooterStatsPanel className="w-full" />
         </motion.div>
 
-        {/* NEDRE band: stor logotyp till vänster, navigation + kontakt till höger. */}
-        <div className="mt-14 flex flex-col gap-10 lg:absolute lg:bottom-[58px] lg:left-0 lg:right-0 lg:mt-0 lg:flex-row lg:items-end lg:justify-between lg:gap-16">
-          <motion.div style={logoStyle} className="footer-reveal-layer">
-            <BrandWordmark className="text-[clamp(2.25rem,4vw,3.8rem)]" />
-          </motion.div>
-
+        {/* NEDRE band: navigation + kontakt (höger). Lyft över golv-loggan. */}
+        <div className="footer-pos-nav z-10 mt-14 flex flex-col gap-10 lg:mt-0 lg:flex-row lg:items-end lg:justify-end lg:gap-16">
           <motion.div
             style={navStyle}
             className="footer-reveal-layer grid grid-cols-1 gap-y-8 sm:grid-cols-[82px_210px] sm:gap-x-[46px] sm:gap-y-0"
