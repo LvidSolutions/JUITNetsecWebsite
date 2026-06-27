@@ -107,6 +107,22 @@
     animation: footer-noise 1.25s steps(4) infinite;
   }
 
+  .service-static {
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='ss'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.92' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23ss)' opacity='0.88'/%3E%3C/svg%3E"),
+      repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 4px);
+    background-position:
+      0 0,
+      0 0;
+    background-repeat: repeat;
+    background-size:
+      180px 180px,
+      4px 4px;
+    opacity: 0.16;
+    mix-blend-mode: soft-light;
+    animation: service-static-shift 0.9s steps(3) infinite;
+  }
+
   /* Långsam, teknisk scan-linje (radar/operativ modell). */
   .tech-scanline {
     background: linear-gradient(
@@ -176,7 +192,7 @@
       contrast(var(--footer-cutout-contrast)) drop-shadow(var(--footer-cutout-edge));
   }
 
-  .footer-radar-graphic {
+  .footer-maze-graphic {
     --footer-cutout-brightness: 1.5;
     --footer-cutout-contrast: 1.55;
     --footer-cutout-edge: 0 0 0.45px rgba(255, 255, 255, 0.7);
@@ -245,34 +261,44 @@
     box-shadow: none;
   }
 
-  /* Responsiv scen för radar (vänster) + dashboard (höger): på breda skärmar
-     dras de mot mitten (växande --edge), på smala separerar de naturligt mot
-     kanterna. Helt clamp()/calc-/vw-baserat – ingen fixed positionering. */
+  /* Responsiv scen (desktop): hela kompositionen skalar mot footer-storleken via
+     clamp()/min()/calc med BÅDE vw och vh, så den håller proportion på alla
+     skärmar. Maze (vänster) + dashboard (höger) dras mot mitten på breda skärmar
+     (växande --edge) och separerar mot kanterna på smala. Footerns höjd kapas så
+     stora/höga skärmar inte skapar en enorm tom mittyta. Ingen fixed positionering. */
   @media (min-width: 1024px) {
     .footer-stage {
-      /* halv klusterbredd: styr hur långt isär radar/dashboard hamnar */
-      --half: clamp(560px, 30vw, 730px);
-      /* kant-inset = håll klustret centrerat på breda skärmar, kanta på smala */
-      --edge: max(16px, calc(50% - var(--half)));
+      /* grafik-bredder: skala upp/ner med viewport men begränsas även av höjd (vh)
+         så de aldrig blir för stora på korta skärmar eller för små på stora. */
+      --maze-w: clamp(232px, min(17.5vw, 30vh), 384px);
+      --dash-w: clamp(504px, min(34vw, 58vh), 760px);
+      /* halv klusterbredd → styr hur långt isär maze/dashboard hamnar (kapas så
+         gapet inte blir enormt på breda skärmar). */
+      --half: clamp(520px, 33vw, 690px);
+      /* kant-inset: håll klustret centrerat på breda skärmar, kanta på smala. */
+      --edge: max(var(--footer-frame-x, 44px), calc(50% - var(--half)));
+      /* kapa höjden: fyll på normala skärmar, undvik tom mittyta på höga skärmar. */
+      min-height: min(calc(100svh - 96px), clamp(740px, 80svh, 1080px));
     }
+    /* Golv-loggan full-bleed: skalar med bredd (vw) men kapas av höjd (vh) så den
+       varken blir för liten på stora skärmar eller för hög på korta. */
     .footer-floor-wordmark {
-      font-size: clamp(7rem, 16vw, 19rem);
+      font-size: clamp(4rem, min(15.5vw, 33vh), 30rem);
     }
-    .footer-pos-radar {
+    .footer-pos-maze {
       position: absolute;
-      top: clamp(24px, 2.4vw, 46px);
+      top: clamp(20px, 5.5vh, 76px);
       left: var(--edge);
     }
-    .footer-pos-stats {
+    .footer-pos-dashboard {
       position: absolute;
-      top: clamp(20px, 2.2vw, 42px);
+      top: clamp(18px, 5vh, 70px);
       right: var(--edge);
-      width: clamp(520px, 31vw, 668px);
     }
     .footer-pos-nav {
       position: absolute;
       right: var(--edge);
-      bottom: clamp(184px, 17vh, 300px);
+      bottom: clamp(176px, 22vh, 324px);
     }
   }
 
@@ -283,9 +309,19 @@
      – på mobil/tablet behåller vi full-bleed (scale 1) för läsbarhet. */
   .footer-frame {
     background: #ffffff;
-    /* Marginal mätt från Flyward-videon: ~48px jämn inramning på desktop, skalas
-       ned på mindre skärmar (3.75vw → 48px-tak vid ≥1280px). Lika på alla sidor. */
-    padding: calc(var(--ff, 0) * clamp(14px, 3.75vw, 48px));
+    /* Vita marginaler i Flyward-proportioner (uppmätta i referensvideon): sidor
+       ~2.7% av bredden (vw), topp ~3% och botten ~4% av höjden (vh). Per-axel och
+       responsiva – samma procent oavsett skärmformat (clamp ger sansade px-gränser). */
+    --footer-frame-x: clamp(20px, 2.7vw, 104px);
+    --footer-frame-top: clamp(16px, 3vh, 54px);
+    --footer-frame-bottom: clamp(22px, 4vh, 76px);
+    padding:
+      calc(var(--ff, 0) * var(--footer-frame-top))
+      calc(var(--ff, 0) * var(--footer-frame-x))
+      calc(var(--ff, 0) * var(--footer-frame-bottom));
+    /* EN rörelse: hela inramningen animeras in på sista scroll-ticket (Flyward),
+       i stället för en scroll-länkad gradvis sex-stegs-reveal. */
+    transition: padding 0.62s cubic-bezier(0.22, 1, 0.36, 1);
     will-change: padding;
   }
 
@@ -332,6 +368,29 @@
   }
 }
 
+@keyframes service-static-shift {
+  0% {
+    background-position:
+      0 0,
+      0 0;
+  }
+  33% {
+    background-position:
+      -18px 12px,
+      0 1px;
+  }
+  66% {
+    background-position:
+      14px -20px,
+      1px 0;
+  }
+  100% {
+    background-position:
+      0 0,
+      0 0;
+  }
+}
+
 @keyframes intro-scanbeam {
   0% {
     transform: translateY(-100%);
@@ -363,6 +422,10 @@
   }
 
   .footer-noise--animated {
+    animation: none;
+  }
+
+  .service-static {
     animation: none;
   }
 
