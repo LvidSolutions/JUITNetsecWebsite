@@ -233,13 +233,8 @@ export function AboutSection() {
             {principles.map((item, index) => (
               <article key={item.title} className="border-b border-brand-line last:border-b-0">
                 <Reveal delay={index * 0.04}>
-                  <div
-                    className={cn(
-                      'grid gap-8 p-6 transition-colors duration-200 hover:bg-white/[0.025] sm:p-8 lg:grid-cols-2 lg:items-center lg:gap-14 lg:p-12',
-                      index % 2 === 1 && 'lg:[&_.principle-copy]:order-2 lg:[&_.principle-visual]:order-1',
-                    )}
-                  >
-                    <div className="principle-copy">
+                  <div className="grid gap-8 p-6 transition-colors duration-200 hover:bg-white/[0.025] sm:p-8 lg:grid-cols-[0.92fr_1.08fr] lg:items-center lg:gap-14 lg:p-12">
+                    <div>
                       <div className="flex items-center gap-4">
                         <ScrambleText
                           as="span"
@@ -263,7 +258,7 @@ export function AboutSection() {
                       </p>
                     </div>
 
-                    <div className="principle-visual">
+                    <div>
                       <PrincipleImagePlaceholder label={item.imageLabel} index={index} />
                     </div>
                   </div>
