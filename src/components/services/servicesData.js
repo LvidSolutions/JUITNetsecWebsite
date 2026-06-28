@@ -1,12 +1,9 @@
-// Källdata för den ombyggda Services-sidan. Innehållet är hämtat ur den
-// befintliga Services-sidan (sex tjänstedomäner + vendors) och omorganiserat
-// till de två Shift5-inspirerade funktionerna: en tre-panels-väljare och en
-// cirkulär driftsmodell. Pastellgrönt ersätter Shift5:s röda som aktiv färg.
+// Data for the Services page. Content is organized around the Services selector,
+// the square process model, and the retained support matrix.
 
 export const PASTEL = '#A9E8B4';
 export const PASTEL_SOFT = '#B8F2C2';
 
-// ── Sektion 2/3: tre primära spår (väljare + detaljpanel) ───────────────────
 export const serviceTracks = [
   {
     id: 'ops',
@@ -43,15 +40,15 @@ export const serviceTracks = [
     layer: 'Protection layer',
     graphic: 'orbit',
     description:
-      'Reduce risk through cybersecurity strategy, cloud security, incident response, compliance, awareness, SOC and MDR — staffed by humans and powered by automation.',
-    tags: ['Strategy', 'Cloud Security', 'Incident Response', 'Compliance', 'Awareness', 'SOC', 'MDR'],
+      'Reduce risk through practical cybersecurity guidance, cloud and identity hardening, incident readiness, compliance support and security awareness.',
+    tags: ['Strategy', 'Cloud Security', 'Identity', 'Incident Readiness', 'Compliance', 'Awareness'],
     covers: [
       'Security strategy & hardening',
       'Cloud & identity security',
-      'Incident response & escalation',
+      'Incident readiness & escalation paths',
       'Compliance & governance support',
       'Awareness & training',
-      'SOC / MDR monitoring',
+      'Secure operating routines',
     ],
     outcomes: [
       'Reduced exposure',
@@ -60,7 +57,7 @@ export const serviceTracks = [
       'Stronger identity & cloud posture',
       'Practical governance',
     ],
-    related: ['Identity', 'SOC', 'Cloud', 'Infrastructure', 'Users'],
+    related: ['Identity', 'Cloud', 'Infrastructure', 'Users', 'Governance'],
   },
   {
     id: 'gov',
@@ -91,60 +88,41 @@ export const serviceTracks = [
   },
 ];
 
-// ── Sektion 4: cirkulär driftsmodell (sex steg på radarn) ────────────────────
-export const operatingStages = [
+export const processStages = [
   {
+    id: 'discover',
     number: '01',
     title: 'Discover',
-    code: 'DISCOVERY',
-    text: 'Map devices, identities, networks, infrastructure, cloud, SOC, help desk and existing tools to understand what exists, where ownership is unclear and where risk or fragmentation is building up.',
-    tags: ['Inventory', 'Identity', 'Network', 'Cloud'],
+    code: 'DISCOVER',
+    text: 'Understand the current infrastructure, risks, requirements, operating constraints and business context before changing the environment.',
+    tags: ['Infrastructure', 'Risk', 'Requirements', 'Context'],
   },
   {
+    id: 'map',
     number: '02',
-    title: 'Onboard',
-    code: 'ONBOARD',
-    text: 'Bring users, devices, systems and services into a managed operating model with clear access, documentation, ownership, support paths and configuration standards.',
-    tags: ['Device', 'Access', 'Documentation', 'Support'],
+    title: 'Map',
+    code: 'MAP',
+    text: 'Identify systems, dependencies, network and security posture, access paths, ownership and priorities across the technical estate.',
+    tags: ['Systems', 'Dependencies', 'Access', 'Priorities'],
   },
   {
+    id: 'secure',
     number: '03',
-    title: 'Control',
-    code: 'CONTROL',
-    text: 'Apply practical controls across identity, endpoint, cloud, infrastructure and tooling so the environment becomes easier to operate, secure and improve.',
-    tags: ['Identity', 'Endpoint', 'Cloud', 'Tooling'],
+    title: 'Secure',
+    code: 'SECURE',
+    text: 'Implement practical improvements across infrastructure, network, identity, access, operations and security controls.',
+    tags: ['Network', 'Identity', 'Access', 'Controls'],
   },
   {
+    id: 'operate',
     number: '04',
-    title: 'Monitor',
-    code: 'MONITOR',
-    text: 'Maintain visibility across operational health, alerts, security events, vulnerabilities and service issues using a connected IT and security view.',
-    tags: ['SOC', 'MDR', 'Visibility', 'Alerts'],
-  },
-  {
-    number: '05',
-    title: 'Respond',
-    code: 'RESPOND',
-    text: 'Handle incidents, support needs, changes and escalations with structured communication, clear responsibility and documented resolution.',
-    tags: ['Incident Response', 'Help Desk', 'Escalation', 'Resolution'],
-  },
-  {
-    number: '06',
-    title: 'Improve',
-    code: 'IMPROVE',
-    text: 'Continuously improve the environment through reporting, compliance support, awareness, governance, roadmaps and technical decision-making.',
-    tags: ['Compliance', 'Awareness', 'Governance', 'Roadmaps'],
+    title: 'Operate',
+    code: 'OPERATE',
+    text: 'Support, advise, improve and maintain secure IT operations over time with clear communication and technical ownership.',
+    tags: ['Support', 'Advisory', 'Improvement', 'Management'],
   },
 ];
 
-export const ringLabels = {
-  outer: 'CONTINUOUS IMPROVEMENT',
-  ring2: 'MONITORING & RESPONSE',
-  ring3: 'CONTROL & HARDENING',
-  center: 'INVENTORY & OWNERSHIP',
-};
-
-// ── Sektion 5: bevarad detaljinfo (de sex ursprungliga tjänstedomänerna) ─────
 export const serviceDomains = [
   {
     number: '01',

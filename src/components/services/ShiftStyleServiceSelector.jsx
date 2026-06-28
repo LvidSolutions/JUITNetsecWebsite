@@ -2,7 +2,7 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { cn } from '../../lib/cn';
 import { serviceTracks } from './servicesData.js';
 
-const ACTIVE = '#A9E8B4';
+const ACTIVE = '#050505';
 const IDLE = 'rgba(229,231,235,0.32)';
 
 // ── Tekniska line-art-grafiker (inline SVG, ingen extern asset) ─────────────
@@ -78,20 +78,22 @@ function Panel({ track, index, isActive, onSelect, reduce }) {
     <button
       type="button"
       onClick={() => onSelect(index)}
+      onMouseEnter={() => onSelect(index)}
+      onFocus={() => onSelect(index)}
       aria-pressed={isActive}
       aria-label={`${track.code} — ${track.title}`}
       className={cn(
-        'group relative flex min-h-[28rem] flex-1 flex-col overflow-hidden p-6 text-left transition-colors duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] sm:p-8 lg:min-h-[37rem] lg:p-10',
+        'group relative flex min-h-[28rem] flex-1 flex-col overflow-hidden p-6 text-left transition-colors duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] sm:p-8 lg:min-h-[37rem] lg:p-10',
         'focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-pastel',
-        isActive ? 'bg-brand-pastel/[0.055]' : 'bg-transparent hover:bg-white/[0.022]',
+        isActive ? 'bg-brand-pastel text-brand-black' : 'bg-transparent hover:bg-brand-pastel hover:text-brand-black',
       )}
     >
       {/* aktiv topp-accent */}
       <span
         aria-hidden="true"
         className={cn(
-          'absolute inset-x-0 top-0 h-px origin-left transition-all duration-500',
-          isActive ? 'scale-x-100 bg-brand-pastel' : 'scale-x-0 bg-brand-pastel/70 group-hover:scale-x-100',
+          'absolute inset-x-0 top-0 h-[2px] origin-left transition-all duration-300',
+          isActive ? 'scale-x-100 bg-brand-black' : 'scale-x-0 bg-brand-black group-hover:scale-x-100',
         )}
       />
 
@@ -99,13 +101,18 @@ function Panel({ track, index, isActive, onSelect, reduce }) {
       <div className="flex items-start justify-between gap-4">
         <span
           className={cn(
-            'font-display text-3xl font-semibold leading-none tracking-tight transition-colors duration-500 sm:text-4xl',
-            isActive ? 'text-brand-pastel' : 'text-brand-white/22 group-hover:text-brand-white/45',
+            'font-display text-3xl font-semibold leading-none tracking-tight transition-colors duration-300 sm:text-4xl',
+            isActive ? 'text-brand-black' : 'text-brand-white/22 group-hover:text-brand-black',
           )}
         >
           {track.number}
         </span>
-        <span className="text-right font-mono text-[10px] uppercase leading-5 tracking-[0.24em] text-brand-mist/40">
+        <span
+          className={cn(
+            'text-right font-mono text-[10px] uppercase leading-5 tracking-[0.24em] transition-colors duration-300',
+            isActive ? 'text-brand-black/60' : 'text-brand-mist/40 group-hover:text-brand-black/60',
+          )}
+        >
           {track.code}
           <br />
           {track.layer}
@@ -121,16 +128,16 @@ function Panel({ track, index, isActive, onSelect, reduce }) {
       <div>
         <h3
           className={cn(
-            'font-display text-2xl font-semibold leading-tight tracking-tight transition-colors duration-500 sm:text-[1.7rem]',
-            isActive ? 'text-brand-white' : 'text-brand-white/55',
+            'font-display text-2xl font-semibold leading-tight tracking-tight transition-colors duration-300 sm:text-[1.7rem]',
+            isActive ? 'text-brand-black' : 'text-brand-white/55 group-hover:text-brand-black',
           )}
         >
           {track.title}
         </h3>
         <p
           className={cn(
-            'mt-3 max-w-sm text-sm leading-7 transition-colors duration-500',
-            isActive ? 'text-brand-mist/72' : 'text-brand-mist/35',
+            'mt-3 max-w-sm text-sm leading-7 transition-colors duration-300',
+            isActive ? 'text-brand-black/78' : 'text-brand-mist/35 group-hover:text-brand-black/78',
           )}
         >
           {track.description}
@@ -140,10 +147,10 @@ function Panel({ track, index, isActive, onSelect, reduce }) {
             <span
               key={tag}
               className={cn(
-                'border px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.16em] transition-colors duration-500',
+                'border px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.16em] transition-colors duration-300',
                 isActive
-                  ? 'border-brand-pastel/35 text-brand-pastel'
-                  : 'border-brand-line text-brand-mist/45',
+                  ? 'border-brand-black/35 text-brand-black'
+                  : 'border-brand-line text-brand-mist/45 group-hover:border-brand-black/35 group-hover:text-brand-black',
               )}
             >
               {tag}
@@ -152,8 +159,8 @@ function Panel({ track, index, isActive, onSelect, reduce }) {
         </div>
         <span
           className={cn(
-            'mt-7 inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.24em] transition-colors duration-500',
-            isActive ? 'text-brand-pastel' : 'text-brand-mist/40 group-hover:text-brand-mist/70',
+            'mt-7 inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.24em] transition-colors duration-300',
+            isActive ? 'text-brand-black' : 'text-brand-mist/40 group-hover:text-brand-black',
           )}
         >
           {isActive ? 'Selected — see detail below' : 'Select track'}
@@ -173,10 +180,10 @@ export function ShiftStyleServiceSelector({ activeIndex, onSelect }) {
       aria-label="Service tracks selector"
       className="relative isolate overflow-hidden border-b border-brand-line bg-brand-black"
     >
-      <div aria-hidden="true" className="tech-noise tech-noise--anim pointer-events-none absolute inset-[-20%] -z-10" />
+      <div aria-hidden="true" className="service-static pointer-events-none absolute inset-[-20%] -z-10" />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_-10%,rgba(169,232,180,0.08),transparent_45%)]"
+        className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgba(255,255,255,0.018),transparent_34%,rgba(255,255,255,0.014))]"
       />
 
       <div className="mx-auto w-full max-w-[1700px] px-4 pt-16 sm:px-6 lg:px-8 lg:pt-20">
