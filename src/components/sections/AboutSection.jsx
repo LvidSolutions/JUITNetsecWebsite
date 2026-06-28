@@ -27,32 +27,41 @@ const companyContact = [
   { k: 'Web', v: 'www.juit.se', href: 'https://www.juit.se' },
 ];
 
-// Ersätter referensens "Awards & Recognition" – inga påhittade priser.
 const principles = [
   {
-    title: 'Security before complexity',
-    description: 'Solutions should reduce risk without adding unnecessary technical weight.',
-    area: 'Security',
+    title: 'Security first',
+    description:
+      'Every recommendation starts with risk, resilience and the practical controls needed to protect business-critical systems.',
+    area: 'Risk reduction',
+    imageLabel: 'Image placeholder: secured infrastructure',
   },
   {
-    title: 'Stability before short-term fixes',
-    description: 'Technical decisions should work in production, not just in presentations.',
-    area: 'Operations',
+    title: 'Clarity over complexity',
+    description:
+      'We make technical choices understandable, so stakeholders can see the trade-offs, priorities and next steps.',
+    area: 'Guidance',
+    imageLabel: 'Image placeholder: clear architecture',
   },
   {
-    title: 'Practical expertise before buzzwords',
-    description: 'Advice should be technically grounded and possible to execute.',
-    area: 'Consulting',
+    title: 'Built on trust',
+    description:
+      'Security work depends on confidence, discretion and honest advice, especially when decisions affect long-term operations.',
+    area: 'Partnership',
+    imageLabel: 'Image placeholder: trusted collaboration',
   },
   {
-    title: 'Clear guidance',
-    description: 'The client should understand the risks, the options and the next steps.',
+    title: 'Practical expertise',
+    description:
+      'Advice should be grounded in real technical environments and shaped for implementation, not presentation value.',
+    area: 'Execution',
+    imageLabel: 'Image placeholder: hands-on operations',
+  },
+  {
+    title: 'Solve before we sell',
+    description:
+      'We focus on the actual problem first, then recommend the simplest durable path for the environment and the team.',
     area: 'Advisory',
-  },
-  {
-    title: 'Long-term function',
-    description: 'Environments should be documented, maintainable and sustainable over time.',
-    area: 'Management',
+    imageLabel: 'Image placeholder: problem solving',
   },
 ];
 
@@ -84,6 +93,22 @@ function Reveal({ children, className = '', delay = 0 }) {
     >
       {children}
     </motion.div>
+  );
+}
+
+function PrincipleImagePlaceholder({ label }) {
+  return (
+    <div className="relative mt-8 aspect-[4/3] min-h-[11rem] overflow-hidden rounded-[2px] border border-brand-line bg-[linear-gradient(135deg,rgba(0,200,83,0.12),rgba(255,255,255,0.025)_48%,rgba(0,0,0,0.2))]">
+      {/* Image placeholder: replace this block with a principle-specific image when assets are ready. */}
+      <div className="absolute inset-0 hero-grid opacity-35" />
+      <div className="absolute left-5 top-5 h-2 w-2 rounded-[1px] bg-brand-green" />
+      <div className="absolute bottom-5 right-5 h-10 w-10 border border-brand-green/40" />
+      <div className="relative flex h-full items-end p-5">
+        <p className="max-w-[12rem] font-mono text-[10px] uppercase leading-5 tracking-[0.24em] text-brand-mist/55">
+          {label}
+        </p>
+      </div>
+    </div>
   );
 }
 
@@ -179,48 +204,58 @@ export function AboutSection() {
       <section className="border-b border-brand-line py-24 sm:py-28 lg:py-32">
         <Container>
           <Reveal>
-            <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
+            <div className="grid gap-10 lg:grid-cols-[0.78fr_1.22fr] lg:items-end">
               <div>
-                <Label>Principles</Label>
-                <h2 className="mt-6 max-w-3xl font-display text-3xl font-semibold leading-[1.08] tracking-tight text-brand-white sm:text-5xl">
-                  Principles that guide technical decisions
+                <Label>Our Principles</Label>
+                <h2 className="mt-6 max-w-4xl font-display text-3xl font-semibold leading-[1.04] tracking-tight text-brand-white sm:text-5xl lg:text-6xl">
+                  Principles that guide our work
                 </h2>
               </div>
-              <p className="max-w-2xl text-base leading-7 text-brand-mist/70 sm:text-lg sm:leading-8 lg:justify-self-end">
-                JUIT NetSec works from a clear set of technical principles: reduce risk, keep
-                environments understandable and make decisions that can survive real operations.
-              </p>
+              <div className="max-w-2xl text-base leading-7 text-brand-mist/70 sm:text-lg sm:leading-8 lg:justify-self-end">
+                <p>
+                  The best security work is calm, practical and built for continuity. These
+                  principles shape how JUIT NetSec advises, implements and supports technical
+                  environments over time.
+                </p>
+              </div>
             </div>
           </Reveal>
 
-          <ol className="mt-14 overflow-hidden rounded-[2px] border border-brand-line bg-white/[0.02]">
+          <div className="mt-14 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {principles.map((item, index) => (
-              <li key={item.title} className="border-b border-brand-line last:border-b-0">
-                <Reveal delay={index * 0.04}>
-                  <div className="group grid gap-4 p-6 transition-colors duration-200 hover:bg-white/[0.025] sm:p-8 lg:grid-cols-[4rem_minmax(0,0.9fr)_minmax(0,1.25fr)_8rem] lg:items-baseline lg:gap-8">
-                    <ScrambleText
-                      as="span"
-                      text={String(index + 1).padStart(2, '0')}
-                      durationMs={500}
-                      className="font-mono text-xs tracking-[0.24em] text-brand-green"
-                    />
+              <Reveal
+                key={item.title}
+                className={cn(index === 0 && 'md:col-span-2 xl:col-span-1 xl:row-span-2')}
+                delay={index * 0.04}
+              >
+                <article className="group flex h-full min-h-[28rem] flex-col justify-between rounded-[2px] border border-brand-line bg-white/[0.02] p-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-green/45 hover:bg-white/[0.035] sm:p-7">
+                  <div>
+                    <div className="flex items-center justify-between gap-4">
+                      <ScrambleText
+                        as="span"
+                        text={String(index + 1).padStart(2, '0')}
+                        durationMs={500}
+                        className="font-mono text-xs tracking-[0.24em] text-brand-green"
+                      />
+                      <span className="font-mono text-[10px] uppercase tracking-[0.24em] text-brand-mist/45">
+                        {item.area}
+                      </span>
+                    </div>
                     <ScrambleText
                       as="h3"
                       text={item.title}
                       durationMs={850}
-                      className="font-display text-xl font-medium leading-snug text-brand-white transition-transform duration-200 group-hover:translate-x-1 sm:text-2xl"
+                      className="mt-8 font-display text-2xl font-semibold leading-tight tracking-tight text-brand-white transition-transform duration-200 group-hover:translate-x-1 sm:text-3xl"
                     />
-                    <p className="max-w-2xl text-sm leading-6 text-brand-mist/65 sm:text-base sm:leading-7">
+                    <p className="mt-5 text-sm leading-6 text-brand-mist/68 sm:text-base sm:leading-7">
                       {item.description}
                     </p>
-                    <span className="font-mono text-[10px] uppercase tracking-[0.24em] text-brand-mist/45 lg:text-right">
-                      {item.area}
-                    </span>
                   </div>
-                </Reveal>
-              </li>
+                  <PrincipleImagePlaceholder label={item.imageLabel} />
+                </article>
+              </Reveal>
             ))}
-          </ol>
+          </div>
         </Container>
       </section>
 
