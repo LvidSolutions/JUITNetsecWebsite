@@ -69,20 +69,28 @@ Only two files changed for the footer: **`src/components/layout/Footer.jsx`** an
    `footer-pos-stats→footer-pos-dashboard`, `footer-radar-graphic→footer-maze-graphic`.
    (Asset filename stays `/assets/footer-radar.png` — do not rename the asset.)
 
-## Verified margins after changes (live, via Playwright before handoff)
+## Verified margins after changes (live, via Playwright — stable across repeated runs)
 | viewport | sides | bottom | notes |
 |---|---|---|---|
-| 1440×900 | 2.7% | 3.8% | ✅ |
-| 1920×1080 | 2.7% | 3.85% | ✅ |
-| 2560×1440 | 2.7% | 3.88% | ✅ |
-| 3440×1440 | 2.7% | 3.88% | ✅ |
-| **1366×768** | **0%** | **0%** | ❌ frame-out did NOT trigger — see open items |
+| 1366×768 | 2.7% | 3.98% | ✅ fixed (see "Resolved" below) |
+| 1440×900 | 2.7% | 4.0% | ✅ |
+| 1920×1080 | 2.7% | 4.0% | ✅ |
+| 2560×1440 | 2.7% | 4.0% | ✅ |
+| 3440×1440 | 2.7% | 4.0% | ✅ |
+
+## Resolved: 1366×768 frame-out trigger
+**Root cause:** the frame-out padding grew the document height, so on the last tick the
+page was no longer at the bottom — the bottom margin slipped below the fold and the
+scroll-distance trigger oscillated (flaky: sometimes 0%, sometimes framed with a
+negative bottom margin).
+**Fix (CSS-only, `.footer-stage` desktop `min-height`):** shrink the stage height by
+exactly the frame padding (`- var(--ff) * (var(--footer-frame-top) + var(--footer-frame-bottom))`,
+transitioned in sync), so the frame's **outer height stays constant** whether framed or
+not. No document-height jump → the trigger is reliable on every size (verified stable
+over 3 consecutive runs) and the bottom margin is visible immediately on the last tick.
 
 ## Open items / next steps (in priority order)
-1. **1366×768 frame-out doesn't engage** (measured 0% margins). Likely the
-   scroll-distance/hysteresis edge case when the footer is shorter than the viewport
-   on short screens. Fix the `framed` trigger in `Footer.jsx` (the `update()` in the
-   `useEffect`) so it reliably frames at the bottom on short viewports too.
+1. ✅ **DONE — 1366×768 frame-out trigger** (see "Resolved" above).
 2. **Confirm the top composition.** Because `min-height` is capped, on tall monitors
    the footer card sits at the bottom with the previous section visible above the top
    white margin. Flyward instead fills the framed viewport. Decide with the user whether

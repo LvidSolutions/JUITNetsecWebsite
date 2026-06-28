@@ -277,8 +277,16 @@
       --half: clamp(520px, 33vw, 690px);
       /* kant-inset: håll klustret centrerat på breda skärmar, kanta på smala. */
       --edge: max(var(--footer-frame-x, 44px), calc(50% - var(--half)));
-      /* kapa höjden: fyll på normala skärmar, undvik tom mittyta på höga skärmar. */
-      min-height: min(calc(100svh - 96px), clamp(740px, 80svh, 1080px));
+      /* Kapa höjden (fyll på normala skärmar, undvik tom mittyta på höga skärmar)
+         OCH krymp den med exakt frame-out-paddingen (topp+botten) så ramens YTTRE
+         höjd blir konstant – inga dokumenthöjd-hopp när de vita marginalerna tonar
+         in. Det gör frame-out-triggern stabil på ALLA skärmar (även 1366×768) och
+         håller botten-marginalen synlig direkt på sista scroll-ticket. */
+      min-height: calc(
+        min(calc(100svh - 96px), clamp(740px, 80svh, 1080px))
+        - var(--ff, 0) * (var(--footer-frame-top) + var(--footer-frame-bottom))
+      );
+      transition: min-height 0.62s cubic-bezier(0.22, 1, 0.36, 1);
     }
     /* Golv-loggan full-bleed: skalar med bredd (vw) men kapas av höjd (vh) så den
        varken blir för liten på stora skärmar eller för hög på korta. */
