@@ -5,108 +5,71 @@ import { processStages } from './servicesData.js';
 
 const EASE = [0.22, 1, 0.36, 1];
 const SIZE = 400;
-const PASTEL = '#A9E8B4';
-const BLACK = '#050505';
-const INSETS = [20, 65, 110, 155];
+const LAYERS = processStages.length; // 4
 
-function ringPath(outerInset, innerInset) {
-  const outerEnd = SIZE - outerInset;
-  const innerEnd = SIZE - innerInset;
+// JUIT-loggans gröna kvadrat (brand-green). Platt, ingen glow/skugga/bloom.
+const GREEN = '#00C853';
+const PANEL = '#0A0A0A'; // platt, opak panelyta (ingen static inuti rutan)
 
-  return [
-    `M ${outerInset} ${outerInset} H ${outerEnd} V ${outerEnd} H ${outerInset} Z`,
-    `M ${innerInset} ${innerInset} H ${innerEnd} V ${innerEnd} H ${innerInset} Z`,
-  ].join(' ');
+// Bottenförankrade, horisontellt centrerade nästlade kvadrater. Den minsta
+// "boxen" vilar mot rutans nederkant; varje yttre lager växer uppåt + utåt.
+//   g = 0 -> yttersta (hela rutan), g = 3 -> minsta boxen längst ned.
+function squareFor(g) {
+  const side = SIZE - 100 * g; // 400, 300, 200, 100
+  return { x: 50 * g, y: 100 * g, w: side, h: side }; // botten = y + h = 400
 }
 
-function SquareLayer({ stage, index, lit, onActivate }) {
-  const isCenter = index === processStages.length - 1;
-  const inset = INSETS[index];
-  const nextInset = INSETS[index + 1];
-  const end = SIZE - inset;
-  const labelInset = inset + 17;
-  const titleY = isCenter ? SIZE / 2 + 8 : labelInset + 17;
-  const labelY = isCenter ? SIZE / 2 - 14 : labelInset;
+function rectPath({ x, y, w, h }) {
+  return `M ${x} ${y} H ${x + w} V ${y + h} H ${x} Z`;
+}
 
-  const commonProps = {
+// ⊓-bandet mellan lager g och g+1 (delar nederkant -> öppet i botten).
+function bandPath(g) {
+  return `${rectPath(squareFor(g))} ${rectPath(squareFor(g + 1))}`;
+}
+
+// Grön fyllnad = den hovrade kvadraten (innehåller alla inre lager). I viloläge
+// kollapsar den till en punkt vid nederkantens mitt, så den "startar i boxen".
+function greenFor(g) {
+  if (g == null) return { x: SIZE / 2, y: SIZE, width: 0, height: 0 };
+  const s = squareFor(g);
+  return { x: s.x, y: s.y, width: s.w, height: s.h };
+}
+
+function HitLayer({ g, stageIndex, onActivate }) {
+  const stage = processStages[stageIndex];
+  const handlers = {
     role: 'button',
     tabIndex: 0,
-    focusable: 'true',
     'aria-label': `${stage.number} ${stage.title}`,
-    onMouseEnter: () => onActivate(index),
-    onFocus: () => onActivate(index),
-    onClick: () => onActivate(index),
+    onMouseEnter: () => onActivate(g),
+    onFocus: () => onActivate(g),
+    onClick: () => onActivate(g),
     onKeyDown: (event) => {
       if (event.key === 'Enter' || event.key === ' ') {
         event.preventDefault();
-        onActivate(index);
+        onActivate(g);
       }
     },
-    className: 'cursor-pointer outline-none',
+    style: { pointerEvents: 'all', cursor: 'pointer', outline: 'none' },
   };
 
-  return (
-    <g {...commonProps}>
-      {isCenter ? (
-        <rect
-          x={inset}
-          y={inset}
-          width={end - inset}
-          height={end - inset}
-          fill={lit ? PASTEL : 'rgba(5,5,5,0.84)'}
-          stroke={lit ? BLACK : 'rgba(229,231,235,0.26)'}
-          strokeWidth="1.2"
-          className="transition-colors duration-200"
-        />
-      ) : (
-        <path
-          d={ringPath(inset, nextInset)}
-          fill={lit ? PASTEL : 'rgba(5,5,5,0.72)'}
-          fillRule="evenodd"
-          stroke={lit ? BLACK : 'rgba(229,231,235,0.22)'}
-          strokeWidth="1.2"
-          className="transition-colors duration-200"
-        />
-      )}
-
-      <text
-        x={isCenter ? SIZE / 2 : labelInset}
-        y={labelY}
-        textAnchor={isCenter ? 'middle' : 'start'}
-        className="select-none font-mono"
-        style={{
-          fill: lit ? BLACK : 'rgba(229,231,235,0.48)',
-          fontSize: isCenter ? 12 : 10,
-          fontWeight: 700,
-          letterSpacing: '0.18em',
-        }}
-      >
-        {stage.number}
-      </text>
-      <text
-        x={isCenter ? SIZE / 2 : labelInset}
-        y={titleY}
-        textAnchor={isCenter ? 'middle' : 'start'}
-        className="select-none font-display"
-        style={{
-          fill: lit ? BLACK : 'rgba(229,231,235,0.72)',
-          fontSize: isCenter ? 17 : 15,
-          fontWeight: 650,
-          letterSpacing: 0,
-        }}
-      >
-        {stage.title}
-      </text>
-    </g>
-  );
+  if (g === LAYERS - 1) {
+    const s = squareFor(g);
+    return <rect x={s.x} y={s.y} width={s.w} height={s.h} fill="transparent" {...handlers} />;
+  }
+  return <path d={bandPath(g)} fillRule="evenodd" fill="transparent" {...handlers} />;
 }
 
-function SquareProcess({ hoverLevel, onActivate, onClear }) {
-  const litThrough = hoverLevel ?? -1;
+function SquareProcess({ hoverG, onActivate, onClear, reduce }) {
+  const green = greenFor(hoverG);
+  const linesLit = hoverG === 0; // sista (yttersta) lagret -> linjerna tonar bort
+  const tween = reduce ? { duration: 0 } : { duration: 0.55, ease: EASE };
+  const lineTween = reduce ? { duration: 0 } : { duration: 0.5, ease: EASE };
 
   return (
     <div
-      className="relative mx-auto aspect-square w-full max-w-[560px]"
+      className="relative mx-auto aspect-square w-full max-w-[680px]"
       onMouseLeave={onClear}
       onBlur={(event) => {
         if (!event.currentTarget.contains(event.relatedTarget)) {
@@ -115,21 +78,62 @@ function SquareProcess({ hoverLevel, onActivate, onClear }) {
       }}
     >
       <svg
-        viewBox={`0 0 ${SIZE} ${SIZE}`}
+        viewBox={`-1 -1 ${SIZE + 2} ${SIZE + 2}`}
         role="img"
-        aria-label="Four nested square layers: Discover, Map, Secure, Operate"
+        aria-label="Four bottom-anchored square layers that fill upward and outward: Discover, Map, Secure, Operate"
         className="h-full w-full"
       >
-        <rect x="1" y="1" width="398" height="398" fill="rgba(5,5,5,0.52)" stroke="rgba(229,231,235,0.14)" />
-        {processStages.map((stage, index) => (
-          <SquareLayer
-            key={stage.id}
-            stage={stage}
-            index={index}
-            lit={index <= litThrough}
-            onActivate={onActivate}
-          />
-        ))}
+        <defs>
+          <clipPath id="wf-clip">
+            <rect x="0" y="0" width={SIZE} height={SIZE} />
+          </clipPath>
+        </defs>
+
+        {/* 1. Platt, opak panel – ingen static inuti rutan. */}
+        <rect x="0" y="0" width={SIZE} height={SIZE} fill={PANEL} pointerEvents="none" />
+
+        {/* 2. Grön fyllnad – platt JUIT-grön som växer uppåt/utåt från botten-boxen. */}
+        <motion.rect
+          clipPath="url(#wf-clip)"
+          initial={false}
+          animate={{ x: green.x, y: green.y, width: green.width, height: green.height }}
+          transition={tween}
+          fill={GREEN}
+          pointerEvents="none"
+        />
+
+        {/* 3. Separatorlinjer ovanpå fyllnaden – subtila, kvar under de tre inre
+              lagren, men tonar bort när det yttersta lagret aktiveras (en hel
+              grön kvadrat). */}
+        <motion.g
+          initial={false}
+          animate={{ opacity: linesLit ? 0 : 1 }}
+          transition={lineTween}
+          fill="none"
+          pointerEvents="none"
+        >
+          {Array.from({ length: LAYERS }, (_, k) => {
+            const s = squareFor(k);
+            return (
+              <rect
+                key={k}
+                x={s.x}
+                y={s.y}
+                width={s.w}
+                height={s.h}
+                stroke={k === 0 ? 'rgba(229,231,235,0.16)' : 'rgba(229,231,235,0.10)'}
+                strokeWidth="1.2"
+              />
+            );
+          })}
+        </motion.g>
+
+        {/* 4. Träffytor per lager (överst, fångar hover/fokus). */}
+        <g>
+          {Array.from({ length: LAYERS }, (_, g) => (
+            <HitLayer key={g} g={g} stageIndex={LAYERS - 1 - g} onActivate={onActivate} />
+          ))}
+        </g>
       </svg>
     </div>
   );
@@ -137,16 +141,17 @@ function SquareProcess({ hoverLevel, onActivate, onClear }) {
 
 export function NetsecOperatingModel({ activeIndex, onSelect }) {
   const reduce = useReducedMotion();
-  const [hoverLevel, setHoverLevel] = useState(null);
+  // hoverG = hovrat geometri-lager (0 = yttersta, 3 = botten-boxen) eller null.
+  const [hoverG, setHoverG] = useState(null);
   const active = processStages[activeIndex] ?? processStages[0];
 
-  function activateLayer(index) {
-    setHoverLevel(index);
-    onSelect(index);
+  function activateLayer(g) {
+    setHoverG(g);
+    onSelect(LAYERS - 1 - g); // botten-boxen = Discover (01), yttersta = Operate (04)
   }
 
   function clearLayer() {
-    setHoverLevel(null);
+    setHoverG(null);
   }
 
   return (
@@ -154,7 +159,9 @@ export function NetsecOperatingModel({ activeIndex, onSelect }) {
       aria-label="How Netsec works - square process"
       className="relative isolate overflow-hidden border-b border-brand-line bg-brand-black pb-20 pt-28 sm:pb-24 sm:pt-32 lg:py-28"
     >
-      <div aria-hidden="true" className="service-static pointer-events-none absolute inset-[-15%] -z-10" />
+      {/* Sidövergripande Shift5-static ligger bakom innehållet; den opaka rutan
+          blockerar den, så det finns ingen static inuti själva rutan. */}
+      <div aria-hidden="true" className="service-static pointer-events-none absolute inset-0 -z-10" />
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(255,255,255,0.018),transparent_42%,rgba(255,255,255,0.012))]"
@@ -175,10 +182,12 @@ export function NetsecOperatingModel({ activeIndex, onSelect }) {
           </p>
         </div>
 
-        <div className="mt-14 grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
-          <SquareProcess hoverLevel={hoverLevel} onActivate={activateLayer} onClear={clearLayer} />
+        {/* Rebalanserad layout: den stora kvadraten centreras i en bred, flexibel
+            vänsterkolumn, medan textpanelen är smalare och skjuts åt höger. */}
+        <div className="mt-16 grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-16 xl:grid-cols-[minmax(0,1fr)_24rem] xl:gap-24">
+          <SquareProcess hoverG={hoverG} onActivate={activateLayer} onClear={clearLayer} reduce={reduce} />
 
-          <div className="border-l border-brand-line pl-6 sm:pl-8">
+          <div className="lg:ml-auto lg:w-full lg:max-w-[24rem] lg:border-l lg:border-brand-line lg:pl-8">
             <div className="flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.26em]">
               <span className="text-brand-pastel">
                 {active.number} <span className="text-brand-mist/35">/ {String(processStages.length).padStart(2, '0')}</span>

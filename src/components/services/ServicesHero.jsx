@@ -50,7 +50,7 @@ export function ServicesHero() {
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_-10%,rgba(0,200,83,0.16),transparent_40%),radial-gradient(circle_at_8%_30%,rgba(169,232,180,0.07),transparent_30%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(circle,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:34px_34px] opacity-50 [mask-image:radial-gradient(120%_90%_at_70%_10%,#000,transparent_75%)]" />
-        <div className="tech-noise tech-noise--anim absolute inset-[-20%]" />
+        <div className="service-static absolute inset-[-20%]" />
         <div className="absolute right-[-8%] top-1/2 hidden h-[34rem] w-[34rem] -translate-y-1/2 text-brand-white lg:block">
           <HeroRings reduce={reduce} />
         </div>

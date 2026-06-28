@@ -3,7 +3,7 @@ import { Container } from '../ui';
 export function ServicesCTA() {
   return (
     <section aria-label="Contact call to action" className="relative isolate overflow-hidden bg-brand-black py-24 sm:py-28 lg:py-36">
-      <div aria-hidden="true" className="tech-noise tech-noise--anim pointer-events-none absolute inset-[-15%] -z-10" />
+      <div aria-hidden="true" className="service-static pointer-events-none absolute inset-[-15%] -z-10" />
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_120%,rgba(169,232,180,0.12),transparent_55%)]"

@@ -31,6 +31,7 @@ export function ServiceDetailPanel({ track }) {
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.022)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.022)_1px,transparent_1px)] bg-[size:80px_80px] opacity-30"
       />
+      <div aria-hidden="true" className="service-static pointer-events-none absolute inset-0" />
       <Container className="relative">
         <AnimatePresence mode="wait">
           <motion.div
