@@ -56,40 +56,6 @@ const principles = [
   },
 ];
 
-// Ersätter referensens "Experience" – kompetens-/tjänsteområden.
-const competencies = [
-  {
-    title: 'IT infrastructure',
-    description:
-      'Planning, improvement and management of stable IT environments with a focus on security, reliability and scalability.',
-    area: 'Infrastructure',
-  },
-  {
-    title: 'Networking & secure communication',
-    description:
-      'Design and optimization of secure communication solutions for users, offices, systems and external connections.',
-    area: 'Network',
-  },
-  {
-    title: 'Cybersecurity',
-    description:
-      'Practical guidance, technical review and implementation of security solutions that reduce risk.',
-    area: 'Security',
-  },
-  {
-    title: 'Computer operations & management',
-    description:
-      'Technical support, operations expertise and management for companies that need stable, secure IT systems over time.',
-    area: 'Operations',
-  },
-  {
-    title: 'IT management & advisory',
-    description:
-      'Technical advice, requirements definition, project management and strategic choices across IT and security.',
-    area: 'Advisory',
-  },
-];
-
 // Liten mono-label med grön bullet (återkommer genom hela sidan).
 function Label({ children, className = '' }) {
   return (
@@ -255,61 +221,6 @@ export function AboutSection() {
               </li>
             ))}
           </ol>
-        </Container>
-      </section>
-
-      {/* ---------------------------------------------------------------- */}
-      {/* AREAS OF EXPERTISE – fristående kompetenssektion                  */}
-      {/* ---------------------------------------------------------------- */}
-      <section className="border-b border-brand-line py-24 sm:py-28 lg:py-32">
-        <Container>
-          <Reveal>
-            <Label>Areas of Expertise</Label>
-            <div className="mt-6 grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-end">
-              <h2 className="max-w-3xl font-display text-3xl font-semibold leading-[1.08] tracking-tight text-brand-white sm:text-5xl">
-                Expertise for secure infrastructure and operations
-              </h2>
-              <p className="max-w-xl text-base leading-7 text-brand-mist/70 sm:text-lg sm:leading-8 lg:justify-self-end">
-                Practical senior expertise across the technical areas that shape stable, secure and
-                maintainable IT environments.
-              </p>
-            </div>
-          </Reveal>
-
-          <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {competencies.map((item, index) => (
-              <Reveal key={item.title} delay={index * 0.04}>
-                <article
-                  className={cn(
-                    'group flex min-h-[17rem] flex-col justify-between rounded-[2px] border border-brand-line bg-white/[0.02] p-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-green/45 hover:bg-white/[0.035] sm:p-7',
-                    index === 0 && 'lg:col-span-2',
-                  )}
-                >
-                  <div>
-                    <div className="flex items-center justify-between gap-4">
-                      <ScrambleText
-                        as="span"
-                        text={`${String(index + 1).padStart(2, '0')} / ${item.area}`}
-                        durationMs={700}
-                        startDelay={100}
-                        className="font-mono text-[10px] uppercase tracking-[0.28em] text-brand-green/90"
-                      />
-                      <span aria-hidden="true" className="h-1.5 w-1.5 shrink-0 rounded-[1px] bg-brand-green" />
-                    </div>
-                    <ScrambleText
-                      as="h3"
-                      text={item.title}
-                      durationMs={950}
-                      className="mt-8 font-display text-2xl font-semibold leading-tight tracking-tight text-brand-white transition-transform duration-200 group-hover:translate-x-1 sm:text-3xl"
-                    />
-                  </div>
-                  <p className="mt-8 text-sm leading-6 text-brand-mist/68 sm:text-base sm:leading-7">
-                    {item.description}
-                  </p>
-                </article>
-              </Reveal>
-            ))}
-          </div>
         </Container>
       </section>
 
