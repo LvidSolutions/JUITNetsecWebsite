@@ -21,7 +21,6 @@ const company = {
 export function Footer() {
   const footerRef = useRef(null);
   const frameRef = useRef(null);
-  const [isReferenceVideoVisible, setIsReferenceVideoVisible] = useState(false);
 
   // Flyward-beteende: footern är "connected" (kant-till-kant) under hela scrollen
   // och ramas in mot vita marginaler i EN enda rörelse på sista scroll-ticket –
@@ -64,16 +63,6 @@ export function Footer() {
     };
   }, []);
 
-  useEffect(() => {
-    if (!framed) {
-      setIsReferenceVideoVisible(false);
-      return undefined;
-    }
-
-    const revealTimer = window.setTimeout(() => setIsReferenceVideoVisible(true), 620);
-    return () => window.clearTimeout(revealTimer);
-  }, [framed]);
-
   return (
     <div ref={footerRef} className="relative">
       <div
@@ -100,20 +89,6 @@ export function Footer() {
               </feComponentTransfer>
             </filter>
           </svg>
-          <video
-            className={`footer-reference-video ${isReferenceVideoVisible ? 'footer-reference-video--visible' : ''}`}
-            src="/media/footer-reference.mp4"
-            muted
-            loop
-            autoPlay
-            playsInline
-            preload="metadata"
-            aria-hidden="true"
-          />
-          <div
-            className={`footer-reference-video-scrim ${isReferenceVideoVisible ? 'footer-reference-video-scrim--visible' : ''}`}
-            aria-hidden="true"
-          />
 
           {/* Full-bleed bakgrund + animerat filmkorn – kant-till-kant, ingen ram. */}
           <div
