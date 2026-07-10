@@ -1,7 +1,7 @@
 FROM node:24-alpine AS dependencies
 WORKDIR /app
-COPY package*.json ./
-RUN npm ci --omit=dev
+COPY package.json ./
+RUN npm install --omit=dev --ignore-scripts
 
 FROM node:24-alpine
 ENV NODE_ENV=production
