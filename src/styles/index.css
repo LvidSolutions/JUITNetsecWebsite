@@ -292,7 +292,7 @@
         min(calc(100svh - 96px), clamp(740px, 80svh, 1080px))
         - var(--ff, 0) * (var(--footer-frame-top) + var(--footer-frame-bottom))
       );
-      transition: min-height 0.62s cubic-bezier(0.22, 1, 0.36, 1);
+      transition: none;
     }
     /* Golv-loggan full-bleed: skalar med bredd (vw) men kapas av höjd (vh) så den
        varken blir för liten på stora skärmar eller för hög på korta. */
@@ -341,7 +341,7 @@
       calc(var(--ff, 0) * var(--footer-frame-bottom));
     /* EN rörelse: hela inramningen animeras in på sista scroll-ticket (Flyward),
        i stället för en scroll-länkad gradvis sex-stegs-reveal. */
-    transition: padding 0.62s cubic-bezier(0.22, 1, 0.36, 1);
+    transition: none;
     will-change: padding;
   }
 

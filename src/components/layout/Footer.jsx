@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { BrandWordmark } from './BrandWordmark.jsx';
 import { FooterStatsPanel } from './FooterStatsPanel.jsx';
 
@@ -27,10 +27,11 @@ export function Footer() {
   // dvs när footerns underkant når viewportens underkant. En boolean (framed)
   // driver --ff (0/1); själva rörelsen görs av en padding-transition i CSS, så
   // det blir en mjuk rörelse i stället för en scroll-länkad sex-stegs-reveal.
-  const [framed, setFramed] = useState(false);
 
   useEffect(() => {
+    let animationFrame = 0;
     const update = () => {
+      animationFrame = 0;
       const el = footerRef.current;
       if (!el) return;
       // När footerscenen når viewportens överkant låses den där. Då kan den vita
@@ -38,11 +39,13 @@ export function Footer() {
       // längst ned på sidan. En hysteresis gör att scenen inte flimrar vid
       // riktningbyte precis vid dess startpunkt.
       const rect = el.getBoundingClientRect();
-      setFramed((prev) => (rect.top <= 4 ? true : rect.top > 140 ? false : prev));
+      const raw = Math.min(Math.max(-rect.top / Math.min(window.innerHeight * 0.42, 360), 0), 1);
+      const progress = raw * raw * (3 - 2 * raw);
 
       // Navbaren inverteras till mörkt om den vita topp-marginalen råkar ligga bakom den.
       const frame = frameRef.current;
       if (frame) {
+        frame.style.setProperty('--ff', progress.toFixed(4));
         const fr = frame.getBoundingClientRect();
         const pad = parseFloat(getComputedStyle(frame).paddingTop) || 0;
         const navMid = 40;
@@ -50,14 +53,18 @@ export function Footer() {
         document.body.classList.toggle('nav-over-light', over);
       }
     };
-    window.addEventListener('scroll', update, { passive: true });
-    window.addEventListener('resize', update);
+    const requestUpdate = () => {
+      if (!animationFrame) animationFrame = window.requestAnimationFrame(update);
+    };
+    window.addEventListener('scroll', requestUpdate, { passive: true });
+    window.addEventListener('resize', requestUpdate);
     update();
     // Kör en extra mätning efter att padding-transitionen landat (nav-invertering).
     const settle = window.setTimeout(update, 700);
     return () => {
-      window.removeEventListener('scroll', update);
-      window.removeEventListener('resize', update);
+      window.removeEventListener('scroll', requestUpdate);
+      window.removeEventListener('resize', requestUpdate);
+      window.cancelAnimationFrame(animationFrame);
       window.clearTimeout(settle);
       document.body.classList.remove('nav-over-light');
     };
@@ -68,8 +75,6 @@ export function Footer() {
       <div
         ref={frameRef}
         className="footer-frame"
-        data-framed={framed ? 'true' : 'false'}
-        style={{ '--ff': framed ? 1 : 0 }}
       >
         <footer className="footer-frame__card relative isolate overflow-hidden bg-brand-black">
           <svg
