@@ -46,11 +46,7 @@ export function Footer() {
       const frame = frameRef.current;
       if (frame) {
         frame.style.setProperty('--ff', progress.toFixed(4));
-        const fr = frame.getBoundingClientRect();
-        const pad = parseFloat(getComputedStyle(frame).paddingTop) || 0;
-        const navMid = 40;
-        const over = pad > 8 && fr.top <= navMid && navMid <= fr.top + pad;
-        document.body.classList.toggle('nav-over-light', over);
+        document.body.classList.toggle('nav-over-light', progress >= 0.5);
       }
     };
     const requestUpdate = () => {

@@ -335,10 +335,7 @@
        hela vägen bakom logotyp och länkar när scenen når viewporttoppen. */
     --footer-frame-top: clamp(5rem, 8vh, 7rem);
     --footer-frame-bottom: clamp(22px, 4vh, 76px);
-    padding:
-      calc(var(--ff, 0) * var(--footer-frame-top))
-      calc(var(--ff, 0) * var(--footer-frame-x))
-      calc(var(--ff, 0) * var(--footer-frame-bottom));
+    padding: 0;
     /* EN rörelse: hela inramningen animeras in på sista scroll-ticket (Flyward),
        i stället för en scroll-länkad gradvis sex-stegs-reveal. */
     transition: none;
@@ -349,6 +346,13 @@
     /* Skarpa kanter OCH hörn likt Flyward – ingen radie, ingen skugga. */
     border-radius: 0;
     height: 100%;
+    clip-path: inset(
+      calc(var(--ff, 0) * var(--footer-frame-top))
+      calc(var(--ff, 0) * var(--footer-frame-x))
+      calc(var(--ff, 0) * var(--footer-frame-bottom))
+      calc(var(--ff, 0) * var(--footer-frame-x))
+    );
+    will-change: clip-path;
   }
 
   .footer-scroll-scene {
