@@ -12,6 +12,9 @@ const navigation = [
   { label: 'Contact', href: '/kontakt', delay: 210 },
 ];
 
+const leftNavigation = navigation.slice(0, 2);
+const rightNavigation = navigation.slice(2);
+
 export function Header({ currentPath = '/', logoSlotRef, hideStaticLogo = false }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -44,7 +47,7 @@ export function Header({ currentPath = '/', logoSlotRef, hideStaticLogo = false 
             aria-label="JUIT NetSec AB, go to home page"
             ref={logoSlotRef}
             className={cn(
-              'header-logo shrink-0 text-[20px] transition-opacity duration-200 hover:opacity-80',
+              'header-logo absolute left-1/2 z-40 -translate-x-1/2 text-[20px] transition-opacity duration-200 hover:opacity-80',
               hideStaticLogo && 'invisible',
             )}
             onClick={() => setIsMenuOpen(false)}
@@ -57,17 +60,19 @@ export function Header({ currentPath = '/', logoSlotRef, hideStaticLogo = false 
             // Centreras med auto-marginaler (inte translate): en transform skapar
             // en isolerad blend-grupp, vilket skulle hindra länkarnas
             // mix-blend-difference från att blanda mot sidan bakom headern.
-            className="absolute inset-x-0 z-30 mx-auto hidden w-[clamp(520px,54vw,1000px)] items-center justify-between lg:flex"
+            className="absolute inset-x-0 z-30 hidden grid-cols-[1fr_auto_1fr] items-center lg:grid"
           >
-            {navigation.map((item) => (
-              <ScrambleNavLink
-                key={item.href}
-                label={item.label}
-                href={item.href}
-                delay={item.delay}
-                isActive={currentPath === item.href}
-              />
-            ))}
+            <div className="flex items-center justify-start gap-[clamp(2rem,5vw,6.5rem)]">
+              {leftNavigation.map((item) => (
+                <ScrambleNavLink key={item.href} {...item} isActive={currentPath === item.href} />
+              ))}
+            </div>
+            <span aria-hidden="true" className="w-[clamp(9rem,16vw,16rem)]" />
+            <div className="flex items-center justify-end gap-[clamp(2rem,5vw,6.5rem)]">
+              {rightNavigation.map((item) => (
+                <ScrambleNavLink key={item.href} {...item} isActive={currentPath === item.href} />
+              ))}
+            </div>
           </nav>
 
           <div className="relative z-30 ml-auto flex items-center lg:hidden">

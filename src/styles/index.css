@@ -351,6 +351,14 @@
     mix-blend-mode: normal !important;
   }
 
+  body.nav-over-light header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: #fff;
+  }
+
   /* När footerns vita frame-out-ram ligger bakom navbaren inverteras headerns
      logga (vit→mörk) så den förblir läsbar mot det vita. Scoped till .header-logo
      så footerns stora wordmark (på mörkt kort) påverkas inte. Grön accentkvadrat
