@@ -3,6 +3,14 @@
 @tailwind utilities;
 
 @layer base {
+  @font-face {
+    font-family: 'Elounda';
+    src: url('/fonts/Elounda-Regular.otf') format('opentype');
+    font-display: swap;
+    font-style: normal;
+    font-weight: 400;
+  }
+
   :root {
     color-scheme: dark;
     background: #050505;
