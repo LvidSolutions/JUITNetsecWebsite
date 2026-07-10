@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import './ContactMonitorCTA.css';
 
-const MODEL_UID = '89027483558948aab39357d669166ed8';
+const MODEL_UID = '0178dfc498eb4593891a491fa2469ede';
 const VIEWER_SCRIPT_URL = 'https://static.sketchfab.com/api/sketchfab-viewer-1.12.1.js';
 const VIEWER_SCRIPT_ID = 'juit-sketchfab-viewer-api';
 const CONTACT_ROUTE = '/kontakt';
@@ -18,10 +18,13 @@ let viewerScriptPromise;
  *   start: (callback?: () => void) => void,
  *   stop: () => void,
  *   setUserInteraction: (enabled: boolean, callback?: (error: unknown) => void) => void,
+ *   setBackground: (options: { color: number[] }, callback?: (error: unknown) => void) => void,
  *   addEventListener: (event: string, callback: () => void) => void,
  *   getMaterialList: (callback: (error: unknown, materials?: SketchfabMaterial[]) => void) => void,
  *   getTextureList: (callback: (error: unknown, textures?: unknown[]) => void) => void,
  *   getSceneGraph: (callback: (error: unknown, graph?: unknown) => void) => void,
+ *   getCameraLookAt: (callback: (error: unknown, camera?: { position: number[], target: number[] }) => void) => void,
+ *   setCameraLookAt: (position: number[], target: number[], duration?: number, callback?: (error: unknown) => void) => void,
  *   addTexture: (source: string, callback: (error: unknown, textureUid?: string) => void) => void,
  *   setMaterial: (material: SketchfabMaterial, callback?: () => void) => void
  * }} SketchfabAPI
@@ -170,9 +173,8 @@ function isDedicatedScreenMaterial(candidate) {
 
 function applyTextureToScreen(api, materials, textureUid) {
   const candidate = findScreenMaterial(materials);
-  // This model exposes a single shared material (monitor_01). Updating it would
-  // remap the body, bezel and screen together, so only dedicated screen-like
-  // materials are eligible for a texture change.
+  // Only dedicated screen-like materials are eligible for a texture change.
+  // Shared materials would remap the body, bezel and screen together.
   if (!isDedicatedScreenMaterial(candidate)) {
     return Promise.resolve({ applied: false, material: null });
   }
@@ -183,12 +185,13 @@ function applyTextureToScreen(api, materials, textureUid) {
     return Promise.resolve({ applied: false, material: candidate.material });
   }
 
-  material.channels[channelName].enable = true;
-  material.channels[channelName].texture = { uid: textureUid };
+  for (const colorChannelName of [channelName, 'DiffuseColor', 'DiffusePBR', 'EmitColor']) {
+    const colorChannel = material.channels?.[colorChannelName];
+    if (!colorChannel) continue;
 
-  if (material.channels?.EmitColor) {
-    material.channels.EmitColor.enable = true;
-    material.channels.EmitColor.color = [0.08, 0.32, 0.14];
+    colorChannel.enable = true;
+    colorChannel.texture = { uid: textureUid };
+    colorChannel.color = colorChannelName === 'EmitColor' ? [0.22, 0.9, 0.38] : [1, 1, 1];
   }
 
   return new Promise((resolve) => {
@@ -312,9 +315,19 @@ export function ContactMonitorCTA() {
               apiRef.current = api;
               api.start();
               api.setUserInteraction(false);
+              api.setBackground({ color: [0.02, 0.02, 0.02] });
               api.addEventListener('viewerready', () => {
                 window.clearTimeout(timeout);
                 if (!mountedRef.current) return;
+                api.getCameraLookAt((cameraError, camera) => {
+                  if (!cameraError && camera) {
+                    api.setCameraLookAt(
+                      [camera.target[0], camera.target[1] - 8.4, camera.target[2] + 0.1],
+                      camera.target,
+                      0,
+                    );
+                  }
+                });
                 setMode('viewer');
 
                 const texture = createContactTexture();
