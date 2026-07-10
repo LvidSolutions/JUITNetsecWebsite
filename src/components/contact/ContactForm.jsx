@@ -1,7 +1,10 @@
+import { useState } from 'react';
+import { TurnstileWidget } from './TurnstileWidget.jsx';
+
 const fields = [
-  { id: 'name', label: 'Name', type: 'text', autoComplete: 'name', placeholder: 'First and last name' },
+  { id: 'name', label: 'Name', type: 'text', autoComplete: 'name', placeholder: 'First and last name', required: true },
   { id: 'company', label: 'Company', type: 'text', autoComplete: 'organization', placeholder: 'Organization' },
-  { id: 'email', label: 'Email', type: 'email', autoComplete: 'email', placeholder: 'Your email address' },
+  { id: 'email', label: 'Email', type: 'email', autoComplete: 'email', placeholder: 'Your email address', required: true },
   { id: 'phone', label: 'Phone', type: 'tel', autoComplete: 'tel', placeholder: '+46 ...' },
 ];
 
@@ -16,8 +19,10 @@ const needs = [
 ];
 
 const labelClass = 'mb-2.5 block text-[11px] font-medium uppercase tracking-[0.2em] text-brand-mist/55';
+const apiUrl = import.meta.env.VITE_CONTACT_API_URL || '/api/contact';
+const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY || '';
 
-function Field({ id, label, type, autoComplete, placeholder }) {
+function Field({ id, label, type, autoComplete, placeholder, required }) {
   return (
     <label className="block" htmlFor={id}>
       <span className={labelClass}>{label}</span>
@@ -27,20 +32,61 @@ function Field({ id, label, type, autoComplete, placeholder }) {
         type={type}
         autoComplete={autoComplete}
         placeholder={placeholder}
+        required={required}
+        maxLength={id === 'email' ? 254 : id === 'phone' ? 40 : id === 'company' ? 120 : 100}
         className="contact-field"
       />
     </label>
   );
 }
 
-/**
- * Kontaktformulär i Sohub-anda: en enda stor, mjuk "full-bleed"-panel med stor
- * radie där hela kompositionen (etikett, rubrik, paragraf, kontaktuppgifter och
- * formulär) läses som en sammanhållen, redaktionell yta – inte ett smalt, hårt
- * kantat kort. Fältnamn, select, textarea och submit-handler är oförändrade, så
- * funktionalitet/validering och en framtida EmailJS/API-koppling fungerar som förr.
- */
 export function ContactForm() {
+  const [status, setStatus] = useState('idle');
+  const [feedback, setFeedback] = useState('');
+  const [turnstileToken, setTurnstileToken] = useState('');
+  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+    const form = event.currentTarget;
+
+    if (!form.reportValidity()) return;
+
+    setStatus('submitting');
+    setFeedback('');
+
+    const formData = new FormData(form);
+    const payload = Object.fromEntries(formData.entries());
+    payload.turnstileToken = turnstileToken;
+
+    try {
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(result.message || 'The request could not be sent.');
+      }
+
+      form.reset();
+      setTurnstileToken('');
+      setTurnstileResetKey((value) => value + 1);
+      setStatus('success');
+      setFeedback('Thank you. Your request has been sent and we will get back to you shortly.');
+    } catch (error) {
+      setStatus('error');
+      setFeedback(error instanceof Error ? error.message : 'The request could not be sent.');
+      setTurnstileToken('');
+      setTurnstileResetKey((value) => value + 1);
+    }
+  }
+
+  const submitting = status === 'submitting';
+
   return (
     <section
       id="kontaktformular"
@@ -53,7 +99,6 @@ export function ContactForm() {
       />
 
       <div className="contact-panel mx-auto w-full max-w-5xl overflow-hidden rounded-[28px] px-6 py-14 sm:rounded-[40px] sm:px-12 sm:py-16 lg:px-20 lg:py-[5.5rem]">
-        {/* Texthierarki – centrerad överst. */}
         <div className="mx-auto max-w-2xl text-center">
           <p className="font-mono text-xs font-medium uppercase tracking-[0.32em] text-brand-green sm:text-sm">
             Write to us
@@ -70,7 +115,6 @@ export function ContactForm() {
           </p>
         </div>
 
-        {/* Kontaktuppgifter – diskret, centrerad rad (ingen hård ram). */}
         <div className="mx-auto mt-9 flex max-w-md flex-col items-center justify-center gap-5 text-center sm:flex-row sm:gap-12">
           <div>
             <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-brand-green/70">Email</p>
@@ -93,11 +137,9 @@ export function ContactForm() {
           </div>
         </div>
 
-        {/* Formulär – integrerat i panelen, generösa mellanrum. */}
-        {/* Koppla senare till Formspree, API, CMS eller annan vald lösning. */}
         <form
           className="mx-auto mt-12 grid max-w-3xl gap-6 text-left sm:mt-14"
-          onSubmit={(event) => event.preventDefault()}
+          onSubmit={handleSubmit}
         >
           <div className="grid gap-6 sm:grid-cols-2">
             {fields.map((field) => (
@@ -107,7 +149,7 @@ export function ContactForm() {
 
           <label className="block" htmlFor="need">
             <span className={labelClass}>Type of need</span>
-            <select id="need" name="need" defaultValue="" className="contact-field appearance-none">
+            <select id="need" name="need" defaultValue="" required className="contact-field appearance-none">
               <option value="" disabled>
                 Choose an area …
               </option>
@@ -125,20 +167,43 @@ export function ContactForm() {
               id="message"
               name="message"
               rows="5"
+              minLength="10"
+              maxLength="5000"
+              required
               placeholder="Describe your current situation, needs or project …"
               className="contact-field contact-field--area"
             />
           </label>
 
+          <div className="absolute -left-[10000px] top-auto h-px w-px overflow-hidden" aria-hidden="true">
+            <label htmlFor="website">Website</label>
+            <input id="website" name="website" type="text" tabIndex="-1" autoComplete="off" />
+          </div>
+
+          <TurnstileWidget
+            siteKey={turnstileSiteKey}
+            onVerify={setTurnstileToken}
+            resetKey={turnstileResetKey}
+          />
+
           <button
             type="submit"
-            className="group mt-2 inline-flex min-h-[3.5rem] w-full items-center justify-center gap-3 rounded-full bg-brand-green px-8 text-[13px] font-semibold uppercase tracking-[0.18em] text-brand-black transition-all duration-200 ease-smooth hover:bg-brand-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green"
+            disabled={submitting}
+            className="group mt-2 inline-flex min-h-[3.5rem] w-full items-center justify-center gap-3 rounded-full bg-brand-green px-8 text-[13px] font-semibold uppercase tracking-[0.18em] text-brand-black transition-all duration-200 ease-smooth hover:bg-brand-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Send request
+            {submitting ? 'Sending…' : 'Send request'}
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" className="transition-transform duration-300 ease-smooth group-hover:translate-x-0.5">
               <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
+
+          <p
+            className={`min-h-6 text-center text-sm ${status === 'error' ? 'text-red-300' : 'text-brand-mist/70'}`}
+            role={status === 'error' ? 'alert' : 'status'}
+            aria-live="polite"
+          >
+            {feedback}
+          </p>
         </form>
       </div>
     </section>
