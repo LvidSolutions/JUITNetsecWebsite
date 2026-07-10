@@ -1,0 +1,234 @@
+.contact-monitor-cta {
+  --monitor-rotate-x: 0deg;
+  --monitor-rotate-y: 0deg;
+  --monitor-pointer-x: 50%;
+  --monitor-pointer-y: 50%;
+  position: relative;
+  width: min(100%, 26rem);
+  margin-inline: auto;
+}
+
+.contact-monitor-cta__tilt {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  transform: perspective(1000px) rotateX(var(--monitor-rotate-x)) rotateY(var(--monitor-rotate-y)) translateZ(0);
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.contact-monitor-cta__frame {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid rgba(169, 232, 180, 0.27);
+  border-radius: 0.5rem;
+  background: #050505;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.035), 0 22px 42px rgba(0, 0, 0, 0.45);
+  backface-visibility: hidden;
+}
+
+.contact-monitor-cta__glow {
+  position: absolute;
+  inset: 9%;
+  background: radial-gradient(circle at var(--monitor-pointer-x) var(--monitor-pointer-y), rgba(0, 200, 83, 0.3), transparent 66%);
+  filter: blur(34px);
+  opacity: 0.72;
+  pointer-events: none;
+  transition: opacity 180ms ease;
+}
+
+.contact-monitor-cta__viewer,
+.contact-monitor-cta__placeholder,
+.contact-monitor-cta__local-fallback {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.contact-monitor-cta__viewer {
+  z-index: 1;
+  border: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 280ms ease;
+}
+
+.contact-monitor-cta[data-mode='viewer'] .contact-monitor-cta__viewer,
+.contact-monitor-cta[data-mode='viewer-fallback'] .contact-monitor-cta__viewer {
+  opacity: 1;
+}
+
+.contact-monitor-cta__placeholder {
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+    #070908;
+  background-size: 30px 30px;
+  transition: opacity 240ms ease;
+}
+
+.contact-monitor-cta[data-mode='viewer'] .contact-monitor-cta__placeholder,
+.contact-monitor-cta[data-mode='viewer-fallback'] .contact-monitor-cta__placeholder,
+.contact-monitor-cta[data-mode='fallback'] .contact-monitor-cta__placeholder {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.contact-monitor-cta__placeholder span {
+  width: 2.2rem;
+  height: 2.2rem;
+  border: 2px solid rgba(169, 232, 180, 0.24);
+  border-top-color: #00c853;
+  border-radius: 50%;
+  animation: contact-monitor-spin 1s linear infinite;
+}
+
+.contact-monitor-cta__local-fallback {
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(1rem, 4vw, 2rem);
+  border: 1px solid rgba(0, 200, 83, 0.38);
+  background:
+    linear-gradient(rgba(0, 200, 83, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 200, 83, 0.08) 1px, transparent 1px),
+    #070908;
+  background-size: 28px 28px;
+  color: #fff;
+  text-align: left;
+}
+
+.contact-monitor-cta__fallback-kicker,
+.contact-monitor-cta__caption {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.19em;
+  text-transform: uppercase;
+}
+
+.contact-monitor-cta__fallback-kicker {
+  color: #a9e8b4;
+}
+
+.contact-monitor-cta__local-fallback strong {
+  margin-top: 0.65rem;
+  font-size: clamp(1.3rem, 6vw, 2.35rem);
+  letter-spacing: 0.04em;
+}
+
+.contact-monitor-cta__fallback-arrow {
+  margin-top: 0.35rem;
+  color: #00c853;
+  font-size: 1.55rem;
+}
+
+.contact-monitor-cta__fallback-label {
+  position: absolute;
+  z-index: 3;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  max-width: 76%;
+  padding: 0.54rem 0.68rem;
+  border: 1px solid rgba(169, 232, 180, 0.38);
+  background: rgba(5, 5, 5, 0.84);
+  box-shadow: 0 0 22px rgba(0, 200, 83, 0.18);
+  color: #fff;
+  font-size: 0.56rem;
+  letter-spacing: 0.1em;
+  text-align: right;
+  text-transform: uppercase;
+}
+
+.contact-monitor-cta__fallback-label span,
+.contact-monitor-cta__fallback-label strong,
+.contact-monitor-cta__fallback-label em {
+  display: block;
+}
+
+.contact-monitor-cta__fallback-label span {
+  color: #a9e8b4;
+  font-size: 0.48rem;
+}
+
+.contact-monitor-cta__fallback-label strong {
+  margin-top: 0.14rem;
+  color: #fff;
+  font-size: 0.84rem;
+  letter-spacing: 0.14em;
+  line-height: 1.1;
+}
+
+.contact-monitor-cta__fallback-label em {
+  margin-top: 0.18rem;
+  color: rgba(229, 231, 235, 0.74);
+  font-size: 0.44rem;
+  font-style: normal;
+}
+
+.contact-monitor-cta__interaction {
+  position: absolute;
+  z-index: 4;
+  inset: 0;
+  display: block;
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+
+.contact-monitor-cta__interaction::after {
+  position: absolute;
+  inset: 0;
+  border: 1px solid transparent;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 0 rgba(169, 232, 180, 0);
+  content: '';
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.contact-monitor-cta__interaction:hover::after,
+.contact-monitor-cta__interaction:focus-visible::after {
+  border-color: rgba(169, 232, 180, 0.86);
+  box-shadow: inset 0 0 0 1px rgba(169, 232, 180, 0.38), 0 0 28px rgba(0, 200, 83, 0.32);
+}
+
+.contact-monitor-cta__interaction:focus-visible {
+  outline: 2px solid #00c853;
+  outline-offset: 5px;
+}
+
+.contact-monitor-cta__caption {
+  margin: 0.6rem 0 0;
+  color: rgba(229, 231, 235, 0.62);
+}
+
+@keyframes contact-monitor-spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+@media (max-width: 639px) {
+  .contact-monitor-cta {
+    width: min(100%, 21rem);
+  }
+
+  .contact-monitor-cta__caption {
+    margin-top: 0.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .contact-monitor-cta__tilt {
+    transform: none !important;
+  }
+
+  .contact-monitor-cta__placeholder span {
+    animation: none;
+  }
+}

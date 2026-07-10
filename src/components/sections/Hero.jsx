@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion, useReducedMotion, useMotionValueEvent } from 'framer-motion';
 import { Container } from '../ui';
 import { HeroVideoBackground } from './HeroVideoBackground.jsx';
-import { CTAButtons } from './CTAButtons.jsx';
+import { ContactMonitorCTA } from './ContactMonitorCTA.jsx';
 
 const LOGO_LANDED_AT = 0.45;
 
@@ -44,7 +44,7 @@ export function Hero({ heroRef, introProgress }) {
               depend on control, uptime and trust.
             </p>
 
-            <CTAButtons />
+            <ContactMonitorCTA />
           </motion.div>
         </Container>
       </div>
