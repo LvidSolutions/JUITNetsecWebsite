@@ -33,12 +33,12 @@ export function Footer() {
     const update = () => {
       const el = footerRef.current;
       if (!el) return;
-      // "Sista ticket": användaren har scrollat ned till botten. Hysteres så att
-      // frame-out:ens egen höjdökning (padding) inte av-triggar och skapar flimmer:
-      // rama in inom 64px från botten, rama ur först bortom 180px.
-      const max = document.documentElement.scrollHeight - window.innerHeight;
-      const dist = max - window.scrollY;
-      setFramed((prev) => (dist <= 64 ? true : dist > 180 ? false : prev));
+      // När footerscenen når viewportens överkant låses den där. Då kan den vita
+      // ramen växa runt en hel viewport i stället för att bara bli en smal rand
+      // längst ned på sidan. En hysteresis gör att scenen inte flimrar vid
+      // riktningbyte precis vid dess startpunkt.
+      const rect = el.getBoundingClientRect();
+      setFramed((prev) => (rect.top <= 4 ? true : rect.top > 140 ? false : prev));
 
       // Navbaren inverteras till mörkt om den vita topp-marginalen råkar ligga bakom den.
       const frame = frameRef.current;
@@ -64,7 +64,7 @@ export function Footer() {
   }, []);
 
   return (
-    <div ref={footerRef} className="relative">
+    <div ref={footerRef} className="footer-scroll-scene relative">
       <div
         ref={frameRef}
         className="footer-frame"

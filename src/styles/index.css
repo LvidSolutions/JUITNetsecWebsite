@@ -323,11 +323,17 @@
      – på mobil/tablet behåller vi full-bleed (scale 1) för läsbarhet. */
   .footer-frame {
     background: #ffffff;
+    position: sticky;
+    top: 0;
+    height: 100svh;
+    display: grid;
     /* Vita marginaler i Flyward-proportioner (uppmätta i referensvideon): sidor
        ~2.7% av bredden (vw), topp ~3% och botten ~4% av höjden (vh). Per-axel och
        responsiva – samma procent oavsett skärmformat (clamp ger sansade px-gränser). */
     --footer-frame-x: clamp(20px, 2.7vw, 104px);
-    --footer-frame-top: clamp(16px, 3vh, 54px);
+    /* Toppmarginalen är minst navbarens höjd, så den vita ytan fortsätter
+       hela vägen bakom logotyp och länkar när scenen når viewporttoppen. */
+    --footer-frame-top: clamp(5rem, 8vh, 7rem);
     --footer-frame-bottom: clamp(22px, 4vh, 76px);
     padding:
       calc(var(--ff, 0) * var(--footer-frame-top))
@@ -342,6 +348,29 @@
   .footer-frame__card {
     /* Skarpa kanter OCH hörn likt Flyward – ingen radie, ingen skugga. */
     border-radius: 0;
+    height: 100%;
+  }
+
+  .footer-scroll-scene {
+    min-height: 190svh;
+    background: #fff;
+  }
+
+  @media (min-width: 1024px) {
+    .footer-stage {
+      height: 100%;
+      min-height: 100%;
+    }
+  }
+
+  @media (max-width: 1023px) {
+    .footer-scroll-scene { min-height: auto; }
+
+    .footer-frame {
+      position: relative;
+      height: auto;
+      min-height: 100svh;
+    }
   }
 
   /* Navlänkarna (vita, mix-blend) inverteras till mörkt när den vita ramen ligger
@@ -355,7 +384,7 @@
     content: '';
     position: absolute;
     inset: 0;
-    z-index: -1;
+    z-index: 0;
     background: #fff;
   }
 
