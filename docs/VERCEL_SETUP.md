@@ -1,6 +1,6 @@
 # Vercel production setup
 
-The website frontend and contact API are designed to run in the same Vercel project. The frontend posts to `/api/contact`, which avoids a separate API domain and public CORS configuration. The API rejects requests whose `Origin` is not exactly the current deployment origin.
+The website frontend and contact API are designed to run in the same Vercel project. The frontend always posts to the fixed same-origin path `/api/contact`; there is no public API-origin environment variable. This avoids a separate API domain, public CORS configuration and accidental exfiltration through a misconfigured frontend build value. The API rejects requests whose `Origin` is not exactly the current deployment origin.
 
 ## Confirm in the Vercel dashboard
 
@@ -35,7 +35,6 @@ When the secret is absent and the Preview returns HTTP 401 or 403, CI emits an e
 | Name | Production | Preview |
 |---|---|---|
 | `VITE_CONTACT_FORM_ENABLED` | `true` after all server secrets work | `true` only when preview services are configured |
-| `VITE_CONTACT_API_URL` | `/api/contact` | `/api/contact` |
 | `VITE_TURNSTILE_SITE_KEY` | Production widget site key | Separate preview/test site key |
 
 ### Server-only variables
