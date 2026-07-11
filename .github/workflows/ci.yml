@@ -51,3 +51,96 @@ jobs:
 
       - name: Build frontend
         run: npm run build
+
+  preview-smoke:
+    if: github.event_name == 'pull_request'
+    needs: test-build-and-audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      issues: read
+      pull-requests: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+      EXPECTED_SHA: ${{ github.event.pull_request.head.sha }}
+
+    steps:
+      - name: Discover Vercel Preview URL
+        id: preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          preview_url=""
+
+          for attempt in $(seq 1 36); do
+            comments_json="$(gh api "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments?per_page=100" 2>/dev/null || true)"
+            preview_url="$(
+              printf '%s' "$comments_json" \
+                | jq -r '.[] | select(.user.login == "vercel[bot]") | .body' \
+                | grep -Eo 'https://[A-Za-z0-9.-]+\.vercel\.app' \
+                | head -n 1 \
+                || true
+            )"
+
+            if [ -n "$preview_url" ]; then
+              break
+            fi
+
+            sleep 5
+          done
+
+          if [ -z "$preview_url" ]; then
+            echo "No Vercel Preview URL was found in the pull request comments."
+            exit 1
+          fi
+
+          echo "url=$preview_url" >> "$GITHUB_OUTPUT"
+          echo "Discovered Vercel Preview: $preview_url"
+
+      - name: Wait for exact Preview commit
+        shell: bash
+        env:
+          PREVIEW_URL: ${{ steps.preview.outputs.url }}
+        run: |
+          set -euo pipefail
+          expected_short="${EXPECTED_SHA:0:12}"
+          deployed_version=""
+
+          for attempt in $(seq 1 48); do
+            response="$(curl --fail --silent --show-error --max-time 10 "${PREVIEW_URL}/api/health" 2>/dev/null || true)"
+            deployed_version="$(printf '%s' "$response" | jq -r '.version // empty' 2>/dev/null || true)"
+
+            if [ "$deployed_version" = "$expected_short" ]; then
+              break
+            fi
+
+            sleep 5
+          done
+
+          if [ "$deployed_version" != "$expected_short" ]; then
+            echo "Vercel Preview did not expose expected commit $expected_short. Last version: ${deployed_version:-unavailable}"
+            exit 1
+          fi
+
+      - name: Smoke test routes and security headers
+        shell: bash
+        env:
+          PREVIEW_URL: ${{ steps.preview.outputs.url }}
+        run: |
+          set -euo pipefail
+
+          for route in / /tjanster /om-oss /kontakt /api/health; do
+            status="$(curl --silent --show-error --location --output /dev/null --write-out '%{http_code}' --max-time 15 "${PREVIEW_URL}${route}")"
+            if [ "$status" != "200" ]; then
+              echo "Unexpected HTTP $status for $route"
+              exit 1
+            fi
+          done
+
+          headers="$(curl --silent --show-error --location --head --max-time 15 "${PREVIEW_URL}/kontakt")"
+          printf '%s\n' "$headers" | grep -qi '^x-content-type-options: nosniff'
+          printf '%s\n' "$headers" | grep -qi '^x-frame-options: DENY'
+          printf '%s\n' "$headers" | grep -qi '^referrer-policy: strict-origin-when-cross-origin'
+          printf '%s\n' "$headers" | grep -qi '^permissions-policy:'
