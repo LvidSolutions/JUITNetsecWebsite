@@ -1,6 +1,8 @@
 import { HttpError } from './errors.js';
 import { getClientAddress, hashRateLimitIdentifier } from './request-security.js';
 
+const TEMPORARY_UNAVAILABLE = 'The contact form is temporarily unavailable.';
+
 export async function consumeContactRateLimit({
   request,
   upstashUrl,
@@ -16,26 +18,37 @@ export async function consumeContactRateLimit({
   const windowId = Math.floor(unixSeconds / windowSeconds);
   const redisKey = `juit:contact:${windowId}:${addressHash}`;
 
-  const response = await fetchImpl(`${upstashUrl}/multi-exec`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${upstashToken}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify([
-      ['INCR', redisKey],
-      ['EXPIRE', redisKey, windowSeconds * 2],
-    ]),
-    signal: AbortSignal.timeout(5_000),
-  });
-
-  if (!response.ok) {
-    throw new HttpError(503, 'The contact form is temporarily unavailable.');
+  let response;
+  try {
+    response = await fetchImpl(`${upstashUrl}/multi-exec`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${upstashToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify([
+        ['INCR', redisKey],
+        ['EXPIRE', redisKey, windowSeconds * 2],
+      ]),
+      signal: AbortSignal.timeout(5_000),
+    });
+  } catch {
+    throw new HttpError(503, TEMPORARY_UNAVAILABLE);
   }
 
-  const result = await response.json();
+  if (!response.ok) {
+    throw new HttpError(503, TEMPORARY_UNAVAILABLE);
+  }
+
+  let result;
+  try {
+    result = await response.json();
+  } catch {
+    throw new HttpError(503, TEMPORARY_UNAVAILABLE);
+  }
+
   if (!Array.isArray(result) || result[0]?.error || !Number.isFinite(Number(result[0]?.result))) {
-    throw new HttpError(503, 'The contact form is temporarily unavailable.');
+    throw new HttpError(503, TEMPORARY_UNAVAILABLE);
   }
 
   const count = Number(result[0].result);
