@@ -1,10 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { BrandWordmark } from './BrandWordmark.jsx';
 import { ScrambleNavLink } from './ScrambleNavLink.jsx';
 import { cn } from '../../lib/cn';
 
-// Exakt fyra länkar enligt referensen. Engelska etiketter mappas mot de
-// befintliga svenska routsen så att navigationen fortsatt fungerar.
 const navigation = [
   { label: 'Home', href: '/', delay: 0 },
   { label: 'Services', href: '/tjanster', delay: 70 },
@@ -17,30 +15,36 @@ const rightNavigation = navigation.slice(2);
 
 export function Header({ currentPath = '/', logoSlotRef, hideStaticLogo = false }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuButtonRef = useRef(null);
+  const mobileMenuRef = useRef(null);
 
   useEffect(() => {
+    if (!isMenuOpen) return undefined;
+
+    const frame = window.requestAnimationFrame(() => {
+      mobileMenuRef.current?.querySelector('a[href]')?.focus();
+    });
+
     function handleEscape(event) {
-      if (event.key === 'Escape') {
-        setIsMenuOpen(false);
-      }
+      if (event.key !== 'Escape') return;
+      setIsMenuOpen(false);
+      window.requestAnimationFrame(() => menuButtonRef.current?.focus());
     }
 
     window.addEventListener('keydown', handleEscape);
-    return () => window.removeEventListener('keydown', handleEscape);
-  }, []);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener('keydown', handleEscape);
+    };
+  }, [isMenuOpen]);
 
-  // Som på HackFirst är headern alltid helt transparent – ingen svart navbar-box.
-  // Navlänkarna hålls läsbara mot innehållet under via mix-blend-mode: difference
-  // (vit text inverteras till svart över ljusa partier, se referensen), så ingen
-  // bakgrundston eller backdrop-blur behövs.
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, [currentPath]);
+
   return (
     <header className={cn('sticky top-0', isMenuOpen ? 'z-[70]' : 'z-50')}>
-      {/* Full-bleed rad (ingen centrerad max-width-container): loggan hamnar
-          längst ut i vänster hörn och hamburgaren längst ut till höger,
-          precis som HackFirst. */}
       <div className="px-4 sm:px-6 lg:px-8">
-        {/* Som på HackFirst: logotyp till vänster, navlänkarna utspridda
-            (space-between) i ett centrerat band, hamburgaren längst till höger. */}
         <div className="relative flex h-20 items-center">
           <a
             href="/"
@@ -57,9 +61,6 @@ export function Header({ currentPath = '/', logoSlotRef, hideStaticLogo = false 
 
           <nav
             aria-label="Main navigation"
-            // Centreras med auto-marginaler (inte translate): en transform skapar
-            // en isolerad blend-grupp, vilket skulle hindra länkarnas
-            // mix-blend-difference från att blanda mot sidan bakom headern.
             className="absolute inset-x-0 z-30 hidden grid-cols-[1fr_auto_1fr] items-center lg:grid"
           >
             <div className="flex items-center justify-start gap-[clamp(2rem,5vw,6.5rem)]">
@@ -76,9 +77,8 @@ export function Header({ currentPath = '/', logoSlotRef, hideStaticLogo = false 
           </nav>
 
           <div className="relative z-30 ml-auto flex items-center lg:hidden">
-            {/* Minimalistisk hamburger – två tunna vita linjer, ingen knappruta.
-                Visas bara på mobil/tablet; på desktop används den vanliga navbaren. */}
             <button
+              ref={menuButtonRef}
               type="button"
               className="inline-flex h-11 w-11 items-center justify-center text-brand-white/85 transition-colors duration-200 hover:text-brand-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-green"
               aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
@@ -114,6 +114,7 @@ export function Header({ currentPath = '/', logoSlotRef, hideStaticLogo = false 
         >
           <div className={cn('min-h-0', isMenuOpen && 'bg-brand-black/95')}>
             <nav
+              ref={mobileMenuRef}
               aria-label="Menu navigation"
               className="flex flex-col gap-1 border-t border-brand-line px-1 py-4"
             >
