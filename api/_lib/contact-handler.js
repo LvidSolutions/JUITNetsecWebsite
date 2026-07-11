@@ -82,14 +82,19 @@ export async function handleContactRequest(
       ...config.allowedTurnstileHostnames,
     ]);
 
-    const captchaValid = await verifyCaptcha({
-      secret: config.turnstileSecretKey,
-      token: submission.turnstileToken,
-      remoteIp: getClientAddress(request),
-      expectedAction: 'contact_form',
-      allowedHostnames: [...allowedHostnames],
-      fetchImpl,
-    });
+    let captchaValid;
+    try {
+      captchaValid = await verifyCaptcha({
+        secret: config.turnstileSecretKey,
+        token: submission.turnstileToken,
+        remoteIp: getClientAddress(request),
+        expectedAction: 'contact_form',
+        allowedHostnames: [...allowedHostnames],
+        fetchImpl,
+      });
+    } catch {
+      throw new HttpError(503, 'The security verification service is temporarily unavailable.');
+    }
 
     if (!captchaValid) {
       throw new HttpError(400, 'Security verification failed. Please try again.');
