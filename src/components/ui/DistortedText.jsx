@@ -1,11 +1,6 @@
-import { forwardRef, useEffect, useRef, useState } from 'react';
+import { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
 import './DistortedText.css';
-
-const intensityConfig = {
-  subtle: { shift: 2, duration: 360 },
-  medium: { shift: 4, duration: 440 },
-  strong: { shift: 7, duration: 520 },
-};
+import { createReloadWords, reloadConfig } from './textReload.js';
 
 function getTextValue(children) {
   return Array.isArray(children)
@@ -21,7 +16,7 @@ export const DistortedText = forwardRef(function DistortedText(
     className = '',
     children,
     intensity = 'medium',
-    colorSeparation = true,
+    colorSeparation: _colorSeparation = false,
     duration,
     onPointerEnter,
     onPointerLeave,
@@ -31,32 +26,51 @@ export const DistortedText = forwardRef(function DistortedText(
   forwardedRef,
 ) {
   const animationFrameRef = useRef(0);
+  const timeoutRef = useRef(0);
+  const hoverStartedRef = useRef(false);
   const [active, setActive] = useState(false);
-  const [sequence, setSequence] = useState(0);
-  const config = intensityConfig[intensity] || intensityConfig.medium;
+  const [sequence, setSequence] = useState(1);
+  const config = reloadConfig(intensity);
   const textValue = getTextValue(children);
+  const words = useMemo(
+    () => createReloadWords(textValue, sequence * 7919, config.maxIntermediates),
+    [config.maxIntermediates, sequence, textValue],
+  );
 
   useEffect(
     () => () => {
       window.cancelAnimationFrame(animationFrameRef.current);
+      window.clearTimeout(timeoutRef.current);
     },
     [],
   );
 
-  const handlePointerEnter = (event) => {
-    onPointerEnter?.(event);
-    if (event.defaultPrevented || !textValue) return;
+  const startReload = () => {
+    if (hoverStartedRef.current || !textValue) return;
+    hoverStartedRef.current = true;
 
     window.cancelAnimationFrame(animationFrameRef.current);
+    window.clearTimeout(timeoutRef.current);
     setActive(false);
     animationFrameRef.current = window.requestAnimationFrame(() => {
       setSequence((value) => value + 1);
       setActive(true);
+      timeoutRef.current = window.setTimeout(
+        () => setActive(false),
+        (duration || config.duration) + config.settleDelay,
+      );
     });
+  };
+
+  const handlePointerEnter = (event) => {
+    onPointerEnter?.(event);
+    if (!event.defaultPrevented) startReload();
   };
 
   const handlePointerLeave = (event) => {
     window.cancelAnimationFrame(animationFrameRef.current);
+    window.clearTimeout(timeoutRef.current);
+    hoverStartedRef.current = false;
     setActive(false);
     onPointerLeave?.(event);
   };
@@ -69,17 +83,45 @@ export const DistortedText = forwardRef(function DistortedText(
       data-cursor={props['data-cursor'] || 'text'}
       data-distortion-active={active ? 'true' : undefined}
       data-distortion-text={textValue || undefined}
-      data-distortion-sequence={sequence || undefined}
-      data-distortion-rgb={colorSeparation ? 'true' : 'false'}
+      data-reload-active={active ? 'true' : undefined}
       style={{
-        '--distortion-shift': `${config.shift}px`,
-        '--distortion-duration': `${duration || config.duration}ms`,
+        '--reload-duration': `${duration || config.duration}ms`,
         ...style,
       }}
       onPointerEnter={handlePointerEnter}
       onPointerLeave={handlePointerLeave}
+      onPointerMove={startReload}
     >
-      {children}
+      <span className="text-reload-source">{children}</span>
+      {active && (
+        <span className="text-reload-layer" aria-hidden="true">
+          {words.map((word) =>
+            word.type === 'space' ? (
+              word.value
+            ) : (
+              <span className="text-reload-word" key={word.key}>
+                {word.glyphs.map((glyph) => (
+                  <span className="text-reload-glyph" key={glyph.key}>
+                    <span className="text-reload-glyph__measure">{glyph.character}</span>
+                    <span
+                      className="text-reload-glyph__track"
+                      style={{
+                        '--glyph-delay': `${glyph.delay}ms`,
+                        '--glyph-travel': `-${glyph.rail.length - 1}em`,
+                        '--glyph-steps': glyph.rail.length - 1,
+                      }}
+                    >
+                      {glyph.rail.map((character, index) => (
+                        <span key={`${glyph.key}-${index}`}>{character}</span>
+                      ))}
+                    </span>
+                  </span>
+                ))}
+              </span>
+            ),
+          )}
+        </span>
+      )}
     </Component>
   );
 });
