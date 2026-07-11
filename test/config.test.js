@@ -6,7 +6,7 @@ const completeEnv = {
   CONTACT_FORM_ENABLED: 'true',
   RESEND_API_KEY: 're_test',
   CONTACT_FROM_EMAIL: 'Website <website@example.com>',
-  CONTACT_TO_EMAIL: 'info@juitnetsec.se',
+  CONTACT_TO_EMAIL: 'contact@juit.se',
   TURNSTILE_SECRET_KEY: 'turnstile',
   UPSTASH_REDIS_REST_URL: 'https://redis.example/',
   UPSTASH_REDIS_REST_TOKEN: 'token',
