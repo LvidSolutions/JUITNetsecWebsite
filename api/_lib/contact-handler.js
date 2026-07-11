@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { loadContactConfig } from './config.js';
 import { ConfigurationError, HttpError } from './errors.js';
 import { consumeContactRateLimit } from './rate-limit.js';
-import { getClientAddress, assertAllowedOrigin } from './request-security.js';
+import { getClientAddress, assertSameOrigin } from './request-security.js';
 import { sendContactEmail } from './resend.js';
 import { verifyTurnstile } from './turnstile.js';
 import { readJsonBody, validateContactSubmission } from './validation.js';
@@ -45,7 +45,7 @@ export async function handleContactRequest(
       throw new HttpError(503, 'The contact form is temporarily unavailable.');
     }
 
-    assertAllowedOrigin(request, config.allowedOrigins);
+    assertSameOrigin(request);
 
     const body = await readJsonBody(request);
     const submission = validateContactSubmission(body);
