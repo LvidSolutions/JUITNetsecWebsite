@@ -1,18 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
+import { VERCEL_REWRITE_PATHS } from '../src/lib/routes.js';
 
 const config = JSON.parse(
   await readFile(new URL('../vercel.json', import.meta.url), 'utf8'),
 );
-
-const expectedSpaRoutes = [
-  '/tjanster',
-  '/om-oss',
-  '/about',
-  '/kontakt',
-  '/contact',
-];
 
 const requiredHeaders = new Map([
   ['X-Content-Type-Options', 'nosniff'],
@@ -26,7 +19,13 @@ test('Vercel rewrites every supported client-side route to index.html', () => {
     (config.rewrites || []).map((rewrite) => [rewrite.source, rewrite.destination]),
   );
 
-  for (const route of expectedSpaRoutes) {
+  assert.deepEqual(
+    [...rewrites.keys()].sort(),
+    [...VERCEL_REWRITE_PATHS].sort(),
+    'Vercel rewrites and the application route map must stay synchronized',
+  );
+
+  for (const route of VERCEL_REWRITE_PATHS) {
     assert.equal(rewrites.get(route), '/index.html', `Missing SPA rewrite for ${route}`);
   }
 
