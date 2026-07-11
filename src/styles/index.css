@@ -403,6 +403,16 @@
       transform: translateY(calc(var(--ff, 0) * var(--footer-frame-bottom) * -1));
       will-change: transform;
     }
+
+    .footer-floor-wordmark {
+      /* Unlike the maze/dashboard, the brand mark must become smaller with the
+         card.  One uniform scale follows the card's vertical (limiting) inset,
+         preserving the original letter proportions instead of stretching X and
+         Y independently. */
+      transform: scale(calc(1 - (var(--ff, 0) * 0.15)));
+      transform-origin: bottom center;
+      will-change: transform;
+    }
   }
 
   @media (max-width: 1023px) {
