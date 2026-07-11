@@ -23,7 +23,7 @@
 | **Dev server** | `npm run dev` → http://localhost:5173 |
 | **Footer is global** | Rendered once in `App.jsx`; shared by all pages |
 
-Verified contact data (do NOT invent): email `info@juitnetsec.se`,
+Verified contact data (do NOT invent): email `contact@juit.se`,
 address `Fatburs kvarngata 26 / 118 64 Stockholm / Sweden`.
 Brand colors: green `#00C853`, black `#050505`, mist `#E5E7EB`. Font: Space Grotesk.
 
