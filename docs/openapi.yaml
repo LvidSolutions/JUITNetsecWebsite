@@ -1,0 +1,194 @@
+openapi: 3.1.0
+info:
+  title: JUIT NetSec Website API
+  version: 0.1.0
+  description: |
+    Same-origin API used by the public JUIT NetSec website. The contact
+    endpoint is disabled by default and requires server-side provider
+    configuration before it accepts submissions.
+servers:
+  - url: /
+    description: Current Vercel deployment origin
+paths:
+  /api/health:
+    get:
+      operationId: getHealth
+      summary: Return deployment health metadata
+      responses:
+        '200':
+          description: Function is reachable
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+              example: no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+  /api/contact:
+    post:
+      operationId: submitContactRequest
+      summary: Submit a website contact request
+      description: |
+        Requires an exact same-origin request, a valid Cloudflare Turnstile
+        token and available distributed rate limiting. The endpoint does not
+        store the message in an application database.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactSubmission'
+      responses:
+        '202':
+          description: Request accepted for email delivery, or honeypot fake-success response
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+              example: no-store
+            X-RateLimit-Remaining:
+              schema:
+                type: string
+              description: Present for accepted non-honeypot requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AcceptedResponse'
+        '400':
+          description: Invalid fields or failed security challenge
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Request origin is not the current deployment origin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '413':
+          description: JSON body exceeds 20 KiB
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '415':
+          description: Content-Type is not application/json
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Distributed rate limit exceeded
+          headers:
+            Retry-After:
+              required: true
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '502':
+          description: Email delivery failed or an unexpected upstream error occurred
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Form disabled, configuration missing, or security provider unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      additionalProperties: false
+      required: [ok, environment, version]
+      properties:
+        ok:
+          type: boolean
+          const: true
+        environment:
+          type: string
+        version:
+          type: string
+    ContactSubmission:
+      type: object
+      additionalProperties: false
+      required:
+        - name
+        - email
+        - need
+        - message
+        - turnstileToken
+        - submissionId
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+        company:
+          type: string
+          maxLength: 120
+          default: ''
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        phone:
+          type: string
+          maxLength: 40
+          default: ''
+        need:
+          type: string
+          enum:
+            - IT infrastructure
+            - Networking & communication
+            - Cybersecurity
+            - Computer operations
+            - IT advisory
+            - Technical project management
+            - Other
+        message:
+          type: string
+          minLength: 10
+          maxLength: 5000
+        website:
+          type: string
+          maxLength: 200
+          default: ''
+          description: Invisible honeypot; legitimate visitors leave it empty
+        turnstileToken:
+          type: string
+          minLength: 1
+          maxLength: 2048
+        submissionId:
+          type: string
+          format: uuid
+          description: Stable UUID v4 reused when the visitor retries the same submission
+    AcceptedResponse:
+      type: object
+      additionalProperties: false
+      required: [ok, requestId]
+      properties:
+        ok:
+          type: boolean
+          const: true
+        requestId:
+          type: string
+          format: uuid
+    ErrorResponse:
+      type: object
+      additionalProperties: false
+      required: [ok, message]
+      properties:
+        ok:
+          type: boolean
+          const: false
+        message:
+          type: string
