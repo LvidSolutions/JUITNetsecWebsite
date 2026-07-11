@@ -17,7 +17,7 @@ test('escapes HTML and keeps the visitor address in reply_to', async () => {
   await sendContactEmail({
     apiKey: 'api-key',
     fromEmail: 'JUIT Website <website@example.com>',
-    toEmail: 'info@juitnetsec.se',
+    toEmail: 'contact@juit.se',
     submission,
     requestId: '123e4567-e89b-42d3-a456-426614174000',
     fetchImpl: async (_url, init) => {
@@ -27,6 +27,7 @@ test('escapes HTML and keeps the visitor address in reply_to', async () => {
   });
 
   assert.equal(payload.from, 'JUIT Website <website@example.com>');
+  assert.equal(payload.to[0], 'contact@juit.se');
   assert.equal(payload.reply_to, 'reply@example.com');
   assert.equal(payload.html.includes('<script>'), false);
   assert.equal(payload.html.includes('&lt;script&gt;'), true);
@@ -38,7 +39,7 @@ test('removes CRLF characters from all email header values', async () => {
   await sendContactEmail({
     apiKey: 'api-key',
     fromEmail: 'Website <website@example.com>\r\nBcc: attacker@example.com',
-    toEmail: 'info@juitnetsec.se\nCc: attacker@example.com',
+    toEmail: 'contact@juit.se\nCc: attacker@example.com',
     submission: {
       ...submission,
       email: 'reply@example.com\r\nBcc: attacker@example.com',
@@ -60,7 +61,7 @@ test('treats a successful provider status as accepted even with a malformed opti
   const result = await sendContactEmail({
     apiKey: 'api-key',
     fromEmail: 'JUIT Website <website@example.com>',
-    toEmail: 'info@juitnetsec.se',
+    toEmail: 'contact@juit.se',
     submission,
     requestId: '123e4567-e89b-42d3-a456-426614174000',
     fetchImpl: async () => new Response('not-json', { status: 202 }),
