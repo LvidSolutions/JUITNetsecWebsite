@@ -1,5 +1,11 @@
 const VERIFY_ENDPOINT = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
 
+function providerError() {
+  const error = new Error('Turnstile provider unavailable');
+  error.name = 'TurnstileProviderError';
+  return error;
+}
+
 export async function verifyTurnstile({
   secret,
   token,
@@ -13,15 +19,26 @@ export async function verifyTurnstile({
   form.set('response', token);
   if (remoteIp && remoteIp !== 'unknown') form.set('remoteip', remoteIp);
 
-  const response = await fetchImpl(VERIFY_ENDPOINT, {
-    method: 'POST',
-    body: form,
-    signal: AbortSignal.timeout(8_000),
-  });
+  let response;
+  try {
+    response = await fetchImpl(VERIFY_ENDPOINT, {
+      method: 'POST',
+      body: form,
+      signal: AbortSignal.timeout(8_000),
+    });
+  } catch {
+    throw providerError();
+  }
 
-  if (!response.ok) return false;
+  if (!response.ok) throw providerError();
 
-  const result = await response.json();
+  let result;
+  try {
+    result = await response.json();
+  } catch {
+    throw providerError();
+  }
+
   if (result.success !== true) return false;
   if (expectedAction && result.action !== expectedAction) return false;
 
