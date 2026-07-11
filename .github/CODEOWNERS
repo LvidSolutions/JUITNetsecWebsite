@@ -1,0 +1,8 @@
+# Repository owner review is required for all changes.
+* @LvidSolutions
+
+# Extra-sensitive deployment and security areas.
+/.github/ @LvidSolutions
+/api/ @LvidSolutions
+/vercel.json @LvidSolutions
+/.env.example @LvidSolutions
