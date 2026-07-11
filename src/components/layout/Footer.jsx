@@ -18,7 +18,7 @@ const company = {
   addressLines: ['Stockholm, Sweden'],
 };
 
-export function Footer() {
+export function Footer({ homeEffects = false }) {
   const footerRef = useRef(null);
   const frameRef = useRef(null);
 
@@ -67,7 +67,11 @@ export function Footer() {
   }, []);
 
   return (
-    <div ref={footerRef} className="footer-scroll-scene relative">
+    <div
+      ref={footerRef}
+      className="footer-scroll-scene relative"
+      data-home-cursor-scope={homeEffects ? 'true' : undefined}
+    >
       <div
         ref={frameRef}
         className="footer-frame"

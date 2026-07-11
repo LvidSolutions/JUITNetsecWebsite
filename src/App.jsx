@@ -12,6 +12,8 @@ import { StatsSection } from './components/sections/StatsSection.jsx';
 import { TerminalSignalSection } from './components/sections/TerminalSignalSection.jsx';
 import { NextStepPlaceholder } from './components/sections/NextStepPlaceholder.jsx';
 import { ServicesSection } from './components/sections/ServicesSection.jsx';
+import { HomeCursor } from './components/ui/HomeCursor.jsx';
+import { HomeTextEffects } from './components/ui/HomeTextEffects.jsx';
 import { useHeroIntroProgress } from './lib/useHeroIntroProgress.js';
 
 const titles = {
@@ -149,7 +151,12 @@ function App() {
         hideStaticLogo={isHome}
       />
       {isHome && <AnimatedLogo targetRef={logoSlotRef} progress={introProgress} />}
-      <main id="huvudinnehall" className="min-h-screen bg-brand-black text-brand-white" tabIndex="-1">
+      <main
+        id="huvudinnehall"
+        className="min-h-screen bg-brand-black text-brand-white"
+        data-home-cursor-scope={isHome ? 'true' : undefined}
+        tabIndex="-1"
+      >
         {isHome && (
           <>
             <Hero heroRef={heroRef} introProgress={introProgress} />
@@ -163,7 +170,9 @@ function App() {
         {(currentPath === '/om-oss' || currentPath === '/about') && <AboutSection />}
         {(currentPath === '/kontakt' || currentPath === '/contact') && <ContactPage />}
       </main>
-      <Footer />
+      <Footer homeEffects={isHome} />
+      {isHome && <HomeTextEffects />}
+      {isHome && <HomeCursor />}
     </>
   );
 }
