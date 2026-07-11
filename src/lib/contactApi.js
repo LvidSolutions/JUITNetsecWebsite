@@ -1,3 +1,5 @@
+const CONTACT_ENDPOINT = '/api/contact';
+
 export class ContactRequestError extends Error {
   constructor(message, { code = 'request_failed', status = null } = {}) {
     super(message);
@@ -17,7 +19,6 @@ function publicMessage(value, fallback) {
 export async function submitContactRequest(
   payload,
   {
-    apiUrl = '/api/contact',
     fetchImpl = fetch,
     timeoutMs = 15_000,
     setTimeoutImpl = setTimeout,
@@ -28,7 +29,7 @@ export async function submitContactRequest(
   const timeout = setTimeoutImpl(() => controller.abort(), timeoutMs);
 
   try {
-    const response = await fetchImpl(apiUrl, {
+    const response = await fetchImpl(CONTACT_ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
@@ -55,7 +56,7 @@ export async function submitContactRequest(
   } catch (error) {
     if (error instanceof ContactRequestError) throw error;
 
-    if (error instanceof DOMException && error.name === 'AbortError') {
+    if (error?.name === 'AbortError') {
       throw new ContactRequestError('The request timed out. Please check your connection and try again.', {
         code: 'timeout',
       });
