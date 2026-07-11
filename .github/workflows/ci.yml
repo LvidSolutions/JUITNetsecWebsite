@@ -24,6 +24,16 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Reject tracked environment secret files
+        shell: bash
+        run: |
+          tracked_files="$(git ls-files | grep -E '(^|/)\.env($|\.)' | grep -vE '(^|/)\.env\.example$' || true)"
+          if [ -n "$tracked_files" ]; then
+            echo "Tracked environment file(s) found:"
+            echo "$tracked_files"
+            exit 1
+          fi
+
       - name: Set up Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
