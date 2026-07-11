@@ -21,6 +21,26 @@ const needs = [
 const labelClass = 'mb-2.5 block text-[11px] font-medium uppercase tracking-[0.2em] text-brand-mist/55';
 const apiUrl = import.meta.env.VITE_CONTACT_API_URL || '/api/contact';
 const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY || '';
+const contactFormEnabled = import.meta.env.VITE_CONTACT_FORM_ENABLED === 'true';
+const contactFormConfigured = contactFormEnabled && Boolean(turnstileSiteKey);
+
+function createSubmissionId() {
+  const bytes = new Uint8Array(16);
+
+  if (globalThis.crypto?.getRandomValues) {
+    globalThis.crypto.getRandomValues(bytes);
+  } else {
+    for (let index = 0; index < bytes.length; index += 1) {
+      bytes[index] = Math.floor(Math.random() * 256);
+    }
+  }
+
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+
+  const hex = [...bytes].map((value) => value.toString(16).padStart(2, '0'));
+  return `${hex.slice(0, 4).join('')}-${hex.slice(4, 6).join('')}-${hex.slice(6, 8).join('')}-${hex.slice(8, 10).join('')}-${hex.slice(10).join('')}`;
+}
 
 function Field({ id, label, type, autoComplete, placeholder, required }) {
   return (
@@ -41,16 +61,31 @@ function Field({ id, label, type, autoComplete, placeholder, required }) {
 }
 
 export function ContactForm() {
-  const [status, setStatus] = useState('idle');
-  const [feedback, setFeedback] = useState('');
+  const [status, setStatus] = useState(contactFormConfigured ? 'idle' : 'error');
+  const [feedback, setFeedback] = useState(
+    contactFormConfigured ? '' : 'The contact form is temporarily unavailable. Please use the contact details above.',
+  );
   const [turnstileToken, setTurnstileToken] = useState('');
   const [turnstileResetKey, setTurnstileResetKey] = useState(0);
+  const [submissionId, setSubmissionId] = useState(createSubmissionId);
 
   async function handleSubmit(event) {
     event.preventDefault();
     const form = event.currentTarget;
 
+    if (!contactFormConfigured) {
+      setStatus('error');
+      setFeedback('The contact form is temporarily unavailable. Please use the contact details above.');
+      return;
+    }
+
     if (!form.reportValidity()) return;
+
+    if (!turnstileToken) {
+      setStatus('error');
+      setFeedback('Please complete the security verification before sending.');
+      return;
+    }
 
     setStatus('submitting');
     setFeedback('');
@@ -58,12 +93,17 @@ export function ContactForm() {
     const formData = new FormData(form);
     const payload = Object.fromEntries(formData.entries());
     payload.turnstileToken = turnstileToken;
+    payload.submissionId = submissionId;
+
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 15_000);
 
     try {
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
+        signal: controller.signal,
       });
 
       const result = await response.json().catch(() => ({}));
@@ -75,17 +115,33 @@ export function ContactForm() {
       form.reset();
       setTurnstileToken('');
       setTurnstileResetKey((value) => value + 1);
+      setSubmissionId(createSubmissionId());
       setStatus('success');
       setFeedback('Thank you. Your request has been sent and we will get back to you shortly.');
     } catch (error) {
       setStatus('error');
-      setFeedback(error instanceof Error ? error.message : 'The request could not be sent.');
+      setFeedback(
+        error instanceof DOMException && error.name === 'AbortError'
+          ? 'The request timed out. Please check your connection and try again.'
+          : error instanceof Error
+            ? error.message
+            : 'The request could not be sent.',
+      );
       setTurnstileToken('');
       setTurnstileResetKey((value) => value + 1);
+    } finally {
+      window.clearTimeout(timeout);
     }
   }
 
+  function handleTurnstileError() {
+    setTurnstileToken('');
+    setStatus('error');
+    setFeedback('The security verification could not be loaded. Please reload the page and try again.');
+  }
+
   const submitting = status === 'submitting';
+  const submitDisabled = submitting || !contactFormConfigured || !turnstileToken;
 
   return (
     <section
@@ -140,6 +196,7 @@ export function ContactForm() {
         <form
           className="mx-auto mt-12 grid max-w-3xl gap-6 text-left sm:mt-14"
           onSubmit={handleSubmit}
+          aria-busy={submitting}
         >
           <div className="grid gap-6 sm:grid-cols-2">
             {fields.map((field) => (
@@ -180,15 +237,18 @@ export function ContactForm() {
             <input id="website" name="website" type="text" tabIndex="-1" autoComplete="off" />
           </div>
 
-          <TurnstileWidget
-            siteKey={turnstileSiteKey}
-            onVerify={setTurnstileToken}
-            resetKey={turnstileResetKey}
-          />
+          {contactFormConfigured && (
+            <TurnstileWidget
+              siteKey={turnstileSiteKey}
+              onVerify={setTurnstileToken}
+              onError={handleTurnstileError}
+              resetKey={turnstileResetKey}
+            />
+          )}
 
           <button
             type="submit"
-            disabled={submitting}
+            disabled={submitDisabled}
             className="group mt-2 inline-flex min-h-[3.5rem] w-full items-center justify-center gap-3 rounded-full bg-brand-green px-8 text-[13px] font-semibold uppercase tracking-[0.18em] text-brand-black transition-all duration-200 ease-smooth hover:bg-brand-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green disabled:cursor-not-allowed disabled:opacity-60"
           >
             {submitting ? 'Sending…' : 'Send request'}
