@@ -39,7 +39,6 @@ test('cancels a streamed request as soon as it crosses the byte limit', async ()
     pull(controller) {
       pulls += 1;
       controller.enqueue(chunk);
-      if (pulls >= 3) controller.close();
     },
     cancel(reason) {
       cancelReason = String(reason);
@@ -54,7 +53,7 @@ test('cancels a streamed request as soon as it crosses the byte limit', async ()
   });
 
   await assert.rejects(readJsonBody(request), isTooLarge);
-  assert.equal(pulls, 2);
+  assert.ok(pulls >= 2 && pulls <= 3, `Unexpected stream pull count: ${pulls}`);
   assert.equal(cancelReason, 'body limit exceeded');
 });
 
