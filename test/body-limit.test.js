@@ -57,7 +57,20 @@ test('cancels a streamed request as soon as it crosses the byte limit', async ()
   assert.equal(cancelReason, 'body limit exceeded');
 });
 
-test('accepts valid multibyte JSON when its encoded byte length is within the limit', async () => {
+test('requires the exact application/json media type', async () => {
+  const request = new Request('https://juitnetsec.se/api/contact', {
+    method: 'POST',
+    headers: { 'content-type': 'application/jsonp' },
+    body: '{}',
+  });
+
+  await assert.rejects(
+    readJsonBody(request),
+    (error) => error?.status === 415 && error?.publicMessage === 'Unsupported content type.',
+  );
+});
+
+test('accepts valid multibyte JSON with a charset parameter within the byte limit', async () => {
   const payload = { message: 'säkerhet '.repeat(100) };
   const request = new Request('https://juitnetsec.se/api/contact', {
     method: 'POST',
