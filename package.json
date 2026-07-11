@@ -10,7 +10,8 @@
     "test": "node --test \"test/*.test.js\"",
     "test:api": "node --test \"test/*.test.js\"",
     "smoke:local": "node scripts/smoke-local.mjs",
-    "smoke:preview": "node scripts/smoke-vercel-preview.mjs"
+    "smoke:preview": "node scripts/smoke-vercel-preview.mjs",
+    "report:build": "node scripts/report-build-size.mjs"
   },
   "dependencies": {
     "framer-motion": "^12.40.0",
