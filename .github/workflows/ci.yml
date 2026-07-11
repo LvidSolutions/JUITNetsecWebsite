@@ -107,20 +107,39 @@ jobs:
           set -euo pipefail
           expected_short="${EXPECTED_SHA:0:12}"
           deployed_version=""
+          http_status="000"
+          response_file="$(mktemp)"
+          trap 'rm -f "$response_file"' EXIT
 
-          for attempt in $(seq 1 48); do
-            response="$(curl --fail --silent --show-error --max-time 10 "${PREVIEW_URL}/api/health" 2>/dev/null || true)"
-            deployed_version="$(printf '%s' "$response" | jq -r '.version // empty' 2>/dev/null || true)"
+          for attempt in $(seq 1 24); do
+            : > "$response_file"
+            http_status="$(
+              curl --silent --show-error --location \
+                --output "$response_file" \
+                --write-out '%{http_code}' \
+                --max-time 10 \
+                "${PREVIEW_URL}/api/health" \
+                || printf '000'
+            )"
 
-            if [ "$deployed_version" = "$expected_short" ]; then
-              break
+            if [ "$http_status" = "200" ]; then
+              deployed_version="$(jq -r '.version // empty' "$response_file" 2>/dev/null || true)"
+              if [ "$deployed_version" = "$expected_short" ]; then
+                break
+              fi
             fi
 
             sleep 5
           done
 
-          if [ "$deployed_version" != "$expected_short" ]; then
-            echo "Vercel Preview did not expose expected commit $expected_short. Last version: ${deployed_version:-unavailable}"
+          if [ "$http_status" != "200" ] || [ "$deployed_version" != "$expected_short" ]; then
+            echo "Vercel Preview verification failed."
+            echo "Expected commit: $expected_short"
+            echo "Last HTTP status: $http_status"
+            echo "Last reported version: ${deployed_version:-unavailable}"
+            echo "Response prefix:"
+            head -c 300 "$response_file" | tr '\n' ' '
+            echo
             exit 1
           fi
 
