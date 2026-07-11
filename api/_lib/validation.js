@@ -128,7 +128,8 @@ async function readBoundedBody(request, maxBytes) {
 
 export async function readJsonBody(request, maxBytes = 20 * 1024) {
   const contentType = request.headers.get('content-type') || '';
-  if (!contentType.toLowerCase().startsWith('application/json')) {
+  const mediaType = contentType.split(';', 1)[0].trim().toLowerCase();
+  if (mediaType !== 'application/json') {
     throw new HttpError(415, 'Unsupported content type.');
   }
 
