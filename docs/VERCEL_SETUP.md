@@ -12,7 +12,21 @@ These values cannot be verified from this repository and must be checked by a pr
 4. The project framework preset is Vite and the output directory is `dist`.
 5. The Node.js runtime selected by Vercel is supported by the project and CI.
 6. Production and Preview environment variables are configured separately.
-7. **Enable access to System Environment Variables** is enabled. The health endpoint and Preview smoke test use `VERCEL_ENV` and `VERCEL_GIT_COMMIT_SHA` to identify the exact deployed environment and commit.
+7. Enable Vercel System Environment Variables if `/api/health` should expose the deployed environment and short commit SHA. CI verifies the exact deployed commit independently through Vercel's GitHub commit status.
+
+## Protected Preview deployments
+
+The CI workflow first confirms that Vercel reported a successful deployment for the exact pull-request commit. It then attempts live HTTP route and security-header checks.
+
+If Deployment Protection blocks anonymous automation, create an automation bypass secret in Vercel and store it as the GitHub repository secret:
+
+```text
+VERCEL_AUTOMATION_BYPASS_SECRET
+```
+
+The value is sent only as Vercel's server-side protection-bypass header. Never expose it through a `VITE_` variable, commit it, print it, or reuse it as an application secret.
+
+When the secret is absent and the Preview returns HTTP 401 or 403, CI emits an explicit warning instead of claiming that live routes were tested. The local production-build smoke test remains blocking.
 
 ## Environment variables
 
@@ -77,8 +91,10 @@ openssl rand -hex 32
 Do not enable the form in Production until all checks pass:
 
 - GitHub CI is green.
-- The Vercel Preview build is green.
-- `/api/health` returns HTTP 200 and the expected commit SHA.
+- The locked dependency audit, API tests, Vercel configuration tests, frontend build and local production smoke test pass.
+- Vercel reports a successful deployment for the exact pull-request commit.
+- Protected Preview automation is configured, or the remaining HTTP verification is explicitly recorded as blocked.
+- `/api/health` returns HTTP 200 from an authorized Preview request.
 - A valid contact request returns HTTP 202.
 - The email arrives in the confirmed test inbox.
 - Cross-origin requests, invalid JSON, failed Turnstile and rate-limit cases are rejected.
