@@ -259,14 +259,8 @@
     font-size: clamp(2.6rem, 13vw, 15rem);
     line-height: 0.82;
     white-space: nowrap;
-    /* The component has natural side bearings around JUIT/netsec.  Overscan
-       the mark itself so the visible J and c, rather than an empty flex box,
-       are what meet and disappear into the white frame edges. */
-    /* Keep the complete glyphs inside the card.  Its baseline sits precisely
-       on the card edge, so white letterforms flow into the white margin rather
-       than being pushed under it and visibly cut off. */
-    transform: scaleX(1.18);
-    transform-origin: bottom center;
+    /* Preserve the native letterforms.  Size is increased proportionally at
+       desktop below instead of using a horizontal scale transform. */
   }
   /* Den gröna accent-kvadraten behåller sin form men tappar den stora halo-skuggan
      på golv-skala (annars blir det en oönskad grön glow). Endast golv-varianten. */
@@ -305,7 +299,9 @@
     /* Golv-loggan full-bleed: skalar med bredd (vw) men kapas av höjd (vh) så den
        varken blir för liten på stora skärmar eller för hög på korta. */
     .footer-floor-wordmark {
-      font-size: clamp(4rem, min(15.5vw, 33vh), 30rem);
+      /* Proportional overscan makes the visible J and c meet the inner card
+         edges without horizontally stretching the brand wordmark. */
+      font-size: clamp(4rem, min(18.3vw, 33vh), 30rem);
     }
     .footer-pos-maze {
       position: absolute;
@@ -374,30 +370,39 @@
     .footer-stage {
       height: 100%;
       min-height: 100%;
-      /* Keep the complete footer composition inside the shrinking card rather
-         than letting the dashboard, maze, or floor mark be clipped by it. */
-      /* The X/Y scale exactly matches the insets of .footer-frame__card.  Move
-         its anchor to the active card bottom too, keeping every child – notably
-         the floor wordmark – inside that shrinking rectangle at every tick. */
-      transform: translateY(calc(var(--ff, 0) * var(--footer-frame-bottom) * -1))
-        scaleX(calc(1 - (var(--ff, 0) * 0.054)))
-        scaleY(calc(1 - (var(--ff, 0) * 0.15)));
-      /* The wordmark must stay tied to the card's lower edge as the frame
-         closes, not float upward with the rest of the composition. */
-      transform-origin: center bottom;
-      will-change: transform;
+      /* Do not scale the entire composition: unequal X/Y frame insets made the
+         maze, dashboard, and typography visibly distort.  Each element instead
+         translates toward its matching inner edge below. */
     }
 
     .footer-pos-maze {
-      transform: translateX(calc(var(--ff, 0) * var(--footer-frame-x)));
+      transform: translate(
+        calc(var(--ff, 0) * var(--footer-frame-x)),
+        calc(var(--ff, 0) * var(--footer-frame-top))
+      );
       will-change: transform;
     }
 
     .footer-pos-dashboard {
-      transform: translateX(calc(var(--ff, 0) * var(--footer-frame-x) * -1));
+      transform: translate(
+        calc(var(--ff, 0) * var(--footer-frame-x) * -1),
+        calc(var(--ff, 0) * var(--footer-frame-top))
+      );
       will-change: transform;
     }
 
+    .footer-pos-nav {
+      transform: translateY(calc(var(--ff, 0) * var(--footer-frame-bottom) * -1));
+      will-change: transform;
+    }
+
+    .footer-floor-logo {
+      /* Keep the mark at its natural aspect ratio while its baseline follows
+         the inner card's lower edge.  The active side clip supplies the clean
+         white-margin merge without horizontally squashing the lettering. */
+      transform: translateY(calc(var(--ff, 0) * var(--footer-frame-bottom) * -1));
+      will-change: transform;
+    }
   }
 
   @media (max-width: 1023px) {
