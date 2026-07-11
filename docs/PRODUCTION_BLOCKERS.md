@@ -2,11 +2,15 @@
 
 This file intentionally records unknowns instead of filling them with assumptions.
 
+## Confirmed business data
+
+- [x] Official public contact email: `contact@juit.se`.
+- [x] Contact-form receiving inbox: `contact@juit.se`.
+
 ## Blockers requiring account or business access
 
 - [ ] Confirm the Vercel plan, project owner and Production Branch in the Vercel dashboard.
 - [ ] Confirm the final domain; no production DNS, TLS, canonical URLs or email DNS can be completed before purchase.
-- [ ] Confirm the official public and receiving email address. The current frontend displays `contact@juit.se`, while repository notes previously identified `info@juitnetsec.se`.
 - [ ] Confirm the official phone number, address and primary site language.
 - [ ] Create and verify the Resend sending domain and restricted API key.
 - [ ] Create Turnstile production/preview widgets and keys.
