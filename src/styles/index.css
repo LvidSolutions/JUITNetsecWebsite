@@ -356,7 +356,9 @@
   }
 
   .footer-scroll-scene {
-    min-height: 190svh;
+    /* The scene ends exactly when the frame reaches 100%; no inert scroll
+       distance remains after the white-margin transition has completed. */
+    min-height: calc(100svh + min(42svh, 360px));
     background: #fff;
   }
 
@@ -364,6 +366,29 @@
     .footer-stage {
       height: 100%;
       min-height: 100%;
+      /* Keep the complete footer composition inside the shrinking card rather
+         than letting the dashboard, maze, or floor mark be clipped by it. */
+      transform: translateY(calc(var(--ff, 0) * 26px))
+        scaleX(calc(1 - (var(--ff, 0) * 0.054)))
+        scaleY(calc(1 - (var(--ff, 0) * 0.15)));
+      transform-origin: center;
+      will-change: transform;
+    }
+
+    .footer-pos-maze {
+      transform: translateX(calc(var(--ff, 0) * var(--footer-frame-x)));
+      will-change: transform;
+    }
+
+    .footer-pos-dashboard {
+      transform: translateX(calc(var(--ff, 0) * var(--footer-frame-x) * -1));
+      will-change: transform;
+    }
+
+    .footer-floor-logo {
+      transform: translateY(calc(var(--ff, 0) * -12px)) scaleX(calc(1 - (var(--ff, 0) * 0.054)));
+      transform-origin: bottom center;
+      will-change: transform;
     }
   }
 
