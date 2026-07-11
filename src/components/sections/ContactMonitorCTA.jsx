@@ -25,6 +25,7 @@ let viewerScriptPromise;
  *   getSceneGraph: (callback: (error: unknown, graph?: unknown) => void) => void,
  *   getCameraLookAt: (callback: (error: unknown, camera?: { position: number[], target: number[] }) => void) => void,
  *   setCameraLookAt: (position: number[], target: number[], duration?: number, callback?: (error: unknown) => void) => void,
+ *   getScreenShot: (width: number, height: number, mimeType: string, callback: (error: unknown, image?: string) => void) => void,
  *   addTexture: (source: string, callback: (error: unknown, textureUid?: string) => void) => void,
  *   setMaterial: (material: SketchfabMaterial, callback?: () => void) => void
  * }} SketchfabAPI
@@ -218,11 +219,13 @@ export function ContactMonitorCTA() {
   const visibleRef = useRef(true);
   const mountedRef = useRef(true);
   const apiRef = useRef(null);
+  const snapshotRequestedRef = useRef(false);
   const tiltRef = useRef({ currentX: 0, currentY: 0, targetX: 0, targetY: 0, lastTime: 0, hovering: false });
   const [mode, setMode] = useState('placeholder');
   const [screenMaterial, setScreenMaterial] = useState('');
   const [textureStatus, setTextureStatus] = useState('pending');
   const [textureUid, setTextureUid] = useState('');
+  const [snapshot, setSnapshot] = useState('');
 
   const updateTilt = useCallback((time) => {
     const target = tiltRef.current;
@@ -334,9 +337,24 @@ export function ContactMonitorCTA() {
                 });
                 setMode('viewer');
 
+                const captureCleanRender = () => {
+                  if (snapshotRequestedRef.current) return;
+                  snapshotRequestedRef.current = true;
+                  window.setTimeout(() => {
+                    if (!mountedRef.current) return;
+                    api.getScreenShot(1024, 576, 'image/png', (screenshotError, image) => {
+                      if (!screenshotError && image && mountedRef.current) {
+                        setSnapshot(image);
+                        api.stop();
+                      }
+                    });
+                  }, 450);
+                };
+
                 const texture = createContactTexture();
                 if (!texture) {
                   setMode('viewer-fallback');
+                  captureCleanRender();
                   return;
                 }
 
@@ -345,6 +363,7 @@ export function ContactMonitorCTA() {
                 api.getMaterialList((error, materials = []) => {
                   if (error || !materials.length || !mountedRef.current) {
                     if (mountedRef.current) setMode('viewer-fallback');
+                    captureCleanRender();
                     return;
                   }
 
@@ -353,12 +372,16 @@ export function ContactMonitorCTA() {
                     setScreenMaterial(candidate?.material?.name || candidate?.material?.id || 'none');
                     setTextureStatus('fallback');
                     setMode('viewer-fallback');
+                    captureCleanRender();
                     return;
                   }
 
                   api.addTexture(texture, (textureError, textureUid) => {
                     if (textureError || !textureUid || !mountedRef.current) {
-                      if (mountedRef.current) setMode('viewer-fallback');
+                      if (mountedRef.current) {
+                        setMode('viewer-fallback');
+                        captureCleanRender();
+                      }
                       return;
                     }
 
@@ -368,9 +391,11 @@ export function ContactMonitorCTA() {
                         setScreenMaterial(material?.name || material?.id || material?.stateSetID || 'screen');
                         setTextureStatus('applied');
                         setTextureUid(textureUid);
+                        captureCleanRender();
                       } else {
                         setTextureStatus('fallback');
                         setMode('viewer-fallback');
+                        captureCleanRender();
                       }
                     });
                   });
@@ -411,6 +436,7 @@ export function ContactMonitorCTA() {
     target.targetY = Math.max(-9, Math.min(9, (percentX - 50) * 0.18));
     containerRef.current?.style.setProperty('--monitor-pointer-x', `${percentX}%`);
     containerRef.current?.style.setProperty('--monitor-pointer-y', `${percentY}%`);
+    containerRef.current?.setAttribute('data-active', 'true');
     target.hovering = true;
     startTilt();
   };
@@ -422,6 +448,7 @@ export function ContactMonitorCTA() {
     target.hovering = false;
     containerRef.current?.style.setProperty('--monitor-pointer-x', '50%');
     containerRef.current?.style.setProperty('--monitor-pointer-y', '50%');
+    containerRef.current?.setAttribute('data-active', 'false');
     startTilt();
   };
 
@@ -435,6 +462,7 @@ export function ContactMonitorCTA() {
       data-screen-material={screenMaterial || undefined}
       data-texture-status={textureStatus}
       data-texture-uid={textureUid || undefined}
+      data-has-snapshot={snapshot ? 'true' : 'false'}
     >
       <div
         ref={containerRef}
@@ -461,6 +489,14 @@ export function ContactMonitorCTA() {
             allowFullScreen
             loading="lazy"
           />
+          {snapshot && (
+            <img
+              className="contact-monitor-cta__render"
+              src={snapshot}
+              alt=""
+              aria-hidden="true"
+            />
+          )}
           {(mode === 'placeholder' || mode === 'loading') && (
             <div className="contact-monitor-cta__placeholder" aria-hidden="true">
               <span />
@@ -471,6 +507,13 @@ export function ContactMonitorCTA() {
               <span>Secure connection</span>
               <strong>Contact us</strong>
               <em>Open a technical discussion</em>
+            </div>
+          )}
+          {!showLocalFallback && (
+            <div className="contact-monitor-cta__screen" aria-hidden="true">
+              <span>Secure connection</span>
+              <strong>Contact us</strong>
+              <em>Start a technical discussion</em>
             </div>
           )}
         </div>
