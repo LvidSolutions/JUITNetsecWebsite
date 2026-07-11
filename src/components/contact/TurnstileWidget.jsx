@@ -26,14 +26,16 @@ function loadTurnstileScript() {
   });
 }
 
-export function TurnstileWidget({ siteKey, onVerify, resetKey }) {
+export function TurnstileWidget({ siteKey, onVerify, onError, resetKey }) {
   const containerRef = useRef(null);
   const widgetIdRef = useRef(null);
   const onVerifyRef = useRef(onVerify);
+  const onErrorRef = useRef(onError);
 
   useEffect(() => {
     onVerifyRef.current = onVerify;
-  }, [onVerify]);
+    onErrorRef.current = onError;
+  }, [onVerify, onError]);
 
   useEffect(() => {
     if (!siteKey || !containerRef.current) return undefined;
@@ -48,12 +50,20 @@ export function TurnstileWidget({ siteKey, onVerify, resetKey }) {
           sitekey: siteKey,
           theme: 'dark',
           size: 'flexible',
+          action: 'contact_form',
+          'response-field': false,
           callback: (token) => onVerifyRef.current(token),
           'expired-callback': () => onVerifyRef.current(''),
-          'error-callback': () => onVerifyRef.current(''),
+          'error-callback': () => {
+            onVerifyRef.current('');
+            onErrorRef.current?.();
+          },
         });
       })
-      .catch(() => onVerifyRef.current(''));
+      .catch(() => {
+        onVerifyRef.current('');
+        onErrorRef.current?.();
+      });
 
     return () => {
       cancelled = true;
