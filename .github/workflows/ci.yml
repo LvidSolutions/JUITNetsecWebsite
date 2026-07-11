@@ -52,6 +52,9 @@ jobs:
       - name: Build frontend
         run: npm run build
 
+      - name: Report frontend build size
+        run: npm run report:build
+
       - name: Smoke test local production build
         run: npm run smoke:local
 
