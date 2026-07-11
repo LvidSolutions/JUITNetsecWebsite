@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { submitContactRequest } from '../../lib/contactApi.js';
+import { readPublicContactConfig } from '../../lib/contactConfig.js';
 import { TurnstileWidget } from './TurnstileWidget.jsx';
 
 const fields = [
@@ -20,9 +21,7 @@ const needs = [
 ];
 
 const labelClass = 'mb-2.5 block text-[11px] font-medium uppercase tracking-[0.2em] text-brand-mist/55';
-const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY || '';
-const contactFormEnabled = import.meta.env.VITE_CONTACT_FORM_ENABLED === 'true';
-const contactFormConfigured = contactFormEnabled && Boolean(turnstileSiteKey);
+const contactConfig = readPublicContactConfig(import.meta.env);
 
 function createSubmissionId() {
   if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
@@ -63,9 +62,9 @@ function Field({ id, label, type, autoComplete, placeholder, required }) {
 }
 
 export function ContactForm() {
-  const [status, setStatus] = useState(contactFormConfigured ? 'idle' : 'error');
+  const [status, setStatus] = useState(contactConfig.configured ? 'idle' : 'error');
   const [feedback, setFeedback] = useState(
-    contactFormConfigured ? '' : 'The contact form is temporarily unavailable. Please use the contact details above.',
+    contactConfig.configured ? '' : 'The contact form is temporarily unavailable. Please use the contact details above.',
   );
   const [turnstileToken, setTurnstileToken] = useState('');
   const [turnstileResetKey, setTurnstileResetKey] = useState(0);
@@ -75,7 +74,7 @@ export function ContactForm() {
     event.preventDefault();
     const form = event.currentTarget;
 
-    if (!contactFormConfigured) {
+    if (!contactConfig.configured) {
       setStatus('error');
       setFeedback('The contact form is temporarily unavailable. Please use the contact details above.');
       return;
@@ -120,7 +119,7 @@ export function ContactForm() {
   }
 
   const submitting = status === 'submitting';
-  const submitDisabled = submitting || !contactFormConfigured || !turnstileToken;
+  const submitDisabled = submitting || !contactConfig.configured || !turnstileToken;
 
   return (
     <section
@@ -216,9 +215,9 @@ export function ContactForm() {
             <input id="website" name="website" type="text" tabIndex="-1" autoComplete="off" />
           </div>
 
-          {contactFormConfigured && (
+          {contactConfig.configured && (
             <TurnstileWidget
-              siteKey={turnstileSiteKey}
+              siteKey={contactConfig.turnstileSiteKey}
               onVerify={setTurnstileToken}
               onError={handleTurnstileError}
               resetKey={turnstileResetKey}
