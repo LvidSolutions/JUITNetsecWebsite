@@ -18,7 +18,7 @@ let viewerScriptPromise;
  *   start: (callback?: () => void) => void,
  *   stop: () => void,
  *   setUserInteraction: (enabled: boolean, callback?: (error: unknown) => void) => void,
- *   setBackground: (options: { color: number[] }, callback?: (error: unknown) => void) => void,
+ *   setBackground: (options: { color?: number[], transparent?: boolean }, callback?: () => void) => void,
  *   addEventListener: (event: string, callback: () => void) => void,
  *   getMaterialList: (callback: (error: unknown, materials?: SketchfabMaterial[]) => void) => void,
  *   getTextureList: (callback: (error: unknown, textures?: unknown[]) => void) => void,
@@ -28,7 +28,7 @@ let viewerScriptPromise;
  *   addTexture: (source: string, callback: (error: unknown, textureUid?: string) => void) => void,
  *   setMaterial: (material: SketchfabMaterial, callback?: () => void) => void
  * }} SketchfabAPI
- * @typedef {{ init: (uid: string, options: { autostart: number, autospin: number, scrollwheel: number, animation_autoplay: number, camera: number, dnt: number, dof_circle: number, ui_hint: number, max_texture_size: number, success: (api: SketchfabAPI) => void, error: () => void }) => void }} SketchfabClient
+ * @typedef {{ init: (uid: string, options: { autostart: number, autospin: number, scrollwheel: number, animation_autoplay: number, camera: number, dnt: number, dof_circle: number, ui_hint: number, ui_help: number, ui_controls: number, ui_infos: number, transparent: number, max_texture_size: number, success: (api: SketchfabAPI) => void, error: () => void }) => void }} SketchfabClient
  */
 
 function loadViewerScript(allowRetry = true) {
@@ -306,6 +306,10 @@ export function ContactMonitorCTA() {
             dnt: 1,
             dof_circle: 0,
             ui_hint: 0,
+            ui_help: 0,
+            ui_controls: 0,
+            ui_infos: 0,
+            transparent: 0,
             max_texture_size: 1024,
             success(api) {
               if (!mountedRef.current) {
@@ -315,10 +319,10 @@ export function ContactMonitorCTA() {
               apiRef.current = api;
               api.start();
               api.setUserInteraction(false);
-              api.setBackground({ color: [0.02, 0.02, 0.02] });
               api.addEventListener('viewerready', () => {
                 window.clearTimeout(timeout);
                 if (!mountedRef.current) return;
+                api.setBackground({ color: [0, 0, 0] });
                 api.getCameraLookAt((cameraError, camera) => {
                   if (!cameraError && camera) {
                     api.setCameraLookAt(
@@ -481,8 +485,19 @@ export function ContactMonitorCTA() {
           <span className="sr-only">Contact us</span>
         </a>
       </div>
-      <p className="contact-monitor-cta__caption" aria-live="polite">
-        {mode === 'viewer' ? 'Contact us' : 'Start a technical discussion'}
+      <p className="contact-monitor-cta__attribution">
+        <a
+          href="https://sketchfab.com/3d-models/wide-monitor-model-1-0178dfc498eb4593891a491fa2469ede"
+          target="_blank"
+          rel="nofollow noreferrer"
+        >
+          Wide Monitor Model 1
+        </a>{' '}
+        by{' '}
+        <a href="https://sketchfab.com/Naudaff3D" target="_blank" rel="nofollow noreferrer">
+          Naudaff3D
+        </a>{' '}
+        on Sketchfab
       </p>
     </div>
   );
