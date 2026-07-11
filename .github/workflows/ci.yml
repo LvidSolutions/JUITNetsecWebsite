@@ -46,11 +46,14 @@ jobs:
       - name: Audit dependencies
         run: npm audit --audit-level=high
 
-      - name: Run API tests
+      - name: Run API and configuration tests
         run: npm test
 
       - name: Build frontend
         run: npm run build
+
+      - name: Smoke test local production build
+        run: npm run smoke:local
 
   preview-smoke:
     if: github.event_name == 'pull_request'
@@ -66,8 +69,14 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       PR_NUMBER: ${{ github.event.pull_request.number }}
       EXPECTED_SHA: ${{ github.event.pull_request.head.sha }}
+      VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
 
     steps:
+      - name: Check out repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          persist-credentials: false
+
       - name: Discover Vercel Preview URL
         id: preview
         shell: bash
@@ -143,23 +152,7 @@ jobs:
             exit 1
           fi
 
-      - name: Smoke test routes and security headers
-        shell: bash
+      - name: Smoke test Vercel routes and security headers
         env:
           PREVIEW_URL: ${{ steps.preview.outputs.url }}
-        run: |
-          set -euo pipefail
-
-          for route in / /tjanster /om-oss /kontakt /api/health; do
-            status="$(curl --silent --show-error --location --output /dev/null --write-out '%{http_code}' --max-time 15 "${PREVIEW_URL}${route}")"
-            if [ "$status" != "200" ]; then
-              echo "Unexpected HTTP $status for $route"
-              exit 1
-            fi
-          done
-
-          headers="$(curl --silent --show-error --location --head --max-time 15 "${PREVIEW_URL}/kontakt")"
-          printf '%s\n' "$headers" | grep -qi '^x-content-type-options: nosniff'
-          printf '%s\n' "$headers" | grep -qi '^x-frame-options: DENY'
-          printf '%s\n' "$headers" | grep -qi '^referrer-policy: strict-origin-when-cross-origin'
-          printf '%s\n' "$headers" | grep -qi '^permissions-policy:'
+        run: npm run smoke:preview
