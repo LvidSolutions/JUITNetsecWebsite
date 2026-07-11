@@ -22,9 +22,9 @@ export function ContactVideoObject({ className = '', reveal = false }) {
     if (reduce) return undefined;
     const fine = window.matchMedia('(min-width: 1024px) and (pointer: fine)');
     if (!fine.matches) return undefined;
-    const onMove = (e) => {
-      mx.set((e.clientX / window.innerWidth) * 2 - 1);
-      my.set((e.clientY / window.innerHeight) * 2 - 1);
+    const onMove = (event) => {
+      mx.set((event.clientX / window.innerWidth) * 2 - 1);
+      my.set((event.clientY / window.innerHeight) * 2 - 1);
     };
     window.addEventListener('pointermove', onMove);
     return () => window.removeEventListener('pointermove', onMove);
@@ -45,7 +45,7 @@ export function ContactVideoObject({ className = '', reveal = false }) {
             <div className="contact-tilt">
               <div className={cn('relative', !reduce && 'contact-float')}>
                 <div className="contact-video-glow pointer-events-none absolute inset-[-14%] -z-10" />
-                <PremiumVideo />
+                <PremiumVideo paused={reduce} />
               </div>
             </div>
           </motion.div>
@@ -55,17 +55,19 @@ export function ContactVideoObject({ className = '', reveal = false }) {
   );
 }
 
-function PremiumVideo() {
+function PremiumVideo({ paused = false }) {
   const videoRef = useRef(null);
-  const [active, setActive] = useState(false);
+  const [inView, setInView] = useState(false);
+  const [pageVisible, setPageVisible] = useState(() => document.visibilityState !== 'hidden');
+  const [saveData, setSaveData] = useState(() => Boolean(navigator.connection?.saveData));
 
   useEffect(() => {
     const node = videoRef.current;
     if (!node || typeof IntersectionObserver === 'undefined') {
-      setActive(true);
+      setInView(true);
       return undefined;
     }
-    const observer = new IntersectionObserver(([entry]) => setActive(entry.isIntersecting), {
+    const observer = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting), {
       rootMargin: '300px 0px',
     });
     observer.observe(node);
@@ -73,25 +75,39 @@ function PremiumVideo() {
   }, []);
 
   useEffect(() => {
+    const connection = navigator.connection;
+    const syncVisibility = () => setPageVisible(document.visibilityState !== 'hidden');
+    const syncConnection = () => setSaveData(Boolean(connection?.saveData));
+
+    document.addEventListener('visibilitychange', syncVisibility);
+    connection?.addEventListener?.('change', syncConnection);
+    return () => {
+      document.removeEventListener('visibilitychange', syncVisibility);
+      connection?.removeEventListener?.('change', syncConnection);
+    };
+  }, []);
+
+  useEffect(() => {
     const node = videoRef.current;
     if (!node) return;
-    if (active) {
-      const p = node.play();
-      if (p && typeof p.catch === 'function') p.catch(() => {});
+
+    if (inView && pageVisible && !paused && !saveData) {
+      const play = node.play();
+      if (play && typeof play.catch === 'function') play.catch(() => {});
     } else {
       node.pause();
     }
-  }, [active]);
+  }, [inView, pageVisible, paused, saveData]);
 
   return (
     <video
       ref={videoRef}
       className="contact-video block h-auto w-full select-none"
-      autoPlay
+      autoPlay={!paused && !saveData}
       muted
       loop
       playsInline
-      preload="metadata"
+      preload={paused || saveData ? 'none' : 'metadata'}
     >
       <source src="/videos/contact-hero.webm" type="video/webm" />
       <source src="/videos/contact-hero.mp4" type="video/mp4" />
