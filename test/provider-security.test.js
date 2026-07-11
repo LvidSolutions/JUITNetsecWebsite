@@ -33,6 +33,42 @@ test('escapes HTML and keeps the visitor address in reply_to', async () => {
   assert.equal(payload.html.includes('<img'), false);
 });
 
+test('removes CRLF characters from all email header values', async () => {
+  let payload;
+  await sendContactEmail({
+    apiKey: 'api-key',
+    fromEmail: 'Website <website@example.com>\r\nBcc: attacker@example.com',
+    toEmail: 'info@juitnetsec.se\nCc: attacker@example.com',
+    submission: {
+      ...submission,
+      email: 'reply@example.com\r\nBcc: attacker@example.com',
+      need: 'Cybersecurity\r\nInjected: value',
+    },
+    requestId: '123e4567-e89b-42d3-a456-426614174000',
+    fetchImpl: async (_url, init) => {
+      payload = JSON.parse(init.body);
+      return Response.json({ id: 'email-id' });
+    },
+  });
+
+  for (const value of [payload.from, payload.to[0], payload.reply_to, payload.subject]) {
+    assert.equal(/[\r\n]/u.test(value), false);
+  }
+});
+
+test('treats a successful provider status as accepted even with a malformed optional body', async () => {
+  const result = await sendContactEmail({
+    apiKey: 'api-key',
+    fromEmail: 'JUIT Website <website@example.com>',
+    toEmail: 'info@juitnetsec.se',
+    submission,
+    requestId: '123e4567-e89b-42d3-a456-426614174000',
+    fetchImpl: async () => new Response('not-json', { status: 202 }),
+  });
+
+  assert.deepEqual(result, { id: null });
+});
+
 test('requires matching Turnstile action and hostname', async () => {
   const valid = await verifyTurnstile({
     secret: 'secret',
@@ -60,4 +96,48 @@ test('requires matching Turnstile action and hostname', async () => {
     }),
   });
   assert.equal(wrongAction, false);
+
+  const wrongHostname = await verifyTurnstile({
+    secret: 'secret',
+    token: 'token',
+    expectedAction: 'contact_form',
+    allowedHostnames: ['juitnetsec.se'],
+    fetchImpl: async () => Response.json({
+      success: true,
+      action: 'contact_form',
+      hostname: 'attacker.example',
+    }),
+  });
+  assert.equal(wrongHostname, false);
+});
+
+test('reports Turnstile transport and response failures as provider errors', async () => {
+  await assert.rejects(
+    verifyTurnstile({
+      secret: 'secret',
+      token: 'token',
+      fetchImpl: async () => new Response('unavailable', { status: 503 }),
+    }),
+    { name: 'TurnstileProviderError' },
+  );
+
+  await assert.rejects(
+    verifyTurnstile({
+      secret: 'secret',
+      token: 'token',
+      fetchImpl: async () => new Response('not-json', { status: 200 }),
+    }),
+    { name: 'TurnstileProviderError' },
+  );
+
+  await assert.rejects(
+    verifyTurnstile({
+      secret: 'secret',
+      token: 'token',
+      fetchImpl: async () => {
+        throw new Error('network failure');
+      },
+    }),
+    { name: 'TurnstileProviderError' },
+  );
 });
