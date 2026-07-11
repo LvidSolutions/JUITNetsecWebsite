@@ -9,6 +9,7 @@ import { PartnersSection } from './components/sections/PartnersSection.jsx';
 import { StatsSection } from './components/sections/StatsSection.jsx';
 import { TerminalSignalSection } from './components/sections/TerminalSignalSection.jsx';
 import { NextStepPlaceholder } from './components/sections/NextStepPlaceholder.jsx';
+import { getRoute, normalizePath } from './lib/routes.js';
 import { useHeroIntroProgress } from './lib/useHeroIntroProgress.js';
 
 const AboutSection = lazy(() =>
@@ -27,21 +28,7 @@ const ServicesSection = lazy(() =>
   })),
 );
 
-const titles = {
-  '/': 'JUIT NetSec AB – IT security, networking and infrastructure',
-  '/tjanster': 'Services – JUIT NetSec AB',
-  '/om-oss': 'About – JUIT NetSec AB',
-  '/about': 'About – JUIT NetSec AB',
-  '/kontakt': 'Contact – JUIT NetSec AB',
-  '/contact': 'Contact – JUIT NetSec AB',
-};
-
 const INTRO_SEEN_KEY = 'juit:introSeen';
-
-function normalizePath(path) {
-  if (!path || path === '/') return '/';
-  return path.endsWith('/') ? path.slice(0, -1) : path;
-}
 
 function getCurrentPath() {
   return normalizePath(window.location.pathname);
@@ -99,11 +86,11 @@ function NotFoundPage() {
 
 function App() {
   const [currentPath, setCurrentPath] = useState(getCurrentPath);
-  const isHome = currentPath === '/';
-  const isKnownPath = Boolean(titles[currentPath]);
+  const route = getRoute(currentPath);
+  const isHome = route?.page === 'home';
   const logoSlotRef = useRef(null);
   const navigationPendingRef = useRef(false);
-  const title = titles[currentPath] || 'Page not found – JUIT NetSec AB';
+  const title = route?.title || 'Page not found – JUIT NetSec AB';
   const { scrollYProgress: introProgress, heroRef } = useHeroIntroProgress();
   const [introPhase, setIntroPhase] = useState(() =>
     getCurrentPath() !== '/' || hasSeenIntro() ? 'done' : 'loader',
@@ -215,14 +202,14 @@ function App() {
             <NextStepPlaceholder />
           </>
         )}
-        {!isHome && isKnownPath && (
+        {route && !isHome && (
           <Suspense fallback={<RouteFallback />}>
-            {currentPath === '/tjanster' && <ServicesSection />}
-            {(currentPath === '/om-oss' || currentPath === '/about') && <AboutSection />}
-            {(currentPath === '/kontakt' || currentPath === '/contact') && <ContactPage />}
+            {route.page === 'services' && <ServicesSection />}
+            {route.page === 'about' && <AboutSection />}
+            {route.page === 'contact' && <ContactPage />}
           </Suspense>
         )}
-        {!isKnownPath && <NotFoundPage />}
+        {!route && <NotFoundPage />}
       </main>
       <Footer />
     </>
