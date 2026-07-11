@@ -108,15 +108,6 @@
   transition: background-color 300ms ease, border-color 300ms ease, box-shadow 300ms ease, color 300ms ease;
 }
 
-.contact-monitor-cta__screen::before {
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 3px;
-  background: #63ff83;
-  box-shadow: 0 0 13px rgba(99, 255, 131, 0.9);
-  content: '';
-}
-
 .contact-monitor-cta__screen em {
   position: relative;
   z-index: 1;
