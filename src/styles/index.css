@@ -262,7 +262,10 @@
     /* The component has natural side bearings around JUIT/netsec.  Overscan
        the mark itself so the visible J and c, rather than an empty flex box,
        are what meet and disappear into the white frame edges. */
-    transform: translateY(26%) scaleX(1.18);
+    /* Keep the complete glyphs inside the card.  Its baseline sits precisely
+       on the card edge, so white letterforms flow into the white margin rather
+       than being pushed under it and visibly cut off. */
+    transform: scaleX(1.18);
     transform-origin: bottom center;
   }
   /* Den gröna accent-kvadraten behåller sin form men tappar den stora halo-skuggan
@@ -373,7 +376,10 @@
       min-height: 100%;
       /* Keep the complete footer composition inside the shrinking card rather
          than letting the dashboard, maze, or floor mark be clipped by it. */
-      transform: translateY(calc(var(--ff, 0) * 26px))
+      /* The X/Y scale exactly matches the insets of .footer-frame__card.  Move
+         its anchor to the active card bottom too, keeping every child – notably
+         the floor wordmark – inside that shrinking rectangle at every tick. */
+      transform: translateY(calc(var(--ff, 0) * var(--footer-frame-bottom) * -1))
         scaleX(calc(1 - (var(--ff, 0) * 0.054)))
         scaleY(calc(1 - (var(--ff, 0) * 0.15)));
       /* The wordmark must stay tied to the card's lower edge as the frame
@@ -392,18 +398,6 @@
       will-change: transform;
     }
 
-    .footer-floor-logo {
-      /* This remains inside the clipped card.  The stage provides the same
-         horizontal compression as the active card; this downward offset makes
-         every letter meet the moving lower cut line, so white glyphs visually
-         stream directly into the white bottom margin at every frame size. */
-      /* The stage itself moves down as the scene closes.  Counter that shift
-         plus the new bottom inset here: enough of the wordmark remains visible
-         while its baseline is still deliberately cut by the inner card edge. */
-      transform: translateY(calc(var(--ff, 0) * (var(--footer-frame-bottom) + 24px) * -1));
-      transform-origin: bottom center;
-      will-change: transform;
-    }
   }
 
   @media (max-width: 1023px) {
@@ -416,22 +410,11 @@
     }
   }
 
-  /* Headern använder exakt samma scroll-progress som frame-out-kortet. Den vita
-     ytan, länkarna och loggan tonas kontinuerligt i stället för att växla klass
-     vid en godtycklig 50%-tröskel – ingen synlig navbar-tick mitt i rörelsen. */
+  /* Headern använder exakt samma scroll-progress som frame-out-kortet.  Den är
+     transparent: när kortet rullar in syns dess riktiga, solida vita toppram
+     bakom navbaren. Ingen separat halvgenomskinlig navbar-overlay används. */
   body {
     --footer-frame-progress: 0;
-  }
-
-  header::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
-    background: #fff;
-    opacity: var(--footer-frame-progress);
-    will-change: opacity;
   }
 
   header nav a:not([aria-current='page']) {
