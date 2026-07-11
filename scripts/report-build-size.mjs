@@ -1,17 +1,18 @@
 import { createReadStream } from 'node:fs';
 import { readdir, stat } from 'node:fs/promises';
 import { extname, join, relative } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { createGzip } from 'node:zlib';
 
-const root = new URL('../dist/', import.meta.url);
+const directory = fileURLToPath(new URL('../dist/', import.meta.url));
 const trackedExtensions = new Set(['.js', '.css']);
 
-async function walk(directory) {
-  const entries = await readdir(directory, { withFileTypes: true });
+async function walk(currentDirectory) {
+  const entries = await readdir(currentDirectory, { withFileTypes: true });
   const files = [];
 
   for (const entry of entries) {
-    const path = join(directory, entry.name);
+    const path = join(currentDirectory, entry.name);
     if (entry.isDirectory()) files.push(...await walk(path));
     else files.push(path);
   }
@@ -37,7 +38,6 @@ function format(bytes) {
   return `${(bytes / 1024).toFixed(1)} KiB`;
 }
 
-const directory = root.pathname;
 const paths = (await walk(directory)).filter((path) => trackedExtensions.has(extname(path)));
 const assets = [];
 
