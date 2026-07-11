@@ -4,6 +4,14 @@ import { cn } from '../../lib/cn';
 
 const EASE = [0.16, 1, 0.3, 1];
 
+function isDocumentVisible() {
+  return typeof document === 'undefined' || document.visibilityState !== 'hidden';
+}
+
+function isDataSavingEnabled() {
+  return typeof navigator !== 'undefined' && Boolean(navigator.connection?.saveData);
+}
+
 export function ContactVideoObject({ className = '', reveal = false }) {
   const wrapRef = useRef(null);
   const reduce = useReducedMotion();
@@ -58,8 +66,8 @@ export function ContactVideoObject({ className = '', reveal = false }) {
 function PremiumVideo({ paused = false }) {
   const videoRef = useRef(null);
   const [inView, setInView] = useState(false);
-  const [pageVisible, setPageVisible] = useState(() => document.visibilityState !== 'hidden');
-  const [saveData, setSaveData] = useState(() => Boolean(navigator.connection?.saveData));
+  const [pageVisible, setPageVisible] = useState(isDocumentVisible);
+  const [saveData, setSaveData] = useState(isDataSavingEnabled);
 
   useEffect(() => {
     const node = videoRef.current;
@@ -76,8 +84,8 @@ function PremiumVideo({ paused = false }) {
 
   useEffect(() => {
     const connection = navigator.connection;
-    const syncVisibility = () => setPageVisible(document.visibilityState !== 'hidden');
-    const syncConnection = () => setSaveData(Boolean(connection?.saveData));
+    const syncVisibility = () => setPageVisible(isDocumentVisible());
+    const syncConnection = () => setSaveData(isDataSavingEnabled());
 
     document.addEventListener('visibilitychange', syncVisibility);
     connection?.addEventListener?.('change', syncConnection);
