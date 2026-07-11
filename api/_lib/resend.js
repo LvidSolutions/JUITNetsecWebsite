@@ -88,6 +88,12 @@ export async function sendContactEmail({
     throw error;
   }
 
-  const result = await response.json();
-  return { id: result.id || null };
+  // A successful provider status means the message was accepted. Do not turn a
+  // malformed optional response body into a retry that could create duplicates.
+  try {
+    const result = await response.json();
+    return { id: typeof result?.id === 'string' ? result.id : null };
+  } catch {
+    return { id: null };
+  }
 }
