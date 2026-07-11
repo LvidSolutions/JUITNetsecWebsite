@@ -44,7 +44,7 @@ When the secret is absent and the Preview returns HTTP 401 or 403, CI emits an e
 | `CONTACT_FORM_ENABLED` | Fail-closed switch; must be exactly `true` to send |
 | `RESEND_API_KEY` | Restricted Resend sending key |
 | `CONTACT_FROM_EMAIL` | Verified static sender, for example `JUIT NetSec Website <website@notify.DOMAIN>` |
-| `CONTACT_TO_EMAIL` | Confirmed company inbox |
+| `CONTACT_TO_EMAIL` | Confirmed company inbox: `contact@juit.se` |
 | `TURNSTILE_SECRET_KEY` | Server-side Turnstile secret |
 | `TURNSTILE_ALLOWED_HOSTNAMES` | Optional comma-separated extra hostname allowlist; the current deployment hostname is always checked |
 | `UPSTASH_REDIS_REST_URL` | Upstash Redis REST endpoint |
@@ -95,7 +95,7 @@ Do not enable the form in Production until all checks pass:
 - Protected Preview automation is configured, or the remaining HTTP verification is explicitly recorded as blocked.
 - `/api/health` returns HTTP 200 from an authorized Preview request.
 - A valid contact request returns HTTP 202.
-- The email arrives in the confirmed test inbox.
+- The email arrives at `contact@juit.se`.
 - Cross-origin requests, invalid JSON, failed Turnstile and rate-limit cases are rejected.
 - No form content appears in Vercel logs.
 - Rollback to the previous Vercel deployment has been tested.
