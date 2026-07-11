@@ -259,7 +259,11 @@
     font-size: clamp(2.6rem, 13vw, 15rem);
     line-height: 0.82;
     white-space: nowrap;
-    transform: translateY(26%);
+    /* The component has natural side bearings around JUIT/netsec.  Overscan
+       the mark itself so the visible J and c, rather than an empty flex box,
+       are what meet and disappear into the white frame edges. */
+    transform: translateY(26%) scaleX(1.18);
+    transform-origin: bottom center;
   }
   /* Den gröna accent-kvadraten behåller sin form men tappar den stora halo-skuggan
      på golv-skala (annars blir det en oönskad grön glow). Endast golv-varianten. */
@@ -267,33 +271,6 @@
     box-shadow: none;
   }
 
-  /* This mark sits outside the clipped card. As the card reveals its white
-     frame, the white letters deliberately continue into the side and bottom
-     margins, where they visually disappear into the same white surface. */
-  .footer-stage .footer-floor-logo { display: none; }
-
-  .footer-frame-floor-logo {
-    position: absolute;
-    z-index: 3;
-    inset-inline: 0;
-    bottom: calc(var(--ff, 0) * var(--footer-frame-bottom) * -1);
-    display: flex;
-    justify-content: center;
-    overflow: hidden;
-    line-height: 0;
-    transform: scaleX(calc(1 + (var(--ff, 0) * 0.054)));
-    transform-origin: bottom center;
-    will-change: transform;
-  }
-
-  .footer-frame-floor-wordmark {
-    font-size: clamp(4rem, min(15.5vw, 33vh), 30rem);
-    line-height: 0.82;
-    white-space: nowrap;
-    transform: translateY(26%);
-  }
-
-  .footer-frame-floor-wordmark span[aria-hidden='true'] { box-shadow: none; }
 
   /* Responsiv scen (desktop): hela kompositionen skalar mot footer-storleken via
      clamp()/min()/calc med BÅDE vw och vh, så den håller proportion på alla
@@ -399,7 +376,9 @@
       transform: translateY(calc(var(--ff, 0) * 26px))
         scaleX(calc(1 - (var(--ff, 0) * 0.054)))
         scaleY(calc(1 - (var(--ff, 0) * 0.15)));
-      transform-origin: center;
+      /* The wordmark must stay tied to the card's lower edge as the frame
+         closes, not float upward with the rest of the composition. */
+      transform-origin: center bottom;
       will-change: transform;
     }
 
@@ -414,7 +393,14 @@
     }
 
     .footer-floor-logo {
-      transform: translateY(calc(var(--ff, 0) * -12px)) scaleX(calc(1 - (var(--ff, 0) * 0.054)));
+      /* This remains inside the clipped card.  The stage provides the same
+         horizontal compression as the active card; this downward offset makes
+         every letter meet the moving lower cut line, so white glyphs visually
+         stream directly into the white bottom margin at every frame size. */
+      /* The stage itself moves down as the scene closes.  Counter that shift
+         plus the new bottom inset here: enough of the wordmark remains visible
+         while its baseline is still deliberately cut by the inner card edge. */
+      transform: translateY(calc(var(--ff, 0) * (var(--footer-frame-bottom) + 24px) * -1));
       transform-origin: bottom center;
       will-change: transform;
     }

@@ -171,9 +171,6 @@ export function Footer() {
             </div>
           </div>
         </footer>
-        <div aria-hidden="true" className="footer-frame-floor-logo pointer-events-none">
-          <BrandWordmark className="footer-frame-floor-wordmark" />
-        </div>
       </div>
     </div>
   );
