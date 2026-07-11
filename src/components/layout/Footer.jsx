@@ -42,11 +42,14 @@ export function Footer() {
       const raw = Math.min(Math.max(-rect.top / Math.min(window.innerHeight * 0.42, 360), 0), 1);
       const progress = raw * raw * (3 - 2 * raw);
 
-      // Navbaren inverteras till mörkt om den vita topp-marginalen råkar ligga bakom den.
+      // The header is driven by the very same continuous value as the frame.
+      // Do not use a midpoint class toggle here: that created a visible one-frame
+      // jump in the navbar while the card itself was moving smoothly.
       const frame = frameRef.current;
       if (frame) {
-        frame.style.setProperty('--ff', progress.toFixed(4));
-        document.body.classList.toggle('nav-over-light', progress >= 0.5);
+        const progressValue = progress.toFixed(4);
+        frame.style.setProperty('--ff', progressValue);
+        document.body.style.setProperty('--footer-frame-progress', progressValue);
       }
     };
     const requestUpdate = () => {
@@ -55,14 +58,11 @@ export function Footer() {
     window.addEventListener('scroll', requestUpdate, { passive: true });
     window.addEventListener('resize', requestUpdate);
     update();
-    // Kör en extra mätning efter att padding-transitionen landat (nav-invertering).
-    const settle = window.setTimeout(update, 700);
     return () => {
       window.removeEventListener('scroll', requestUpdate);
       window.removeEventListener('resize', requestUpdate);
       window.cancelAnimationFrame(animationFrame);
-      window.clearTimeout(settle);
-      document.body.classList.remove('nav-over-light');
+      document.body.style.removeProperty('--footer-frame-progress');
     };
   }, []);
 

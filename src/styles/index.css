@@ -416,31 +416,51 @@
     }
   }
 
-  /* Navlänkarna (vita, mix-blend) inverteras till mörkt när den vita ramen ligger
-     bakom navbaren. Den aktiva länken (aria-current) lämnas grön – syns mot vitt. */
-  body.nav-over-light header nav a:not([aria-current='page']) {
-    color: #050505 !important;
-    mix-blend-mode: normal !important;
+  /* Headern använder exakt samma scroll-progress som frame-out-kortet. Den vita
+     ytan, länkarna och loggan tonas kontinuerligt i stället för att växla klass
+     vid en godtycklig 50%-tröskel – ingen synlig navbar-tick mitt i rörelsen. */
+  body {
+    --footer-frame-progress: 0;
   }
 
-  body.nav-over-light header::before {
+  header::before {
     content: '';
     position: absolute;
     inset: 0;
     z-index: 0;
+    pointer-events: none;
     background: #fff;
+    opacity: var(--footer-frame-progress);
+    will-change: opacity;
+  }
+
+  header nav a:not([aria-current='page']) {
+    color: color-mix(
+      in srgb,
+      rgba(255, 255, 255, 0.85) calc((1 - var(--footer-frame-progress)) * 100%),
+      #050505 calc(var(--footer-frame-progress) * 100%)
+    ) !important;
+    mix-blend-mode: normal !important;
   }
 
   /* När footerns vita frame-out-ram ligger bakom navbaren inverteras headerns
      logga (vit→mörk) så den förblir läsbar mot det vita. Scoped till .header-logo
      så footerns stora wordmark (på mörkt kort) påverkas inte. Grön accentkvadrat
      lämnas grön (syns mot vitt). */
-  body.nav-over-light .header-logo .bw-juit {
-    color: #050505;
+  .header-logo .bw-juit {
+    color: color-mix(
+      in srgb,
+      #ffffff calc((1 - var(--footer-frame-progress)) * 100%),
+      #050505 calc(var(--footer-frame-progress) * 100%)
+    );
   }
 
-  body.nav-over-light .header-logo .bw-netsec {
-    color: rgba(5, 5, 5, 0.62);
+  .header-logo .bw-netsec {
+    color: color-mix(
+      in srgb,
+      rgba(255, 255, 255, 0.68) calc((1 - var(--footer-frame-progress)) * 100%),
+      rgba(5, 5, 5, 0.62) calc(var(--footer-frame-progress) * 100%)
+    );
   }
 }
 
