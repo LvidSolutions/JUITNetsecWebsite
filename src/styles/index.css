@@ -267,6 +267,34 @@
     box-shadow: none;
   }
 
+  /* This mark sits outside the clipped card. As the card reveals its white
+     frame, the white letters deliberately continue into the side and bottom
+     margins, where they visually disappear into the same white surface. */
+  .footer-stage .footer-floor-logo { display: none; }
+
+  .footer-frame-floor-logo {
+    position: absolute;
+    z-index: 3;
+    inset-inline: 0;
+    bottom: calc(var(--ff, 0) * var(--footer-frame-bottom) * -1);
+    display: flex;
+    justify-content: center;
+    overflow: hidden;
+    line-height: 0;
+    transform: scaleX(calc(1 + (var(--ff, 0) * 0.054)));
+    transform-origin: bottom center;
+    will-change: transform;
+  }
+
+  .footer-frame-floor-wordmark {
+    font-size: clamp(4rem, min(15.5vw, 33vh), 30rem);
+    line-height: 0.82;
+    white-space: nowrap;
+    transform: translateY(26%);
+  }
+
+  .footer-frame-floor-wordmark span[aria-hidden='true'] { box-shadow: none; }
+
   /* Responsiv scen (desktop): hela kompositionen skalar mot footer-storleken via
      clamp()/min()/calc med BÅDE vw och vh, så den håller proportion på alla
      skärmar. Maze (vänster) + dashboard (höger) dras mot mitten på breda skärmar
