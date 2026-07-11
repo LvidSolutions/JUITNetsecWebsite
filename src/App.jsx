@@ -1,9 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { Header } from './components/layout/Header.jsx';
 import { Footer } from './components/layout/Footer.jsx';
 import { AnimatedLogo } from './components/layout/AnimatedLogo.jsx';
-import { AboutSection } from './components/sections/AboutSection.jsx';
-import { ContactPage } from './components/contact/ContactPage.jsx';
 import { Hero } from './components/sections/Hero.jsx';
 import { IntroLoader } from './components/sections/IntroLoader.jsx';
 import { IntroSequence } from './components/intro/IntroSequence.jsx';
@@ -11,8 +9,23 @@ import { PartnersSection } from './components/sections/PartnersSection.jsx';
 import { StatsSection } from './components/sections/StatsSection.jsx';
 import { TerminalSignalSection } from './components/sections/TerminalSignalSection.jsx';
 import { NextStepPlaceholder } from './components/sections/NextStepPlaceholder.jsx';
-import { ServicesSection } from './components/sections/ServicesSection.jsx';
 import { useHeroIntroProgress } from './lib/useHeroIntroProgress.js';
+
+const AboutSection = lazy(() =>
+  import('./components/sections/AboutSection.jsx').then((module) => ({
+    default: module.AboutSection,
+  })),
+);
+const ContactPage = lazy(() =>
+  import('./components/contact/ContactPage.jsx').then((module) => ({
+    default: module.ContactPage,
+  })),
+);
+const ServicesSection = lazy(() =>
+  import('./components/sections/ServicesSection.jsx').then((module) => ({
+    default: module.ServicesSection,
+  })),
+);
 
 const titles = {
   '/': 'JUIT NetSec AB – IT security, networking and infrastructure',
@@ -25,12 +38,15 @@ const titles = {
 
 const INTRO_SEEN_KEY = 'juit:introSeen';
 
-function getCurrentPath() {
-  return window.location.pathname === '' ? '/' : window.location.pathname;
+function normalizePath(path) {
+  if (!path || path === '/') return '/';
+  return path.endsWith('/') ? path.slice(0, -1) : path;
 }
 
-// Intro-loadern visas bara första gången webbplatsen öppnas under en session –
-// inte varje gång man kommer tillbaka till startsidan.
+function getCurrentPath() {
+  return normalizePath(window.location.pathname);
+}
+
 function hasSeenIntro() {
   try {
     return window.sessionStorage.getItem(INTRO_SEEN_KEY) === '1';
@@ -43,23 +59,57 @@ function markIntroSeen() {
   try {
     window.sessionStorage.setItem(INTRO_SEEN_KEY, '1');
   } catch {
-    /* sessionStorage otillgängligt (privat läge e.d.) – strunta i det */
+    // sessionStorage may be unavailable in hardened or private browsing modes.
   }
+}
+
+function RouteFallback() {
+  return (
+    <div className="flex min-h-[45vh] items-center justify-center" role="status" aria-live="polite">
+      <span className="sr-only">Loading page</span>
+      <span
+        aria-hidden="true"
+        className="h-8 w-8 animate-spin rounded-full border border-brand-green/25 border-t-brand-green motion-reduce:animate-none"
+      />
+    </div>
+  );
+}
+
+function NotFoundPage() {
+  return (
+    <section className="flex min-h-[70vh] items-center px-6 py-24">
+      <div className="mx-auto w-full max-w-4xl">
+        <p className="font-mono text-xs uppercase tracking-[0.3em] text-brand-green">404 / Not found</p>
+        <h1 className="mt-6 max-w-3xl font-display text-5xl font-semibold leading-none tracking-tight sm:text-7xl">
+          The requested page does not exist.
+        </h1>
+        <p className="mt-7 max-w-xl text-base leading-7 text-brand-mist/75 sm:text-lg">
+          Check the address or return to the start page.
+        </p>
+        <a
+          href="/"
+          className="mt-9 inline-flex min-h-12 items-center justify-center rounded-full bg-brand-green px-7 text-sm font-semibold uppercase tracking-[0.16em] text-brand-black transition-colors hover:bg-brand-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-green"
+        >
+          Go to home page
+        </a>
+      </div>
+    </section>
+  );
 }
 
 function App() {
   const [currentPath, setCurrentPath] = useState(getCurrentPath);
   const isHome = currentPath === '/';
+  const isKnownPath = Boolean(titles[currentPath]);
   const logoSlotRef = useRef(null);
-  const title = titles[currentPath] || titles['/'];
+  const navigationPendingRef = useRef(false);
+  const title = titles[currentPath] || 'Page not found – JUIT NetSec AB';
   const { scrollYProgress: introProgress, heroRef } = useHeroIntroProgress();
-  // Intro i två steg: 'loader' (0–100%-uppstart) → 'reveal' (CRT-curtain) → 'done'.
   const [introPhase, setIntroPhase] = useState(() =>
     getCurrentPath() !== '/' || hasSeenIntro() ? 'done' : 'loader',
   );
   const introDone = introPhase === 'done';
 
-  // Lås scroll medan intro-loadern visas så hero inte kan scrollas bakom den.
   useEffect(() => {
     const locked = isHome && !introDone;
     document.body.style.overflow = locked ? 'hidden' : '';
@@ -70,13 +120,12 @@ function App() {
 
   useEffect(() => {
     function navigate(path) {
-      const nextPath = titles[path] ? path : '/';
+      const nextPath = normalizePath(path);
       if (window.location.pathname !== nextPath) {
         window.history.pushState({}, '', nextPath);
       }
+      navigationPendingRef.current = true;
       setCurrentPath(nextPath);
-      // Direkt hopp till toppen vid sidbyte: smooth scroll genom en hel,
-      // tung sida kan kännas hackig och triggar onödig animation under vägen.
       window.scrollTo({ top: 0, behavior: 'auto' });
     }
 
@@ -88,24 +137,20 @@ function App() {
       }
 
       const url = new URL(link.href);
-
-      if (url.origin !== window.location.origin) {
-        return;
-      }
+      if (url.origin !== window.location.origin) return;
 
       event.preventDefault();
       navigate(url.pathname);
     }
 
     function handlePopState() {
+      navigationPendingRef.current = true;
       setCurrentPath(getCurrentPath());
     }
 
     function handleAppNavigate(event) {
       const path = event.detail?.path;
-      if (typeof path === 'string') {
-        navigate(path);
-      }
+      if (typeof path === 'string') navigate(path);
     }
 
     document.addEventListener('click', handleClick);
@@ -122,6 +167,17 @@ function App() {
   useEffect(() => {
     document.title = title;
   }, [title]);
+
+  useEffect(() => {
+    if (!navigationPendingRef.current) return undefined;
+
+    const frame = window.requestAnimationFrame(() => {
+      document.getElementById('huvudinnehall')?.focus({ preventScroll: true });
+      navigationPendingRef.current = false;
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [currentPath]);
 
   return (
     <>
@@ -159,9 +215,14 @@ function App() {
             <NextStepPlaceholder />
           </>
         )}
-        {currentPath === '/tjanster' && <ServicesSection />}
-        {(currentPath === '/om-oss' || currentPath === '/about') && <AboutSection />}
-        {(currentPath === '/kontakt' || currentPath === '/contact') && <ContactPage />}
+        {!isHome && isKnownPath && (
+          <Suspense fallback={<RouteFallback />}>
+            {currentPath === '/tjanster' && <ServicesSection />}
+            {(currentPath === '/om-oss' || currentPath === '/about') && <AboutSection />}
+            {(currentPath === '/kontakt' || currentPath === '/contact') && <ContactPage />}
+          </Suspense>
+        )}
+        {!isKnownPath && <NotFoundPage />}
       </main>
       <Footer />
     </>
