@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { submitContactRequest } from '../../lib/contactApi.js';
 import { TurnstileWidget } from './TurnstileWidget.jsx';
 
 const fields = [
@@ -19,12 +20,13 @@ const needs = [
 ];
 
 const labelClass = 'mb-2.5 block text-[11px] font-medium uppercase tracking-[0.2em] text-brand-mist/55';
-const apiUrl = import.meta.env.VITE_CONTACT_API_URL || '/api/contact';
 const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY || '';
 const contactFormEnabled = import.meta.env.VITE_CONTACT_FORM_ENABLED === 'true';
 const contactFormConfigured = contactFormEnabled && Boolean(turnstileSiteKey);
 
 function createSubmissionId() {
+  if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
+
   const bytes = new Uint8Array(16);
 
   if (globalThis.crypto?.getRandomValues) {
@@ -95,23 +97,8 @@ export function ContactForm() {
     payload.turnstileToken = turnstileToken;
     payload.submissionId = submissionId;
 
-    const controller = new AbortController();
-    const timeout = window.setTimeout(() => controller.abort(), 15_000);
-
     try {
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-        signal: controller.signal,
-      });
-
-      const result = await response.json().catch(() => ({}));
-
-      if (!response.ok) {
-        throw new Error(result.message || 'The request could not be sent.');
-      }
-
+      await submitContactRequest(payload);
       form.reset();
       setTurnstileToken('');
       setTurnstileResetKey((value) => value + 1);
@@ -120,17 +107,9 @@ export function ContactForm() {
       setFeedback('Thank you. Your request has been sent and we will get back to you shortly.');
     } catch (error) {
       setStatus('error');
-      setFeedback(
-        error instanceof DOMException && error.name === 'AbortError'
-          ? 'The request timed out. Please check your connection and try again.'
-          : error instanceof Error
-            ? error.message
-            : 'The request could not be sent.',
-      );
+      setFeedback(error instanceof Error ? error.message : 'The request could not be sent.');
       setTurnstileToken('');
       setTurnstileResetKey((value) => value + 1);
-    } finally {
-      window.clearTimeout(timeout);
     }
   }
 
