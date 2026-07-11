@@ -1,9 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 
+function isDocumentVisible() {
+  return typeof document === 'undefined' || document.visibilityState !== 'hidden';
+}
+
 export function HeroVideoBackground() {
   const videoRef = useRef(null);
   const [useVideo, setUseVideo] = useState(false);
-  const [pageVisible, setPageVisible] = useState(() => document.visibilityState !== 'hidden');
+  const [pageVisible, setPageVisible] = useState(isDocumentVisible);
 
   useEffect(() => {
     const desktop = window.matchMedia('(min-width: 768px) and (pointer: fine)');
@@ -14,7 +18,7 @@ export function HeroVideoBackground() {
       setUseVideo(desktop.matches && !reduced.matches && !connection?.saveData);
     };
 
-    const syncVisibility = () => setPageVisible(document.visibilityState !== 'hidden');
+    const syncVisibility = () => setPageVisible(isDocumentVisible());
 
     sync();
     desktop.addEventListener('change', sync);
