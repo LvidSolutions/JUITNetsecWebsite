@@ -20,7 +20,7 @@ const config = {
   environment: 'test',
   resendApiKey: 'resend-secret',
   fromEmail: 'Website <website@example.com>',
-  toEmail: 'info@juitnetsec.se',
+  toEmail: 'contact@juit.se',
   turnstileSecretKey: 'turnstile-secret',
   allowedOrigins: [],
   allowedTurnstileHostnames: [],
