@@ -8,7 +8,9 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "node --test \"test/*.test.js\"",
-    "test:api": "node --test \"test/*.test.js\""
+    "test:api": "node --test \"test/*.test.js\"",
+    "smoke:local": "node scripts/smoke-local.mjs",
+    "smoke:preview": "node scripts/smoke-vercel-preview.mjs"
   },
   "dependencies": {
     "framer-motion": "^12.40.0",
