@@ -19,7 +19,7 @@ const config = {
   environment: 'test',
   resendApiKey: 'resend-secret',
   fromEmail: 'Website <website@example.com>',
-  toEmail: 'info@juitnetsec.se',
+  toEmail: 'contact@juit.se',
   turnstileSecretKey: 'turnstile-secret',
   allowedTurnstileHostnames: ['juitnetsec.se'],
   upstashUrl: 'https://redis.example',
@@ -72,6 +72,7 @@ test('accepts a valid same-origin contact request', async () => {
     requestId: validSubmission.submissionId,
   });
   assert.equal(delivered.submission.email, validSubmission.email);
+  assert.equal(delivered.toEmail, 'contact@juit.se');
   assert.equal(delivered.requestId, validSubmission.submissionId);
 });
 
