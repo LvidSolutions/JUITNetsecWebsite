@@ -60,15 +60,15 @@ export function Header({ currentPath = '/', logoSlotRef, hideStaticLogo = false 
             // Centreras med auto-marginaler (inte translate): en transform skapar
             // en isolerad blend-grupp, vilket skulle hindra länkarnas
             // mix-blend-difference från att blanda mot sidan bakom headern.
-            className="absolute inset-x-0 z-30 hidden grid-cols-[1fr_auto_1fr] items-center lg:grid"
+            className="absolute left-1/2 z-30 hidden w-[clamp(620px,54vw,820px)] -translate-x-1/2 grid-cols-[1fr_auto_1fr] items-center lg:grid"
           >
-            <div className="flex items-center justify-start gap-[clamp(2rem,5vw,6.5rem)]">
+            <div className="flex items-center justify-end gap-[clamp(2rem,3vw,3.5rem)]">
               {leftNavigation.map((item) => (
                 <ScrambleNavLink key={item.href} {...item} isActive={currentPath === item.href} />
               ))}
             </div>
-            <span aria-hidden="true" className="w-[clamp(9rem,16vw,16rem)]" />
-            <div className="flex items-center justify-end gap-[clamp(2rem,5vw,6.5rem)]">
+            <span aria-hidden="true" className="w-[clamp(8rem,11vw,10rem)]" />
+            <div className="flex items-center justify-start gap-[clamp(2rem,3vw,3.5rem)]">
               {rightNavigation.map((item) => (
                 <ScrambleNavLink key={item.href} {...item} isActive={currentPath === item.href} />
               ))}
