@@ -21,7 +21,6 @@ const config = {
   fromEmail: 'Website <website@example.com>',
   toEmail: 'info@juitnetsec.se',
   turnstileSecretKey: 'turnstile-secret',
-  allowedOrigins: ['https://juitnetsec.se'],
   allowedTurnstileHostnames: ['juitnetsec.se'],
   upstashUrl: 'https://redis.example',
   upstashToken: 'redis-secret',
@@ -76,7 +75,7 @@ test('accepts a valid same-origin contact request', async () => {
   assert.equal(delivered.requestId, validSubmission.submissionId);
 });
 
-test('allows the deployment origin even when it is not in configured origins', async () => {
+test('accepts the current Vercel deployment origin', async () => {
   const response = await handleContactRequest(
     request(validSubmission, {
       url: 'https://branch-preview.vercel.app/api/contact',
