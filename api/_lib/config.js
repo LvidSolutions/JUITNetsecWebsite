@@ -50,7 +50,6 @@ export function loadContactConfig(env = process.env) {
     fromEmail: env.CONTACT_FROM_EMAIL.trim(),
     toEmail: env.CONTACT_TO_EMAIL.trim(),
     turnstileSecretKey: env.TURNSTILE_SECRET_KEY.trim(),
-    allowedOrigins: splitCsv(env.ALLOWED_ORIGINS),
     allowedTurnstileHostnames: splitCsv(env.TURNSTILE_ALLOWED_HOSTNAMES),
     upstashUrl: env.UPSTASH_REDIS_REST_URL.trim().replace(/\/$/, ''),
     upstashToken: env.UPSTASH_REDIS_REST_TOKEN.trim(),
