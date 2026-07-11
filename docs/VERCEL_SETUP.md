@@ -1,6 +1,6 @@
 # Vercel production setup
 
-The website frontend and contact API are designed to run in the same Vercel project. The frontend posts to `/api/contact`, which avoids a separate API domain and public CORS configuration.
+The website frontend and contact API are designed to run in the same Vercel project. The frontend posts to `/api/contact`, which avoids a separate API domain and public CORS configuration. The API rejects requests whose `Origin` is not exactly the current deployment origin.
 
 ## Confirm in the Vercel dashboard
 
@@ -32,8 +32,7 @@ These values cannot be verified from this repository and must be checked by a pr
 | `CONTACT_FROM_EMAIL` | Verified static sender, for example `JUIT NetSec Website <website@notify.DOMAIN>` |
 | `CONTACT_TO_EMAIL` | Confirmed company inbox |
 | `TURNSTILE_SECRET_KEY` | Server-side Turnstile secret |
-| `TURNSTILE_ALLOWED_HOSTNAMES` | Optional comma-separated hostname allowlist |
-| `ALLOWED_ORIGINS` | Optional additional exact origins; the current deployment origin is allowed automatically |
+| `TURNSTILE_ALLOWED_HOSTNAMES` | Optional comma-separated extra hostname allowlist; the current deployment hostname is always checked |
 | `UPSTASH_REDIS_REST_URL` | Upstash Redis REST endpoint |
 | `UPSTASH_REDIS_REST_TOKEN` | Server-only standard/ACL token |
 | `RATE_LIMIT_HASH_SECRET` | At least 32 random characters, used to HMAC client addresses |
@@ -81,6 +80,6 @@ Do not enable the form in Production until all checks pass:
 - `/api/health` returns HTTP 200.
 - A valid contact request returns HTTP 202.
 - The email arrives in the confirmed test inbox.
-- Invalid origin, invalid JSON, failed Turnstile and rate-limit cases are rejected.
+- Cross-origin requests, invalid JSON, failed Turnstile and rate-limit cases are rejected.
 - No form content appears in Vercel logs.
 - Rollback to the previous Vercel deployment has been tested.
