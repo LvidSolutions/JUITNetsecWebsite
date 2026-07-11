@@ -97,17 +97,13 @@
   justify-content: center;
   overflow: hidden;
   padding: 4.8% 5.5% 4.2%;
-  border: 1px solid rgba(88, 255, 126, 0.32);
-  background:
-    linear-gradient(rgba(169, 232, 180, 0.07) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(169, 232, 180, 0.07) 1px, transparent 1px),
-    rgba(3, 12, 7, 0.97);
-  background-size: 13% 25%;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  background: #f4f7f5;
   box-shadow:
     inset 0 0 28px rgba(0, 200, 83, 0.2),
     0 0 24px rgba(0, 200, 83, 0.3),
     0 0 46px rgba(0, 200, 83, 0.16);
-  color: #fff;
+  color: #050706;
   text-align: left;
   transition: background-color 300ms ease, border-color 300ms ease, box-shadow 300ms ease, color 300ms ease;
 }
@@ -121,19 +117,11 @@
   content: '';
 }
 
-.contact-monitor-cta__screen span,
 .contact-monitor-cta__screen em {
   position: relative;
   z-index: 1;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   text-transform: uppercase;
-}
-
-.contact-monitor-cta__screen span {
-  color: #a9e8b4;
-  font-size: clamp(0.32rem, 0.75vw, 0.48rem);
-  font-weight: 700;
-  letter-spacing: 0.12em;
 }
 
 .contact-monitor-cta__screen strong {
@@ -151,7 +139,7 @@
 
 .contact-monitor-cta__screen em {
   margin-top: 0.45rem;
-  color: rgba(229, 231, 235, 0.76);
+  color: rgba(5, 7, 6, 0.68);
   font-size: clamp(0.25rem, 0.54vw, 0.36rem);
   font-style: normal;
   letter-spacing: 0.08em;
@@ -172,14 +160,12 @@
     inset 0 0 34px rgba(157, 255, 177, 0.32),
     0 0 22px rgba(72, 255, 112, 0.78),
     0 0 52px rgba(0, 200, 83, 0.54);
-  color: #020703;
+  color: #fff;
 }
 
-.contact-monitor-cta__tilt[data-active='true'] .contact-monitor-cta__screen span,
 .contact-monitor-cta__tilt[data-active='true'] .contact-monitor-cta__screen em,
-.contact-monitor-cta__tilt:is(:hover, :focus-within) .contact-monitor-cta__screen span,
 .contact-monitor-cta__tilt:is(:hover, :focus-within) .contact-monitor-cta__screen em {
-  color: rgba(1, 18, 6, 0.8);
+  color: rgba(255, 255, 255, 0.82);
 }
 
 .contact-monitor-cta__placeholder {

@@ -511,7 +511,6 @@ export function ContactMonitorCTA() {
           )}
           {!showLocalFallback && (
             <div className="contact-monitor-cta__screen" aria-hidden="true">
-              <span>Secure connection</span>
               <strong>Contact us</strong>
               <em>Start a technical discussion</em>
             </div>
