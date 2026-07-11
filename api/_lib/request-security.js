@@ -9,7 +9,7 @@ function normalizeOrigin(value) {
   }
 }
 
-export function assertAllowedOrigin(request, allowedOrigins = []) {
+export function assertSameOrigin(request) {
   const originHeader = request.headers.get('origin');
   if (!originHeader) {
     throw new HttpError(403, 'Request origin is not allowed.');
@@ -17,10 +17,8 @@ export function assertAllowedOrigin(request, allowedOrigins = []) {
 
   const requestOrigin = new URL(request.url).origin;
   const normalizedOrigin = normalizeOrigin(originHeader);
-  const configuredOrigins = new Set(allowedOrigins.map(normalizeOrigin).filter(Boolean));
-  configuredOrigins.add(requestOrigin);
 
-  if (!normalizedOrigin || !configuredOrigins.has(normalizedOrigin)) {
+  if (!normalizedOrigin || normalizedOrigin !== requestOrigin) {
     throw new HttpError(403, 'Request origin is not allowed.');
   }
 }
