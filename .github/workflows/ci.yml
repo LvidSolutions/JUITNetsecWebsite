@@ -61,6 +61,7 @@ jobs:
       contents: read
       issues: read
       pull-requests: read
+      statuses: read
     env:
       GH_TOKEN: ${{ github.token }}
       PR_NUMBER: ${{ github.event.pull_request.number }}
@@ -99,47 +100,46 @@ jobs:
           echo "url=$preview_url" >> "$GITHUB_OUTPUT"
           echo "Discovered Vercel Preview: $preview_url"
 
-      - name: Wait for exact Preview commit
+      - name: Wait for Vercel status on exact commit
         shell: bash
-        env:
-          PREVIEW_URL: ${{ steps.preview.outputs.url }}
         run: |
           set -euo pipefail
-          expected_short="${EXPECTED_SHA:0:12}"
-          deployed_version=""
-          http_status="000"
-          response_file="$(mktemp)"
-          trap 'rm -f "$response_file"' EXIT
+          vercel_state=""
+          vercel_target=""
 
-          for attempt in $(seq 1 24); do
-            : > "$response_file"
-            http_status="$(
-              curl --silent --show-error --location \
-                --output "$response_file" \
-                --write-out '%{http_code}' \
-                --max-time 10 \
-                "${PREVIEW_URL}/api/health" \
-                || printf '000'
+          for attempt in $(seq 1 60); do
+            status_json="$(gh api "repos/${GITHUB_REPOSITORY}/commits/${EXPECTED_SHA}/status" 2>/dev/null || true)"
+            vercel_state="$(
+              printf '%s' "$status_json" \
+                | jq -r '[.statuses[]? | select(.context == "Vercel")][0].state // empty' \
+                2>/dev/null \
+                || true
+            )"
+            vercel_target="$(
+              printf '%s' "$status_json" \
+                | jq -r '[.statuses[]? | select(.context == "Vercel")][0].target_url // empty' \
+                2>/dev/null \
+                || true
             )"
 
-            if [ "$http_status" = "200" ]; then
-              deployed_version="$(jq -r '.version // empty' "$response_file" 2>/dev/null || true)"
-              if [ "$deployed_version" = "$expected_short" ]; then
-                break
-              fi
+            if [ "$vercel_state" = "success" ]; then
+              echo "Vercel reported success for exact commit ${EXPECTED_SHA}."
+              break
+            fi
+
+            if [ "$vercel_state" = "failure" ] || [ "$vercel_state" = "error" ]; then
+              echo "Vercel reported ${vercel_state} for exact commit ${EXPECTED_SHA}."
+              echo "Deployment details: ${vercel_target:-unavailable}"
+              exit 1
             fi
 
             sleep 5
           done
 
-          if [ "$http_status" != "200" ] || [ "$deployed_version" != "$expected_short" ]; then
-            echo "Vercel Preview verification failed."
-            echo "Expected commit: $expected_short"
-            echo "Last HTTP status: $http_status"
-            echo "Last reported version: ${deployed_version:-unavailable}"
-            echo "Response prefix:"
-            head -c 300 "$response_file" | tr '\n' ' '
-            echo
+          if [ "$vercel_state" != "success" ]; then
+            echo "No successful Vercel status was received for exact commit ${EXPECTED_SHA}."
+            echo "Last Vercel state: ${vercel_state:-unavailable}"
+            echo "Deployment details: ${vercel_target:-unavailable}"
             exit 1
           fi
 
