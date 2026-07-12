@@ -102,8 +102,6 @@ export function PixelatedServiceVideo({
       previousPointerX: null,
       previousPointerY: null,
       reducedOpacity: 0,
-      revealSourceCanvas: document.createElement('canvas'),
-      revealSourceContext: null,
       seed: sourceSeed(src),
       touchActivated: false,
       visible: false,
@@ -146,7 +144,6 @@ export function PixelatedServiceVideo({
     }
 
     state.maskContext = state.maskCanvas.getContext('2d');
-    state.revealSourceContext = state.revealSourceCanvas.getContext('2d', { alpha: false });
 
     function updateDimensions() {
       const bounds = container.getBoundingClientRect();
@@ -183,30 +180,6 @@ export function PixelatedServiceVideo({
       }
 
       drawVideoCover(pixelContext, video, pixelWidth, pixelHeight, cropPosition);
-    }
-
-    function drawGlitchReveal() {
-      // Keep the cursor field deliberately low-resolution too. The interaction
-      // can brighten the image, but never resolves it into a sharp video.
-      const revealWidth = clamp(Math.round(state.displayWidth / 16), 16, 34);
-      const revealHeight = Math.max(10, Math.round((revealWidth * state.displayHeight) / state.displayWidth));
-      const { revealSourceCanvas, revealSourceContext } = state;
-
-      if (revealSourceCanvas.width !== revealWidth || revealSourceCanvas.height !== revealHeight) {
-        revealSourceCanvas.width = revealWidth;
-        revealSourceCanvas.height = revealHeight;
-        revealSourceContext.imageSmoothingEnabled = false;
-      }
-
-      drawVideoCover(revealSourceContext, video, revealWidth, revealHeight, cropPosition);
-      revealContext.imageSmoothingEnabled = false;
-      revealContext.drawImage(revealSourceCanvas, 0, 0, state.displayWidth, state.displayHeight);
-
-      if (revealBrightness > 0) {
-        revealContext.globalCompositeOperation = 'source-atop';
-        revealContext.fillStyle = `rgba(255, 255, 255, ${revealBrightness})`;
-        revealContext.fillRect(0, 0, state.displayWidth, state.displayHeight);
-      }
     }
 
     function stamp(x, y, strength = 1) {
@@ -324,9 +297,15 @@ export function PixelatedServiceVideo({
       revealContext.clearRect(0, 0, state.displayWidth, state.displayHeight);
       revealContext.globalCompositeOperation = 'source-over';
       revealContext.globalAlpha = 1;
-      drawGlitchReveal();
+      revealContext.imageSmoothingEnabled = true;
+      drawVideoCover(revealContext, video, state.displayWidth, state.displayHeight, cropPosition);
       revealContext.globalCompositeOperation = 'destination-in';
       revealContext.drawImage(state.maskCanvas, 0, 0, state.displayWidth, state.displayHeight);
+      if (revealBrightness > 0) {
+        revealContext.globalCompositeOperation = 'source-atop';
+        revealContext.fillStyle = `rgba(255, 255, 255, ${revealBrightness})`;
+        revealContext.fillRect(0, 0, state.displayWidth, state.displayHeight);
+      }
       revealContext.globalCompositeOperation = 'source-over';
     }
 
@@ -339,7 +318,14 @@ export function PixelatedServiceVideo({
       if (state.reducedOpacity <= 0.012 || video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) return;
 
       revealContext.globalAlpha = state.reducedOpacity;
-      drawGlitchReveal();
+      revealContext.imageSmoothingEnabled = true;
+      drawVideoCover(revealContext, video, state.displayWidth, state.displayHeight, cropPosition);
+      if (revealBrightness > 0) {
+        revealContext.globalCompositeOperation = 'source-atop';
+        revealContext.fillStyle = `rgba(255, 255, 255, ${revealBrightness})`;
+        revealContext.fillRect(0, 0, state.displayWidth, state.displayHeight);
+      }
+      revealContext.globalCompositeOperation = 'source-over';
       revealContext.globalAlpha = 1;
     }
 
