@@ -169,8 +169,8 @@ export function NetsecOperatingModel({ activeIndex, onSelect }) {
 
       <Container className="relative">
         <div className="max-w-3xl">
-          <p className="flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.3em] text-brand-pastel">
-            <span aria-hidden="true" className="h-1.5 w-1.5 rounded-[1px] bg-brand-pastel" />
+          <p className="flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.3em] text-brand-green">
+            <span aria-hidden="true" className="h-1.5 w-1.5 rounded-[1px] bg-brand-green" />
             Operating model
           </p>
           <h2 className="mt-5 font-display text-3xl font-semibold leading-[1.05] tracking-tight text-brand-white sm:text-4xl lg:text-5xl">
@@ -189,14 +189,14 @@ export function NetsecOperatingModel({ activeIndex, onSelect }) {
 
           <div className="lg:ml-auto lg:w-full lg:max-w-[24rem] lg:border-l lg:border-brand-line lg:pl-8">
             <div className="flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.26em]">
-              <span className="text-brand-pastel">
+              <span className="text-brand-green">
                 {active.number} <span className="text-brand-mist/35">/ {String(processStages.length).padStart(2, '0')}</span>
               </span>
               <span className="text-brand-mist/45">{active.code}</span>
             </div>
             <div className="mt-4 h-px w-full bg-brand-line">
               <div
-                className="h-px bg-brand-pastel transition-all duration-300"
+                className="h-px bg-brand-green transition-all duration-300"
                 style={{ width: `${((((activeIndex ?? 0) + 1) / processStages.length) * 100)}%` }}
               />
             </div>
@@ -217,7 +217,7 @@ export function NetsecOperatingModel({ activeIndex, onSelect }) {
                   {active.tags.map((tag) => (
                     <span
                       key={tag}
-                      className="border border-brand-pastel/30 px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-brand-pastel"
+                      className="border border-brand-green/30 px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-brand-green"
                     >
                       {tag}
                     </span>
@@ -225,7 +225,7 @@ export function NetsecOperatingModel({ activeIndex, onSelect }) {
                 </div>
                 <a
                   href="/kontakt"
-                  className="group mt-8 inline-flex items-center gap-3 border border-brand-pastel/55 px-6 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-brand-pastel transition-colors duration-200 hover:bg-brand-pastel hover:text-brand-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-pastel"
+                  className="group mt-8 inline-flex items-center gap-3 border border-brand-green/55 px-6 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-brand-green transition-colors duration-200 hover:bg-brand-green hover:text-brand-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green"
                 >
                   Discuss this layer
                   <span aria-hidden="true" className="transition-transform duration-300 group-hover:translate-x-0.5">-&gt;</span>

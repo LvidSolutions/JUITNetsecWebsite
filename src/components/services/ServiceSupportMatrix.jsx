@@ -20,8 +20,8 @@ export function ServiceSupportMatrix() {
       <Container className="relative">
         <div className="flex flex-col gap-3 border-b border-brand-line pb-6 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.3em] text-brand-pastel">
-              <span aria-hidden="true" className="h-1.5 w-1.5 rounded-[1px] bg-brand-pastel" />
+            <p className="flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.3em] text-brand-green">
+              <span aria-hidden="true" className="h-1.5 w-1.5 rounded-[1px] bg-brand-green" />
               Capability matrix
             </p>
             <h2 className="mt-4 max-w-2xl font-display text-2xl font-semibold leading-tight tracking-tight text-brand-white sm:text-3xl">
@@ -42,13 +42,13 @@ export function ServiceSupportMatrix() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.4 }}
               transition={{ duration: 0.5, ease: EASE, delay: reduce ? 0 : index * 0.04 }}
-              className="group relative flex min-h-[15rem] flex-col bg-brand-black p-6 transition-colors duration-300 hover:bg-brand-pastel/[0.03] sm:p-7"
+              className="group relative flex min-h-[15rem] flex-col bg-brand-black p-6 transition-colors duration-300 hover:bg-brand-ink sm:p-7"
             >
               <div className="flex items-start justify-between">
-                <span className="font-display text-3xl font-semibold leading-none text-brand-white/15 transition-colors duration-300 group-hover:text-brand-pastel/40">
+                <span className="font-display text-3xl font-semibold leading-none text-brand-white/15 transition-colors duration-300 group-hover:text-brand-green/40">
                   {domain.number}
                 </span>
-                <span className="flex h-10 w-10 items-center justify-center border border-brand-pastel/25 bg-brand-pastel/5 font-mono text-[11px] font-semibold tracking-[0.12em] text-brand-pastel">
+                <span className="flex h-10 w-10 items-center justify-center border border-brand-green/25 bg-brand-ink font-mono text-[11px] font-semibold tracking-[0.12em] text-brand-green">
                   {domain.symbol}
                 </span>
               </div>
@@ -61,7 +61,7 @@ export function ServiceSupportMatrix() {
                 {domain.focus.map((f) => (
                   <span key={f} className="font-mono text-[10px] uppercase tracking-[0.14em] text-brand-mist/45">
                     {f}
-                    <span aria-hidden="true" className="ml-1.5 text-brand-pastel/40">/</span>
+                    <span aria-hidden="true" className="ml-1.5 text-brand-green/40">/</span>
                   </span>
                 ))}
               </div>
@@ -77,8 +77,8 @@ export function ServiceSupportMatrix() {
           <ul className="mt-5 flex flex-wrap gap-x-8 gap-y-3">
             {vendors.map((vendor) => {
               const inner = (
-                <span className="inline-flex items-center gap-2 font-mono text-[12px] uppercase tracking-[0.12em] text-brand-mist/55 transition-colors duration-200 group-hover/v:text-brand-pastel">
-                  <span className="text-brand-pastel/50">{vendor.symbol}</span>
+                <span className="inline-flex items-center gap-2 font-mono text-[12px] uppercase tracking-[0.12em] text-brand-mist/55 transition-colors duration-200 group-hover/v:text-brand-green">
+                  <span className="text-brand-green/50">{vendor.symbol}</span>
                   {vendor.name}
                 </span>
               );
@@ -90,7 +90,7 @@ export function ServiceSupportMatrix() {
                       target="_blank"
                       rel="noreferrer"
                       aria-label={`Open ${vendor.name} in a new tab`}
-                      className="group/v rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-pastel focus-visible:ring-offset-2 focus-visible:ring-offset-brand-black"
+                      className="group/v rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-green focus-visible:ring-offset-2 focus-visible:ring-offset-brand-black"
                     >
                       {inner}
                     </a>

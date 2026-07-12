@@ -6,11 +6,11 @@ export function ServicesCTA() {
       <div aria-hidden="true" className="service-static pointer-events-none absolute inset-[-15%] -z-10" />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_120%,rgba(169,232,180,0.12),transparent_55%)]"
+        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_120%,rgba(255,255,255,0.035),transparent_55%)]"
       />
       <Container className="relative text-center">
-        <p className="flex items-center justify-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.3em] text-brand-pastel">
-          <span aria-hidden="true" className="h-1.5 w-1.5 rounded-[1px] bg-brand-pastel" />
+        <p className="flex items-center justify-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.3em] text-brand-green">
+          <span aria-hidden="true" className="h-1.5 w-1.5 rounded-[1px] bg-brand-green" />
           Next step
         </p>
         <h2 className="mx-auto mt-6 max-w-3xl font-display text-3xl font-semibold leading-[1.08] tracking-tight text-brand-white sm:text-4xl lg:text-5xl">
@@ -23,14 +23,14 @@ export function ServicesCTA() {
         <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
           <a
             href="/kontakt"
-            className="group inline-flex items-center justify-center gap-3 rounded-full bg-brand-pastel px-8 py-4 text-[13px] font-semibold uppercase tracking-[0.16em] text-brand-black transition-colors duration-200 hover:bg-brand-pastel-soft focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-pastel"
+            className="group inline-flex items-center justify-center gap-3 rounded-full bg-brand-green px-8 py-4 text-[13px] font-semibold uppercase tracking-[0.16em] text-brand-black transition-colors duration-200 hover:bg-brand-green/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green"
           >
             Talk to Netsec
             <span aria-hidden="true" className="transition-transform duration-300 group-hover:translate-x-0.5">→</span>
           </a>
           <a
             href="/kontakt"
-            className="inline-flex items-center justify-center gap-3 rounded-full border border-brand-line px-8 py-4 text-[13px] font-semibold uppercase tracking-[0.16em] text-brand-white transition-colors duration-200 hover:border-brand-pastel/60 hover:text-brand-pastel focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-pastel"
+            className="inline-flex items-center justify-center gap-3 rounded-full border border-brand-line px-8 py-4 text-[13px] font-semibold uppercase tracking-[0.16em] text-brand-white transition-colors duration-200 hover:border-brand-green/60 hover:text-brand-green focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green"
           >
             View contact options
           </a>

@@ -12,7 +12,7 @@ import { serviceTracks } from '../services/servicesData.js';
  *  1. En tre-panels tjänsteväljare (Section 2) som styr en dynamisk detaljpanel (Section 3).
  *  2. En cirkulär driftsmodell/radar med sex steg (Section 4).
  * Allt innehåll kommer från den befintliga Services-sidan (servicesData.js).
- * Aktiv färg är pastellgrön (ersätter Shift5:s röda).
+ * Aktiv färg är JUIT:s befintliga gröna accent.
  */
 export function ServicesSection() {
   const [activeTrack, setActiveTrack] = useState(0);

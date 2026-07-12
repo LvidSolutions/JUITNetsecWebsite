@@ -7,13 +7,13 @@ function DetailList({ label, items, accent = false }) {
   return (
     <div>
       <p className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.24em] text-brand-mist/45">
-        <span aria-hidden="true" className={accent ? 'h-1.5 w-1.5 rounded-[1px] bg-brand-pastel' : 'h-1.5 w-1.5 rounded-[1px] bg-brand-mist/40'} />
+        <span aria-hidden="true" className={accent ? 'h-1.5 w-1.5 rounded-[1px] bg-brand-green' : 'h-1.5 w-1.5 rounded-[1px] bg-brand-mist/40'} />
         {label}
       </p>
       <ul className="mt-4 space-y-2.5">
         {items.map((item) => (
           <li key={item} className="flex gap-2.5 text-sm leading-6 text-brand-mist/70">
-            <span aria-hidden="true" className="mt-2 h-px w-3 shrink-0 bg-brand-pastel/60" />
+            <span aria-hidden="true" className="mt-2 h-px w-3 shrink-0 bg-brand-green/60" />
             {item}
           </li>
         ))}
@@ -43,8 +43,8 @@ export function ServiceDetailPanel({ track }) {
           >
             <div className="grid gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:gap-16">
               {/* Vänster: kod/lager, titel, paragraf, CTA */}
-              <div className="border-l border-brand-pastel/40 pl-6 sm:pl-8">
-                <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-brand-pastel">
+              <div className="border-l border-brand-green/40 pl-6 sm:pl-8">
+                <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-brand-green">
                   {track.number} / {track.code} · {track.layer}
                 </p>
                 <h3 className="mt-5 font-display text-3xl font-semibold leading-[1.05] tracking-tight text-brand-white sm:text-4xl lg:text-5xl">
@@ -57,7 +57,7 @@ export function ServiceDetailPanel({ track }) {
                 <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
                   <a
                     href="/kontakt"
-                    className="group inline-flex items-center gap-3 rounded-full bg-brand-pastel px-6 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-brand-black transition-colors duration-200 hover:bg-brand-pastel-soft focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-pastel"
+                    className="group inline-flex items-center gap-3 rounded-full bg-brand-green px-6 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-brand-black transition-colors duration-200 hover:bg-brand-green/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green"
                   >
                     Discuss {track.code}
                     <span aria-hidden="true" className="transition-transform duration-300 group-hover:translate-x-0.5">→</span>

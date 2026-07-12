@@ -1,9 +1,6 @@
 // Data for the Services page. Content is organized around the Services selector,
 // the square process model, and the retained support matrix.
 
-export const PASTEL = '#A9E8B4';
-export const PASTEL_SOFT = '#B8F2C2';
-
 export const serviceTracks = [
   {
     id: 'ops',
@@ -12,6 +9,9 @@ export const serviceTracks = [
     title: 'Managed IT Operations',
     layer: 'Operations layer',
     graphic: 'stack',
+    video: '/assets/cosmos_1992624789.mp4',
+    objectPosition: '50% 48%',
+    cropPosition: [0.5, 0.48],
     description:
       'Operate, support and maintain the IT environment across devices, users, networks, infrastructure, help desk and cloud so systems stay secure, documented and stable over time.',
     tags: ['Device', 'Network', 'Infrastructure', 'Help Desk', 'Cloud', 'Documentation'],
@@ -39,6 +39,9 @@ export const serviceTracks = [
     title: 'Cybersecurity',
     layer: 'Protection layer',
     graphic: 'orbit',
+    video: '/assets/cosmos_1032118682.mp4',
+    objectPosition: '58% 50%',
+    cropPosition: [0.58, 0.5],
     description:
       'Reduce risk through practical cybersecurity guidance, cloud and identity hardening, incident readiness, compliance support and security awareness.',
     tags: ['Strategy', 'Cloud Security', 'Identity', 'Incident Readiness', 'Compliance', 'Awareness'],
@@ -66,6 +69,9 @@ export const serviceTracks = [
     title: 'Control Plane & Governance',
     layer: 'Management layer',
     graphic: 'cube',
+    video: '/assets/cosmos_93407076 (1).mp4',
+    objectPosition: '42% 50%',
+    cropPosition: [0.42, 0.5],
     description:
       'Connect IT and security into one operating layer across identity, tooling, visibility, ownership, governance and continuous improvement.',
     tags: ['Identity', 'Visibility', 'Governance', 'Tooling', 'Ownership', 'Improvement'],
