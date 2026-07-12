@@ -38,7 +38,7 @@ function Panel({ track, index, isActive, onSelect, reduce }) {
         interactionTargetRef={panelRef}
         revealControllerRef={revealControllerRef}
         isSelected={isActive}
-        revealBrightness={track.id === 'sec' ? 0.34 : 0}
+        dimBrightRevealBackground={track.id === 'sec' ? 0.62 : 0}
       />
     </button>
   );

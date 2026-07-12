@@ -64,7 +64,7 @@ export function PixelatedServiceVideo({
   interactionTargetRef,
   revealControllerRef,
   isSelected,
-  revealBrightness = 0,
+  dimBrightRevealBackground = 0,
 }) {
   const containerRef = useRef(null);
   const videoRef = useRef(null);
@@ -180,6 +180,27 @@ export function PixelatedServiceVideo({
       }
 
       drawVideoCover(pixelContext, video, pixelWidth, pixelHeight, cropPosition);
+    }
+
+    function dimBrightBackgroundOnly() {
+      if (dimBrightRevealBackground <= 0) return;
+
+      const image = revealContext.getImageData(0, 0, state.displayWidth, state.displayHeight);
+      const pixels = image.data;
+
+      for (let offset = 0; offset < pixels.length; offset += 4) {
+        const luminance = pixels[offset] * 0.2126 + pixels[offset + 1] * 0.7152 + pixels[offset + 2] * 0.0722;
+        const backgroundAmount = smoothstep(108, 170, luminance);
+
+        if (backgroundAmount <= 0) continue;
+
+        const brightness = 1 - dimBrightRevealBackground * backgroundAmount;
+        pixels[offset] *= brightness;
+        pixels[offset + 1] *= brightness;
+        pixels[offset + 2] *= brightness;
+      }
+
+      revealContext.putImageData(image, 0, 0);
     }
 
     function stamp(x, y, strength = 1) {
@@ -299,13 +320,9 @@ export function PixelatedServiceVideo({
       revealContext.globalAlpha = 1;
       revealContext.imageSmoothingEnabled = true;
       drawVideoCover(revealContext, video, state.displayWidth, state.displayHeight, cropPosition);
+      dimBrightBackgroundOnly();
       revealContext.globalCompositeOperation = 'destination-in';
       revealContext.drawImage(state.maskCanvas, 0, 0, state.displayWidth, state.displayHeight);
-      if (revealBrightness > 0) {
-        revealContext.globalCompositeOperation = 'source-atop';
-        revealContext.fillStyle = `rgba(255, 255, 255, ${revealBrightness})`;
-        revealContext.fillRect(0, 0, state.displayWidth, state.displayHeight);
-      }
       revealContext.globalCompositeOperation = 'source-over';
     }
 
@@ -320,11 +337,7 @@ export function PixelatedServiceVideo({
       revealContext.globalAlpha = state.reducedOpacity;
       revealContext.imageSmoothingEnabled = true;
       drawVideoCover(revealContext, video, state.displayWidth, state.displayHeight, cropPosition);
-      if (revealBrightness > 0) {
-        revealContext.globalCompositeOperation = 'source-atop';
-        revealContext.fillStyle = `rgba(255, 255, 255, ${revealBrightness})`;
-        revealContext.fillRect(0, 0, state.displayWidth, state.displayHeight);
-      }
+      dimBrightBackgroundOnly();
       revealContext.globalCompositeOperation = 'source-over';
       revealContext.globalAlpha = 1;
     }
@@ -456,7 +469,7 @@ export function PixelatedServiceVideo({
       video.removeEventListener('playing', scheduleFrame);
       if (revealControllerRef.current?.enter === beginReveal) revealControllerRef.current = null;
     };
-  }, [cropPosition, interactionTargetRef, reducedMotion, revealBrightness, revealControllerRef, src]);
+  }, [cropPosition, dimBrightRevealBackground, interactionTargetRef, reducedMotion, revealControllerRef, src]);
 
   useEffect(() => {
     const state = simulationRef.current;
