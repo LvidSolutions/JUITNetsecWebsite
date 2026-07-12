@@ -1,5 +1,6 @@
 import { Component, Suspense, lazy, useEffect, useRef, useState } from 'react';
 import { Container } from '../ui';
+import { DistortedText } from '../ui/DistortedText.jsx';
 
 // ogl (WebGL) ligger i sin egen chunk och laddas först när sektionen behövs,
 // så att startsidans initiala JS-bundle hålls liten.
@@ -153,7 +154,9 @@ export function TerminalSignalSection() {
           Signal / Infrastructure / Control
         </p>
         <h2 className="mt-6 max-w-4xl font-display text-4xl font-semibold leading-[1.05] tracking-tight text-brand-white sm:text-5xl lg:text-6xl">
-          Behind every stable IT environment is technical control.
+          <DistortedText selective className="pointer-events-auto">
+            Behind every stable IT environment is technical control.
+          </DistortedText>
         </h2>
         <p className="mt-6 max-w-2xl text-base leading-relaxed text-brand-mist/80 sm:text-lg sm:leading-8">
           JUIT NetSec helps organizations create order in complex environments — from networking and

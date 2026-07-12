@@ -1,0 +1,53 @@
+.home-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  width: 22px;
+  height: 22px;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate3d(var(--cursor-x, -100px), var(--cursor-y, -100px), 0) translate(-50%, -50%);
+  transition: opacity 90ms linear, width 160ms ease, height 160ms ease;
+}
+
+.home-cursor::before,
+.home-cursor::after {
+  position: absolute;
+  content: '';
+  pointer-events: none;
+}
+
+.home-cursor::before {
+  inset: 2px;
+  border: 1px dashed rgba(245, 255, 246, 0.94);
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(211, 255, 224, 0.28);
+}
+
+.home-cursor::after {
+  top: 50%;
+  left: 50%;
+  width: 3px;
+  height: 3px;
+  border: 1px solid rgba(245, 255, 246, 0.94);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.home-cursor[data-visible='true'] {
+  opacity: 1;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  body[data-home-cursor-active='true'] [data-home-cursor-scope='true'],
+  body[data-home-cursor-active='true'] [data-home-cursor-scope='true'] * {
+    cursor: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce), (hover: none), (pointer: coarse) {
+  .home-cursor {
+    display: none;
+  }
+}

@@ -1,6 +1,7 @@
 import { motion, useReducedMotion } from 'framer-motion';
 import { Container } from '../ui';
 import { StatCard } from './StatCard.jsx';
+import { DistortedText } from '../ui/DistortedText.jsx';
 
 const stats = [
   {
@@ -53,7 +54,7 @@ export function StatsSection() {
             01 / The risk landscape
           </p>
           <h2 className="mt-4 max-w-2xl text-3xl font-semibold leading-tight text-brand-white sm:text-4xl lg:text-5xl">
-            Cyber risk is no longer a future problem
+            <DistortedText selective>Cyber risk is no longer a future problem</DistortedText>
           </h2>
           <p className="mt-6 max-w-2xl text-lg leading-8 text-brand-mist">
             For many companies, security isn't about a single product — it's about visibility, control

@@ -1,4 +1,5 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
+import './HomeCursor.css';
 
 const finePointerQuery = '(hover: hover) and (pointer: fine)';
 
@@ -29,9 +30,14 @@ function nearestReloadTarget(scope, target, x, y) {
 }
 
 export function HomeCursor() {
+  const cursorRef = useRef(null);
+
   useEffect(() => {
     const media = window.matchMedia(finePointerQuery);
     let activeTarget = null;
+    let frame = 0;
+    let visible = false;
+    const pointer = { x: -100, y: -100, targetX: -100, targetY: -100 };
 
     const setActiveTarget = (nextTarget) => {
       if (activeTarget === nextTarget) return;
@@ -40,22 +46,52 @@ export function HomeCursor() {
       activeTarget?.dispatchEvent(new CustomEvent('homecursorenter'));
     };
 
+    const render = () => {
+      frame = 0;
+      const cursor = cursorRef.current;
+      if (!cursor || !visible) return;
+
+      pointer.x += (pointer.targetX - pointer.x) * 0.46;
+      pointer.y += (pointer.targetY - pointer.y) * 0.46;
+      cursor.style.setProperty('--cursor-x', `${pointer.x}px`);
+      cursor.style.setProperty('--cursor-y', `${pointer.y}px`);
+
+      if (Math.abs(pointer.targetX - pointer.x) > 0.15 || Math.abs(pointer.targetY - pointer.y) > 0.15) {
+        frame = window.requestAnimationFrame(render);
+      }
+    };
+
+    const hide = () => {
+      visible = false;
+      setActiveTarget(null);
+      document.body.dataset.homeCursorActive = 'false';
+      cursorRef.current?.setAttribute('data-visible', 'false');
+      window.cancelAnimationFrame(frame);
+      frame = 0;
+    };
+
     const update = (event) => {
       if (!media.matches || !(event.target instanceof Element)) {
-        setActiveTarget(null);
+        hide();
         return;
       }
 
       const scope = event.target.closest('[data-home-cursor-scope="true"]');
       if (!scope) {
-        setActiveTarget(null);
+        hide();
         return;
       }
 
+      pointer.targetX = event.clientX;
+      pointer.targetY = event.clientY;
+      visible = true;
+      document.body.dataset.homeCursorActive = 'true';
+      cursorRef.current?.setAttribute('data-visible', 'true');
       setActiveTarget(nearestReloadTarget(scope, event.target, event.clientX, event.clientY));
+      if (!frame) frame = window.requestAnimationFrame(render);
     };
 
-    const clear = () => setActiveTarget(null);
+    const clear = () => hide();
     const refreshPointerMode = () => {
       if (!media.matches) clear();
     };
@@ -68,9 +104,10 @@ export function HomeCursor() {
       document.removeEventListener('pointermove', update);
       document.removeEventListener('pointerleave', clear);
       media.removeEventListener('change', refreshPointerMode);
+      window.cancelAnimationFrame(frame);
       clear();
     };
   }, []);
 
-  return null;
+  return <div ref={cursorRef} className="home-cursor" data-visible="false" aria-hidden="true" />;
 }
