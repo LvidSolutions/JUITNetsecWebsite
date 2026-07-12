@@ -1,77 +1,51 @@
-.distorted-text,
-.home-text-distort {
+.distorted-text {
   position: relative;
-  isolation: isolate;
 }
 
-.text-reload-layer {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  display: block;
-  width: 100%;
-  color: inherit;
-  font: inherit;
-  letter-spacing: inherit;
-  line-height: inherit;
-  pointer-events: none;
-  text-align: inherit;
-  text-decoration: inherit;
-  user-select: none;
-  opacity: 0;
-  white-space: pre-wrap;
-  line-height: inherit;
-}
-
-.text-reload-word {
+.selective-text-source,
+.selective-text-word {
   display: contents;
 }
 
-.text-reload-glyph {
+.selective-text-glyph {
+  position: relative;
   display: inline-grid;
   grid-template-areas: 'stack';
-  height: 1em;
-  overflow: hidden;
+  line-height: inherit;
   vertical-align: baseline;
-  line-height: 1em;
 }
 
-.text-reload-glyph__measure,
-.text-reload-glyph__track {
+.selective-text-glyph__source {
   grid-area: stack;
+  line-height: inherit;
 }
 
-.text-reload-glyph__measure {
-  visibility: hidden;
+.selective-text-glyph__slot {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
 }
 
-.text-reload-glyph__track {
+.selective-text-glyph__track {
   display: flex;
   flex-direction: column;
-  line-height: 1;
+  line-height: inherit;
   transform: translate3d(0, 0, 0);
 }
 
-.text-reload-glyph__track > span {
+.selective-text-glyph__track > span {
   display: block;
-  height: 1em;
-  line-height: 1em;
+  line-height: inherit;
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .distorted-text[data-reload-active='true'] > .text-reload-source,
-  .home-text-distort[data-reload-active='true'] > .text-reload-source {
+  .selective-text-glyph[data-glitching='true'] > .selective-text-glyph__source {
     opacity: 0;
   }
 
-  .distorted-text[data-reload-active='true'] > .text-reload-layer,
-  .home-text-distort[data-reload-active='true'] > .text-reload-layer {
-    opacity: 1;
-  }
-
-  .distorted-text[data-reload-active='true'] .text-reload-glyph__track,
-  .home-text-distort[data-reload-active='true'] .text-reload-glyph__track {
-    animation: text-reload-scroll var(--reload-duration, 340ms) steps(var(--glyph-steps), end) var(--glyph-delay) both;
+  .selective-text-glyph[data-glitching='true'] .selective-text-glyph__track {
+    animation: text-reload-scroll var(--reload-duration, 260ms) steps(var(--glyph-steps), end) var(--glyph-delay) both;
   }
 }
 
@@ -82,7 +56,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .text-reload-layer {
+  .selective-text-glyph__slot {
     display: none;
   }
 }

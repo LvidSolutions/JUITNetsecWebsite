@@ -13,7 +13,6 @@ import { TerminalSignalSection } from './components/sections/TerminalSignalSecti
 import { NextStepPlaceholder } from './components/sections/NextStepPlaceholder.jsx';
 import { ServicesSection } from './components/sections/ServicesSection.jsx';
 import { HomeCursor } from './components/ui/HomeCursor.jsx';
-import { HomeTextEffects } from './components/ui/HomeTextEffects.jsx';
 import { useHeroIntroProgress } from './lib/useHeroIntroProgress.js';
 
 const titles = {
@@ -171,7 +170,6 @@ function App() {
         {(currentPath === '/kontakt' || currentPath === '/contact') && <ContactPage />}
       </main>
       <Footer homeEffects={isHome} />
-      {isHome && <HomeTextEffects />}
       {isHome && <HomeCursor />}
     </>
   );

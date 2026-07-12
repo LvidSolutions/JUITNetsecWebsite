@@ -28,33 +28,14 @@ function glyphFor(character, seed) {
   return TECHNICAL_GLYPHS[seed % TECHNICAL_GLYPHS.length];
 }
 
-function createStartPoints(length, seed, count) {
-  if (length <= 1) return [0];
-
-  let current = seed >>> 0;
-  const anchors = [];
-
-  for (let index = 0; index < count; index += 1) {
-    [current] = nextRandom(current);
-    const segmentStart = Math.floor((index * length) / count);
-    const segmentEnd = Math.max(segmentStart, Math.floor(((index + 1) * length) / count) - 1);
-    const span = segmentEnd - segmentStart + 1;
-    anchors.push(segmentStart + Math.floor((current / 0x100000000) * span));
-  }
-
-  return [...new Set(anchors)].sort((first, second) => first - second);
-}
-
-export function createGlyphRail(character, seed, minIntermediates = 3, maxIntermediates = 6) {
-  if (/\s/.test(character)) return [character];
-
+function createGlyphRail(character, seed, config) {
   let current = seed >>> 0;
   [current] = nextRandom(current);
-  const range = Math.max(0, maxIntermediates - minIntermediates);
-  const intermediateCount = minIntermediates + Math.floor((current / 0x100000000) * (range + 1));
+  const range = config.maxIntermediates - config.minIntermediates;
+  const count = config.minIntermediates + Math.floor((current / 0x100000000) * (range + 1));
   const rail = [];
 
-  for (let index = 0; index < intermediateCount; index += 1) {
+  for (let index = 0; index < count; index += 1) {
     [current] = nextRandom(current);
     rail.push(glyphFor(character, current));
   }
@@ -63,95 +44,86 @@ export function createGlyphRail(character, seed, minIntermediates = 3, maxInterm
   return rail;
 }
 
-export function createReloadSequence(text, seed, config) {
-  const characters = Array.from(text);
-  const activeIndexes = characters
-    .map((character, index) => (character === '\n' || /\s/.test(character) ? -1 : index))
-    .filter((index) => index >= 0);
-  const anchorCount = Math.min(config.anchorCount, Math.max(1, Math.ceil(activeIndexes.length / 7)));
-  const anchors = createStartPoints(activeIndexes.length, seed, anchorCount).map((index) => activeIndexes[index]);
+function createWords(text) {
+  let glyphIndex = 0;
+  let tokenIndex = 0;
+
+  return text.split(/(\s+)/).map((token) => {
+    const key = `token-${tokenIndex}`;
+    tokenIndex += 1;
+
+    if (token === '\n') return { type: 'break', key };
+    if (/^\s+$/.test(token)) return { type: 'space', value: token, key };
+
+    return {
+      type: 'word',
+      key,
+      glyphs: Array.from(token).map((character) => {
+        const glyph = { character, index: glyphIndex };
+        glyphIndex += 1;
+        return glyph;
+      }),
+    };
+  });
+}
+
+export function createSelectiveSequence(text, seed, config) {
+  const words = createWords(text);
+  const candidates = words.filter((word) => word.type === 'word' && word.glyphs.length > config.minSegment);
+  const stripCount = Math.min(config.stripCount, candidates.length);
+  const selectedGlyphs = new Map();
   let current = seed >>> 0;
   let maxDelay = 0;
-  let activeIndex = 0;
-  let tokenIndex = 0;
-  const words = [];
-  let word = null;
 
-  characters.forEach((character, characterIndex) => {
-    if (character === '\n') {
-      words.push({ type: 'break', key: `break-${tokenIndex}` });
-      tokenIndex += 1;
-      word = null;
-      return;
-    }
-
-    if (/\s/.test(character)) {
-      words.push({ type: 'space', value: character, key: `space-${tokenIndex}` });
-      tokenIndex += 1;
-      word = null;
-      return;
-    }
-
-    if (!word) {
-      word = { type: 'word', glyphs: [], key: `word-${tokenIndex}` };
-      words.push(word);
-      tokenIndex += 1;
-    }
+  for (let stripIndex = 0; stripIndex < stripCount; stripIndex += 1) {
+    [current] = nextRandom(current);
+    const segmentStart = Math.floor((stripIndex * candidates.length) / stripCount);
+    const segmentEnd = Math.max(segmentStart, Math.floor(((stripIndex + 1) * candidates.length) / stripCount) - 1);
+    const word = candidates[segmentStart + Math.floor((current / 0x100000000) * (segmentEnd - segmentStart + 1))];
+    const segmentLength = Math.min(
+      word.glyphs.length - 1,
+      config.minSegment + Math.floor((current / 0x100000000) * (config.maxSegment - config.minSegment + 1)),
+    );
+    const startLimit = Math.max(0, word.glyphs.length - segmentLength);
 
     [current] = nextRandom(current);
-    const distance = Math.min(...anchors.map((anchor) => Math.abs(characterIndex - anchor)));
-    const jitter = Math.floor((current / 0x100000000) * config.delayJitter);
-    const delay = distance * config.waveStep + jitter;
-    const rail = createGlyphRail(character, current, config.minIntermediates, config.maxIntermediates);
+    const start = Math.floor((current / 0x100000000) * (startLimit + 1));
 
-    word.glyphs.push({
-      character,
-      rail,
-      delay,
-      key: `glyph-${characterIndex}-${activeIndex}`,
+    word.glyphs.slice(start, start + segmentLength).forEach((glyph, glyphOffset) => {
+      [current] = nextRandom(current);
+      const delay = stripIndex * config.stripStagger + glyphOffset * config.glyphStagger;
+      selectedGlyphs.set(glyph.index, {
+        ...glyph,
+        delay,
+        rail: createGlyphRail(glyph.character, current, config),
+      });
+      maxDelay = Math.max(maxDelay, delay);
     });
-    maxDelay = Math.max(maxDelay, delay);
-    activeIndex += 1;
-  });
+  }
 
   return {
-    words,
+    words: words.map((word) =>
+      word.type === 'word'
+        ? {
+            ...word,
+            glyphs: word.glyphs.map((glyph) => selectedGlyphs.get(glyph.index) || glyph),
+          }
+        : word,
+    ),
     duration: config.duration + maxDelay,
   };
 }
 
-export function reloadConfig(intensity = 'medium') {
-  if (intensity === 'subtle') {
-    return {
-      duration: 240,
-      minIntermediates: 3,
-      maxIntermediates: 4,
-      anchorCount: 3,
-      waveStep: 16,
-      delayJitter: 6,
-      settleDelay: 60,
-    };
-  }
-
-  if (intensity === 'strong') {
-    return {
-      duration: 360,
-      minIntermediates: 4,
-      maxIntermediates: 6,
-      anchorCount: 5,
-      waveStep: 18,
-      delayJitter: 8,
-      settleDelay: 90,
-    };
-  }
-
+export function reloadConfig() {
   return {
-    duration: 300,
+    duration: 260,
     minIntermediates: 3,
     maxIntermediates: 5,
-    anchorCount: 4,
-    waveStep: 17,
-    delayJitter: 7,
-    settleDelay: 75,
+    stripCount: 3,
+    minSegment: 2,
+    maxSegment: 5,
+    stripStagger: 54,
+    glyphStagger: 16,
+    settleDelay: 80,
   };
 }

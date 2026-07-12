@@ -1,6 +1,6 @@
 import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import './DistortedText.css';
-import { createReloadSequence, reloadConfig } from './textReload.js';
+import { createSelectiveSequence, reloadConfig } from './textReload.js';
 
 function getTextValue(children) {
   return Array.isArray(children)
@@ -15,7 +15,7 @@ export const DistortedText = forwardRef(function DistortedText(
     as: Component = 'span',
     className = '',
     children,
-    intensity = 'medium',
+    selective = false,
     colorSeparation: _colorSeparation = false,
     duration,
     onPointerEnter,
@@ -25,67 +25,60 @@ export const DistortedText = forwardRef(function DistortedText(
   },
   forwardedRef,
 ) {
-  const animationFrameRef = useRef(0);
   const timeoutRef = useRef(0);
   const hoverStartedRef = useRef(false);
   const proximityActiveRef = useRef(false);
   const elementRef = useRef(null);
   const [active, setActive] = useState(false);
   const [sequence, setSequence] = useState(1);
-  const baseConfig = useMemo(() => reloadConfig(intensity), [intensity]);
-  const config = useMemo(
-    () => ({ ...baseConfig, duration: duration || baseConfig.duration }),
-    [baseConfig, duration],
-  );
   const textValue = getTextValue(children);
-  const reloadSequence = useMemo(
-    () => createReloadSequence(textValue, sequence * 7919, config),
+  const config = useMemo(() => {
+    const base = reloadConfig();
+    return { ...base, duration: duration || base.duration };
+  }, [duration]);
+  const selectiveSequence = useMemo(
+    () => createSelectiveSequence(textValue, sequence * 7919, config),
     [
-      config.anchorCount,
-      config.delayJitter,
       config.duration,
+      config.glyphStagger,
       config.maxIntermediates,
+      config.maxSegment,
       config.minIntermediates,
-      config.waveStep,
+      config.minSegment,
+      config.stripCount,
+      config.stripStagger,
       sequence,
       textValue,
     ],
   );
 
-  useEffect(
-    () => () => {
-      window.cancelAnimationFrame(animationFrameRef.current);
-      window.clearTimeout(timeoutRef.current);
-    },
-    [],
-  );
-
-  const finishReload = useCallback(() => {
-    window.cancelAnimationFrame(animationFrameRef.current);
+  const stopReload = useCallback(() => {
     window.clearTimeout(timeoutRef.current);
     setActive(false);
   }, []);
 
   const startReload = useCallback(() => {
-    if (hoverStartedRef.current || !textValue) return;
+    if (!selective || hoverStartedRef.current || !textValue) return;
     hoverStartedRef.current = true;
-
-    window.cancelAnimationFrame(animationFrameRef.current);
     window.clearTimeout(timeoutRef.current);
-    setActive(false);
-    animationFrameRef.current = window.requestAnimationFrame(() => {
-      setSequence((value) => value + 1);
-      setActive(true);
-      timeoutRef.current = window.setTimeout(
-        () => setActive(false),
-        reloadSequence.duration + config.settleDelay,
-      );
-    });
-  }, [config.settleDelay, reloadSequence.duration, textValue]);
+    setSequence((value) => value + 1);
+    setActive(true);
+    timeoutRef.current = window.setTimeout(
+      () => setActive(false),
+      config.duration + (config.stripCount - 1) * config.stripStagger + (config.maxSegment - 1) * config.glyphStagger + config.settleDelay,
+    );
+  }, [config, selective, textValue]);
+
+  useEffect(
+    () => () => {
+      window.clearTimeout(timeoutRef.current);
+    },
+    [],
+  );
 
   useEffect(() => {
     const element = elementRef.current;
-    if (!element) return undefined;
+    if (!element || !selective) return undefined;
 
     const onProximityEnter = () => {
       proximityActiveRef.current = true;
@@ -94,7 +87,7 @@ export const DistortedText = forwardRef(function DistortedText(
     const onProximityLeave = () => {
       proximityActiveRef.current = false;
       hoverStartedRef.current = false;
-      finishReload();
+      stopReload();
     };
 
     element.addEventListener('homecursorenter', onProximityEnter);
@@ -103,20 +96,7 @@ export const DistortedText = forwardRef(function DistortedText(
       element.removeEventListener('homecursorenter', onProximityEnter);
       element.removeEventListener('homecursorleave', onProximityLeave);
     };
-  }, [finishReload, startReload]);
-
-  const handlePointerEnter = (event) => {
-    onPointerEnter?.(event);
-    if (!event.defaultPrevented) startReload();
-  };
-
-  const handlePointerLeave = (event) => {
-    if (!proximityActiveRef.current) {
-      hoverStartedRef.current = false;
-      finishReload();
-    }
-    onPointerLeave?.(event);
-  };
+  }, [selective, startReload, stopReload]);
 
   const setElementRef = (node) => {
     elementRef.current = node;
@@ -127,56 +107,79 @@ export const DistortedText = forwardRef(function DistortedText(
     }
   };
 
+  const handlePointerEnter = (event) => {
+    onPointerEnter?.(event);
+    if (!event.defaultPrevented) startReload();
+  };
+
+  const handlePointerLeave = (event) => {
+    if (!proximityActiveRef.current) {
+      hoverStartedRef.current = false;
+      stopReload();
+    }
+    onPointerLeave?.(event);
+  };
+
   return (
     <Component
       {...props}
       ref={setElementRef}
       className={`distorted-text ${className}`.trim()}
-      data-cursor={props['data-cursor'] || 'text'}
-      data-hover-radius={props['data-hover-radius'] || '30'}
-      data-distortion-active={active ? 'true' : undefined}
-      data-distortion-text={textValue || undefined}
+      data-cursor={selective ? props['data-cursor'] || 'text' : props['data-cursor']}
+      data-hover-radius={selective ? props['data-hover-radius'] || '34' : props['data-hover-radius']}
       data-reload-active={active ? 'true' : undefined}
-      data-reload-proximity="true"
+      data-reload-proximity={selective ? 'true' : undefined}
       style={{
         '--reload-duration': `${config.duration}ms`,
         ...style,
       }}
-      onPointerEnter={handlePointerEnter}
-      onPointerLeave={handlePointerLeave}
-      onPointerMove={startReload}
+      onPointerEnter={selective ? handlePointerEnter : onPointerEnter}
+      onPointerLeave={selective ? handlePointerLeave : onPointerLeave}
+      onPointerMove={selective ? startReload : undefined}
     >
-      <span className="text-reload-source">{children}</span>
-      {active && (
-        <span className="text-reload-layer" aria-hidden="true">
-          {reloadSequence.words.map((word) =>
+      {selective ? (
+        <span className="selective-text-source">
+          {selectiveSequence.words.map((word) =>
             word.type === 'space' ? (
               word.value
             ) : word.type === 'break' ? (
               <br key={word.key} />
             ) : (
-              <span className="text-reload-word" key={word.key}>
-                {word.glyphs.map((glyph) => (
-                  <span className="text-reload-glyph" key={glyph.key}>
-                    <span className="text-reload-glyph__measure">{glyph.character}</span>
+              <span className="selective-text-word" key={word.key}>
+                {word.glyphs.map((glyph) => {
+                  const isGlitching = active && glyph.rail;
+                  return (
                     <span
-                      className="text-reload-glyph__track"
-                      style={{
-                        '--glyph-delay': `${glyph.delay}ms`,
-                        '--glyph-travel': `-${glyph.rail.length - 1}em`,
-                        '--glyph-steps': glyph.rail.length - 1,
-                      }}
+                      className="selective-text-glyph"
+                      data-glitching={isGlitching ? 'true' : undefined}
+                      key={glyph.index}
                     >
-                      {glyph.rail.map((character, index) => (
-                        <span key={`${glyph.key}-${index}`}>{character}</span>
-                      ))}
+                      <span className="selective-text-glyph__source">{glyph.character}</span>
+                      {isGlitching && (
+                        <span className="selective-text-glyph__slot" aria-hidden="true">
+                          <span
+                            className="selective-text-glyph__track"
+                            style={{
+                              '--glyph-delay': `${glyph.delay}ms`,
+                              '--glyph-travel': `-${((glyph.rail.length - 1) / glyph.rail.length) * 100}%`,
+                              '--glyph-steps': glyph.rail.length - 1,
+                            }}
+                          >
+                            {glyph.rail.map((character, index) => (
+                              <span key={`${glyph.index}-${index}`}>{character}</span>
+                            ))}
+                          </span>
+                        </span>
+                      )}
                     </span>
-                  </span>
-                ))}
+                  );
+                })}
               </span>
             ),
           )}
         </span>
+      ) : (
+        children
       )}
     </Component>
   );
