@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import './DistortedText.css';
-import { createReloadWords, reloadConfig } from './textReload.js';
+import { createReloadSequence, reloadConfig } from './textReload.js';
 
 const textSelector = 'h1, h2, h3, h4, h5, h6, p, a, button, span, dt, dd, li';
 
@@ -31,13 +31,19 @@ function getIntensity(element) {
 
 function createLayer(documentRef, value, seed, intensity) {
   const config = reloadConfig(intensity);
+  const sequence = createReloadSequence(value, seed, config);
   const layer = documentRef.createElement('span');
   layer.className = 'text-reload-layer';
   layer.setAttribute('aria-hidden', 'true');
 
-  createReloadWords(value, seed, config.maxIntermediates).forEach((word) => {
+  sequence.words.forEach((word) => {
     if (word.type === 'space') {
       layer.append(word.value);
+      return;
+    }
+
+    if (word.type === 'break') {
+      layer.append(documentRef.createElement('br'));
       return;
     }
 
@@ -69,7 +75,7 @@ function createLayer(documentRef, value, seed, intensity) {
     layer.append(wordElement);
   });
 
-  return layer;
+  return { layer, duration: sequence.duration };
 }
 
 function wrapSource(element) {
@@ -111,12 +117,15 @@ export function HomeTextEffects() {
         let sequence = 0;
         let timeout = 0;
         let hoverStarted = false;
+        let proximityActive = false;
         seed += 97;
         let layer = null;
 
         element.classList.add('home-text-distort');
         element.dataset.distortionText = value;
         element.dataset.cursor = element.closest('a, button') ? 'interactive' : 'text';
+        element.dataset.hoverRadius = element.closest('a, button') ? '24' : '30';
+        element.dataset.reloadProximity = 'true';
         element.style.setProperty('--reload-duration', `${config.duration}ms`);
 
         const onEnter = () => {
@@ -125,7 +134,8 @@ export function HomeTextEffects() {
           window.clearTimeout(timeout);
           sequence += 1;
           layer?.remove();
-          layer = createLayer(document, sourceText(source), seed + sequence * 7919, intensity);
+          const nextLayer = createLayer(document, sourceText(source), seed + sequence * 7919, intensity);
+          layer = nextLayer.layer;
           element.append(layer);
           element.dataset.distortionActive = 'true';
           element.dataset.reloadActive = 'true';
@@ -134,9 +144,10 @@ export function HomeTextEffects() {
             delete element.dataset.reloadActive;
             layer?.remove();
             layer = null;
-          }, config.duration + config.settleDelay);
+          }, nextLayer.duration + config.settleDelay);
         };
         const onLeave = () => {
+          if (proximityActive) return;
           window.clearTimeout(timeout);
           hoverStarted = false;
           delete element.dataset.distortionActive;
@@ -145,10 +156,30 @@ export function HomeTextEffects() {
           layer = null;
         };
 
+        const onProximityEnter = () => {
+          proximityActive = true;
+          onEnter();
+        };
+        const onProximityLeave = () => {
+          proximityActive = false;
+          onLeave();
+        };
+
         element.addEventListener('pointerenter', onEnter);
         element.addEventListener('pointerleave', onLeave);
         element.addEventListener('pointermove', onEnter);
-        registered.push({ element, source, layer: () => layer, onEnter, onLeave, timeout: () => timeout });
+        element.addEventListener('homecursorenter', onProximityEnter);
+        element.addEventListener('homecursorleave', onProximityLeave);
+        registered.push({
+          element,
+          source,
+          layer: () => layer,
+          onEnter,
+          onLeave,
+          onProximityEnter,
+          onProximityLeave,
+          timeout: () => timeout,
+        });
       });
 
       // Statistikvärden räknas upp efter mount. Synka endast det visuella
@@ -169,11 +200,13 @@ export function HomeTextEffects() {
 
     return () => {
       observers.forEach((observer) => observer.disconnect());
-      registered.forEach(({ element, source, layer, onEnter, onLeave, timeout }) => {
+      registered.forEach(({ element, source, layer, onEnter, onLeave, onProximityEnter, onProximityLeave, timeout }) => {
         window.clearTimeout(timeout());
         element.removeEventListener('pointerenter', onEnter);
         element.removeEventListener('pointerleave', onLeave);
         element.removeEventListener('pointermove', onEnter);
+        element.removeEventListener('homecursorenter', onProximityEnter);
+        element.removeEventListener('homecursorleave', onProximityLeave);
         layer()?.remove();
         Array.from(source.childNodes).forEach((node) => source.before(node));
         source.remove();
@@ -181,6 +214,8 @@ export function HomeTextEffects() {
         delete element.dataset.distortionText;
         delete element.dataset.distortionActive;
         delete element.dataset.cursor;
+        delete element.dataset.hoverRadius;
+        delete element.dataset.reloadProximity;
         element.style.removeProperty('--reload-duration');
       });
     };

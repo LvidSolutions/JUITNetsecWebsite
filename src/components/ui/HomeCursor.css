@@ -3,11 +3,12 @@
   top: 0;
   left: 0;
   z-index: 100;
-  width: 26px;
-  height: 26px;
+  width: 24px;
+  height: 24px;
   pointer-events: none;
   opacity: 0;
-  transition: opacity 90ms linear, width 130ms ease, height 130ms ease;
+  transform: translate3d(var(--cursor-x, -100px), var(--cursor-y, -100px), 0) translate(-50%, -50%);
+  transition: opacity 90ms linear, width 150ms ease, height 150ms ease;
 }
 
 .home-cursor::before,
@@ -34,8 +35,8 @@
 .home-cursor::after {
   top: 50%;
   left: 50%;
-  width: 5px;
-  height: 5px;
+  width: 4px;
+  height: 4px;
   border: 1px solid rgba(245, 255, 246, 0.92);
   transform: translate(-50%, -50%);
 }
@@ -44,8 +45,8 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 1px;
-  height: 1px;
+  width: 2px;
+  height: 2px;
   background: #f5fff6;
   box-shadow: 0 0 7px rgba(169, 232, 180, 0.54);
   transform: translate(-50%, -50%);
@@ -56,17 +57,27 @@
 }
 
 .home-cursor[data-mode='text'] {
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
 }
 
 .home-cursor[data-mode='interactive'] {
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
 }
 
 .home-cursor[data-mode='interactive']::before {
   opacity: 1;
+}
+
+.home-cursor[data-proximity='true'][data-mode='text'] {
+  width: 40px;
+  height: 40px;
+}
+
+.home-cursor[data-proximity='true'][data-mode='interactive'] {
+  width: 44px;
+  height: 44px;
 }
 
 @media (hover: hover) and (pointer: fine) {

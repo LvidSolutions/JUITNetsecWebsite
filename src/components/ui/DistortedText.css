@@ -20,6 +20,7 @@
   user-select: none;
   opacity: 0;
   white-space: pre-wrap;
+  line-height: inherit;
 }
 
 .text-reload-word {
@@ -31,7 +32,8 @@
   grid-template-areas: 'stack';
   height: 1em;
   overflow: hidden;
-  vertical-align: top;
+  vertical-align: baseline;
+  line-height: 1em;
 }
 
 .text-reload-glyph__measure,
@@ -50,10 +52,16 @@
   transform: translate3d(0, 0, 0);
 }
 
+.text-reload-glyph__track > span {
+  display: block;
+  height: 1em;
+  line-height: 1em;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .distorted-text[data-reload-active='true'] > .text-reload-source,
   .home-text-distort[data-reload-active='true'] > .text-reload-source {
-    opacity: 0.06;
+    opacity: 0;
   }
 
   .distorted-text[data-reload-active='true'] > .text-reload-layer,

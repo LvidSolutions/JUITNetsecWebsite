@@ -22,19 +22,36 @@ function nextRandom(seed) {
 function glyphFor(character, seed) {
   const variants = signatureGlyphs[character.toUpperCase()];
   if (variants) {
-    const index = Math.floor((seed / 0x100000000) * variants.length);
-    return variants[index];
+    return variants[Math.floor((seed / 0x100000000) * variants.length)];
   }
 
   return TECHNICAL_GLYPHS[seed % TECHNICAL_GLYPHS.length];
 }
 
-export function createGlyphRail(character, seed, maxIntermediates = 4) {
+function createStartPoints(length, seed, count) {
+  if (length <= 1) return [0];
+
+  let current = seed >>> 0;
+  const anchors = [];
+
+  for (let index = 0; index < count; index += 1) {
+    [current] = nextRandom(current);
+    const segmentStart = Math.floor((index * length) / count);
+    const segmentEnd = Math.max(segmentStart, Math.floor(((index + 1) * length) / count) - 1);
+    const span = segmentEnd - segmentStart + 1;
+    anchors.push(segmentStart + Math.floor((current / 0x100000000) * span));
+  }
+
+  return [...new Set(anchors)].sort((first, second) => first - second);
+}
+
+export function createGlyphRail(character, seed, minIntermediates = 3, maxIntermediates = 6) {
   if (/\s/.test(character)) return [character];
 
   let current = seed >>> 0;
   [current] = nextRandom(current);
-  const intermediateCount = 2 + Math.floor((current / 0x100000000) * Math.max(1, maxIntermediates - 1));
+  const range = Math.max(0, maxIntermediates - minIntermediates);
+  const intermediateCount = minIntermediates + Math.floor((current / 0x100000000) * (range + 1));
   const rail = [];
 
   for (let index = 0; index < intermediateCount; index += 1) {
@@ -46,38 +63,95 @@ export function createGlyphRail(character, seed, maxIntermediates = 4) {
   return rail;
 }
 
-export function createReloadWords(text, seed, maxIntermediates) {
+export function createReloadSequence(text, seed, config) {
+  const characters = Array.from(text);
+  const activeIndexes = characters
+    .map((character, index) => (character === '\n' || /\s/.test(character) ? -1 : index))
+    .filter((index) => index >= 0);
+  const anchorCount = Math.min(config.anchorCount, Math.max(1, Math.ceil(activeIndexes.length / 7)));
+  const anchors = createStartPoints(activeIndexes.length, seed, anchorCount).map((index) => activeIndexes[index]);
   let current = seed >>> 0;
-  let characterIndex = 0;
+  let maxDelay = 0;
+  let activeIndex = 0;
+  let tokenIndex = 0;
+  const words = [];
+  let word = null;
 
-  return text.split(/(\s+)/).map((token, tokenIndex) => {
-    if (/^\s+$/.test(token)) {
-      return { type: 'space', value: token, key: `space-${tokenIndex}` };
+  characters.forEach((character, characterIndex) => {
+    if (character === '\n') {
+      words.push({ type: 'break', key: `break-${tokenIndex}` });
+      tokenIndex += 1;
+      word = null;
+      return;
     }
 
-    const glyphs = Array.from(token).map((character) => {
-      [current] = nextRandom(current);
-      const rail = createGlyphRail(character, current, maxIntermediates);
-      const glyph = {
-        character,
-        rail,
-        delay: characterIndex * 11 + Math.floor((current / 0x100000000) * 6),
-        key: `glyph-${tokenIndex}-${characterIndex}`,
-      };
-      characterIndex += 1;
-      return glyph;
-    });
+    if (/\s/.test(character)) {
+      words.push({ type: 'space', value: character, key: `space-${tokenIndex}` });
+      tokenIndex += 1;
+      word = null;
+      return;
+    }
 
-    return { type: 'word', glyphs, key: `word-${tokenIndex}` };
+    if (!word) {
+      word = { type: 'word', glyphs: [], key: `word-${tokenIndex}` };
+      words.push(word);
+      tokenIndex += 1;
+    }
+
+    [current] = nextRandom(current);
+    const distance = Math.min(...anchors.map((anchor) => Math.abs(characterIndex - anchor)));
+    const jitter = Math.floor((current / 0x100000000) * config.delayJitter);
+    const delay = distance * config.waveStep + jitter;
+    const rail = createGlyphRail(character, current, config.minIntermediates, config.maxIntermediates);
+
+    word.glyphs.push({
+      character,
+      rail,
+      delay,
+      key: `glyph-${characterIndex}-${activeIndex}`,
+    });
+    maxDelay = Math.max(maxDelay, delay);
+    activeIndex += 1;
   });
+
+  return {
+    words,
+    duration: config.duration + maxDelay,
+  };
 }
 
 export function reloadConfig(intensity = 'medium') {
   if (intensity === 'subtle') {
-    return { duration: 260, maxIntermediates: 3, settleDelay: 70 };
+    return {
+      duration: 240,
+      minIntermediates: 3,
+      maxIntermediates: 4,
+      anchorCount: 3,
+      waveStep: 16,
+      delayJitter: 6,
+      settleDelay: 60,
+    };
   }
+
   if (intensity === 'strong') {
-    return { duration: 440, maxIntermediates: 5, settleDelay: 130 };
+    return {
+      duration: 360,
+      minIntermediates: 4,
+      maxIntermediates: 6,
+      anchorCount: 5,
+      waveStep: 18,
+      delayJitter: 8,
+      settleDelay: 90,
+    };
   }
-  return { duration: 340, maxIntermediates: 4, settleDelay: 100 };
+
+  return {
+    duration: 300,
+    minIntermediates: 3,
+    maxIntermediates: 5,
+    anchorCount: 4,
+    waveStep: 17,
+    delayJitter: 7,
+    settleDelay: 75,
+  };
 }

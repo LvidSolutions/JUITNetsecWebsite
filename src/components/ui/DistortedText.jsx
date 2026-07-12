@@ -1,6 +1,6 @@
-import { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
+import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import './DistortedText.css';
-import { createReloadWords, reloadConfig } from './textReload.js';
+import { createReloadSequence, reloadConfig } from './textReload.js';
 
 function getTextValue(children) {
   return Array.isArray(children)
@@ -28,13 +28,28 @@ export const DistortedText = forwardRef(function DistortedText(
   const animationFrameRef = useRef(0);
   const timeoutRef = useRef(0);
   const hoverStartedRef = useRef(false);
+  const proximityActiveRef = useRef(false);
+  const elementRef = useRef(null);
   const [active, setActive] = useState(false);
   const [sequence, setSequence] = useState(1);
-  const config = reloadConfig(intensity);
+  const baseConfig = useMemo(() => reloadConfig(intensity), [intensity]);
+  const config = useMemo(
+    () => ({ ...baseConfig, duration: duration || baseConfig.duration }),
+    [baseConfig, duration],
+  );
   const textValue = getTextValue(children);
-  const words = useMemo(
-    () => createReloadWords(textValue, sequence * 7919, config.maxIntermediates),
-    [config.maxIntermediates, sequence, textValue],
+  const reloadSequence = useMemo(
+    () => createReloadSequence(textValue, sequence * 7919, config),
+    [
+      config.anchorCount,
+      config.delayJitter,
+      config.duration,
+      config.maxIntermediates,
+      config.minIntermediates,
+      config.waveStep,
+      sequence,
+      textValue,
+    ],
   );
 
   useEffect(
@@ -45,7 +60,13 @@ export const DistortedText = forwardRef(function DistortedText(
     [],
   );
 
-  const startReload = () => {
+  const finishReload = useCallback(() => {
+    window.cancelAnimationFrame(animationFrameRef.current);
+    window.clearTimeout(timeoutRef.current);
+    setActive(false);
+  }, []);
+
+  const startReload = useCallback(() => {
     if (hoverStartedRef.current || !textValue) return;
     hoverStartedRef.current = true;
 
@@ -57,10 +78,32 @@ export const DistortedText = forwardRef(function DistortedText(
       setActive(true);
       timeoutRef.current = window.setTimeout(
         () => setActive(false),
-        (duration || config.duration) + config.settleDelay,
+        reloadSequence.duration + config.settleDelay,
       );
     });
-  };
+  }, [config.settleDelay, reloadSequence.duration, textValue]);
+
+  useEffect(() => {
+    const element = elementRef.current;
+    if (!element) return undefined;
+
+    const onProximityEnter = () => {
+      proximityActiveRef.current = true;
+      startReload();
+    };
+    const onProximityLeave = () => {
+      proximityActiveRef.current = false;
+      hoverStartedRef.current = false;
+      finishReload();
+    };
+
+    element.addEventListener('homecursorenter', onProximityEnter);
+    element.addEventListener('homecursorleave', onProximityLeave);
+    return () => {
+      element.removeEventListener('homecursorenter', onProximityEnter);
+      element.removeEventListener('homecursorleave', onProximityLeave);
+    };
+  }, [finishReload, startReload]);
 
   const handlePointerEnter = (event) => {
     onPointerEnter?.(event);
@@ -68,24 +111,35 @@ export const DistortedText = forwardRef(function DistortedText(
   };
 
   const handlePointerLeave = (event) => {
-    window.cancelAnimationFrame(animationFrameRef.current);
-    window.clearTimeout(timeoutRef.current);
-    hoverStartedRef.current = false;
-    setActive(false);
+    if (!proximityActiveRef.current) {
+      hoverStartedRef.current = false;
+      finishReload();
+    }
     onPointerLeave?.(event);
+  };
+
+  const setElementRef = (node) => {
+    elementRef.current = node;
+    if (typeof forwardedRef === 'function') {
+      forwardedRef(node);
+    } else if (forwardedRef) {
+      forwardedRef.current = node;
+    }
   };
 
   return (
     <Component
       {...props}
-      ref={forwardedRef}
+      ref={setElementRef}
       className={`distorted-text ${className}`.trim()}
       data-cursor={props['data-cursor'] || 'text'}
+      data-hover-radius={props['data-hover-radius'] || '30'}
       data-distortion-active={active ? 'true' : undefined}
       data-distortion-text={textValue || undefined}
       data-reload-active={active ? 'true' : undefined}
+      data-reload-proximity="true"
       style={{
-        '--reload-duration': `${duration || config.duration}ms`,
+        '--reload-duration': `${config.duration}ms`,
         ...style,
       }}
       onPointerEnter={handlePointerEnter}
@@ -95,9 +149,11 @@ export const DistortedText = forwardRef(function DistortedText(
       <span className="text-reload-source">{children}</span>
       {active && (
         <span className="text-reload-layer" aria-hidden="true">
-          {words.map((word) =>
+          {reloadSequence.words.map((word) =>
             word.type === 'space' ? (
               word.value
+            ) : word.type === 'break' ? (
+              <br key={word.key} />
             ) : (
               <span className="text-reload-word" key={word.key}>
                 {word.glyphs.map((glyph) => (
