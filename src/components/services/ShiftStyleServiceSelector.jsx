@@ -114,7 +114,7 @@ function Panel({ track, index, isActive, onSelect, reduce }) {
         interactionTargetRef={panelRef}
         revealControllerRef={revealControllerRef}
         isSelected={isActive}
-        darkenSharpVideo={track.id === 'sec'}
+        revealBrightness={track.id === 'sec' ? 0.34 : 0}
       />
 
       {/* aktiv topp-accent */}

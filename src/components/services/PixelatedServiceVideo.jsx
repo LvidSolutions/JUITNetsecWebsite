@@ -1,7 +1,5 @@
 import { useEffect, useRef } from 'react';
 
-const SECURITY_REVEAL_TONE = 'rgba(0, 0, 0, 0.48)';
-
 function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
 }
@@ -66,7 +64,7 @@ export function PixelatedServiceVideo({
   interactionTargetRef,
   revealControllerRef,
   isSelected,
-  darkenSharpVideo = false,
+  revealBrightness = 0,
 }) {
   const containerRef = useRef(null);
   const videoRef = useRef(null);
@@ -104,6 +102,8 @@ export function PixelatedServiceVideo({
       previousPointerX: null,
       previousPointerY: null,
       reducedOpacity: 0,
+      revealSourceCanvas: document.createElement('canvas'),
+      revealSourceContext: null,
       seed: sourceSeed(src),
       touchActivated: false,
       visible: false,
@@ -146,6 +146,7 @@ export function PixelatedServiceVideo({
     }
 
     state.maskContext = state.maskCanvas.getContext('2d');
+    state.revealSourceContext = state.revealSourceCanvas.getContext('2d', { alpha: false });
 
     function updateDimensions() {
       const bounds = container.getBoundingClientRect();
@@ -172,7 +173,7 @@ export function PixelatedServiceVideo({
     function drawPixelatedVideo() {
       if (video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA || !state.displayWidth || !state.displayHeight) return;
 
-      const pixelWidth = clamp(Math.round(state.displayWidth / 20), 14, 30);
+      const pixelWidth = clamp(Math.round(state.displayWidth / 30), 12, 22);
       const pixelHeight = Math.max(8, Math.round((pixelWidth * state.displayHeight) / state.displayWidth));
 
       if (pixelCanvas.width !== pixelWidth || pixelCanvas.height !== pixelHeight) {
@@ -182,6 +183,30 @@ export function PixelatedServiceVideo({
       }
 
       drawVideoCover(pixelContext, video, pixelWidth, pixelHeight, cropPosition);
+    }
+
+    function drawGlitchReveal() {
+      // Keep the cursor field deliberately low-resolution too. The interaction
+      // can brighten the image, but never resolves it into a sharp video.
+      const revealWidth = clamp(Math.round(state.displayWidth / 16), 16, 34);
+      const revealHeight = Math.max(10, Math.round((revealWidth * state.displayHeight) / state.displayWidth));
+      const { revealSourceCanvas, revealSourceContext } = state;
+
+      if (revealSourceCanvas.width !== revealWidth || revealSourceCanvas.height !== revealHeight) {
+        revealSourceCanvas.width = revealWidth;
+        revealSourceCanvas.height = revealHeight;
+        revealSourceContext.imageSmoothingEnabled = false;
+      }
+
+      drawVideoCover(revealSourceContext, video, revealWidth, revealHeight, cropPosition);
+      revealContext.imageSmoothingEnabled = false;
+      revealContext.drawImage(revealSourceCanvas, 0, 0, state.displayWidth, state.displayHeight);
+
+      if (revealBrightness > 0) {
+        revealContext.globalCompositeOperation = 'source-atop';
+        revealContext.fillStyle = `rgba(255, 255, 255, ${revealBrightness})`;
+        revealContext.fillRect(0, 0, state.displayWidth, state.displayHeight);
+      }
     }
 
     function stamp(x, y, strength = 1) {
@@ -299,14 +324,9 @@ export function PixelatedServiceVideo({
       revealContext.clearRect(0, 0, state.displayWidth, state.displayHeight);
       revealContext.globalCompositeOperation = 'source-over';
       revealContext.globalAlpha = 1;
-      drawVideoCover(revealContext, video, state.displayWidth, state.displayHeight, cropPosition);
+      drawGlitchReveal();
       revealContext.globalCompositeOperation = 'destination-in';
       revealContext.drawImage(state.maskCanvas, 0, 0, state.displayWidth, state.displayHeight);
-      if (darkenSharpVideo) {
-        revealContext.globalCompositeOperation = 'source-atop';
-        revealContext.fillStyle = SECURITY_REVEAL_TONE;
-        revealContext.fillRect(0, 0, state.displayWidth, state.displayHeight);
-      }
       revealContext.globalCompositeOperation = 'source-over';
     }
 
@@ -319,14 +339,8 @@ export function PixelatedServiceVideo({
       if (state.reducedOpacity <= 0.012 || video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) return;
 
       revealContext.globalAlpha = state.reducedOpacity;
-      drawVideoCover(revealContext, video, state.displayWidth, state.displayHeight, cropPosition);
+      drawGlitchReveal();
       revealContext.globalAlpha = 1;
-      if (darkenSharpVideo) {
-        revealContext.globalCompositeOperation = 'source-atop';
-        revealContext.fillStyle = SECURITY_REVEAL_TONE;
-        revealContext.fillRect(0, 0, state.displayWidth, state.displayHeight);
-        revealContext.globalCompositeOperation = 'source-over';
-      }
     }
 
     function scheduleFrame() {
@@ -456,7 +470,7 @@ export function PixelatedServiceVideo({
       video.removeEventListener('playing', scheduleFrame);
       if (revealControllerRef.current?.enter === beginReveal) revealControllerRef.current = null;
     };
-  }, [cropPosition, darkenSharpVideo, interactionTargetRef, reducedMotion, revealControllerRef, src]);
+  }, [cropPosition, interactionTargetRef, reducedMotion, revealBrightness, revealControllerRef, src]);
 
   useEffect(() => {
     const state = simulationRef.current;
