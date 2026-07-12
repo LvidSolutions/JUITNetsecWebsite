@@ -8,8 +8,7 @@
   position: absolute;
   inset: 0;
   z-index: 1;
-  display: grid;
-  align-content: center;
+  display: block;
   width: 100%;
   color: inherit;
   font: inherit;
@@ -24,8 +23,7 @@
 }
 
 .text-reload-word {
-  display: inline-block;
-  white-space: nowrap;
+  display: contents;
 }
 
 .text-reload-glyph {
