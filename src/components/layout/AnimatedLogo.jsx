@@ -1,14 +1,21 @@
 import { useEffect, useRef, useState } from 'react';
-import { motion, useTransform, useReducedMotion } from 'framer-motion';
-import { BrandWordmark } from './BrandWordmark.jsx';
+import { motion, useMotionValueEvent, useReducedMotion, useTransform } from 'framer-motion';
+import { BrandCube, BrandJuit, BrandNetsec, BrandWordmark } from './BrandWordmark.jsx';
 
-// Andel av viewportbredden som den full-bleed-stora startloggan ska spänna över.
-// Strax under 1 så texten inte klipps eller skapar horisontell scroll.
 const FULL_BLEED_FILL = 0.98;
-// Känd font-size som den dolda referens-wordmarken mäts vid. Wordmarkens bredd
-// skalar linjärt med font-size, så bredd/font-size ger ett storleksoberoende
-// förhållande vi kan räkna full-bleed-storleken från.
 const REFERENCE_FONT_SIZE = 100;
+// Used only until the hidden probe can report the loaded font's exact metrics.
+// The visible header slot is 117px wide at the existing 20px desktop size.
+const FALLBACK_WORDMARK_RATIO = 117 / 20;
+// AnimatedLogo's existing hero-to-header movement clamps at this point. It is
+// the real completion signal for the intro logo, rather than an estimated delay.
+const INTRO_COMPLETE_AT = 0.45;
+const INTRO_RESTORE_BELOW = 0.4;
+const LOGO_EASE = [0.22, 1, 0.36, 1];
+// "netsec" is visually wider than "JUIT". Starting the cube a little left of
+// centre keeps the full-size wordmark centred, then gives the cube a clear
+// diagonal path into its exact navbar anchor.
+const START_CUBE_OFFSET_EM = 0.4;
 
 function measure(targetRef, ratio) {
   if (!targetRef.current || !ratio) {
@@ -17,38 +24,110 @@ function measure(targetRef, ratio) {
 
   const targetRect = targetRef.current.getBoundingClientRect();
   const isMobile = window.innerWidth < 640;
-
-  // Full-bleed startstorlek: font-size som gör att wordmarken spänner i stort
-  // sett hela viewportbredden. ratio = wordmarkbredd / font-size (px per em).
   const startSize = (window.innerWidth * FULL_BLEED_FILL) / ratio;
 
   return {
-    // startläge: full-bleed wordmark centrerad över hero-videon
-    startX: window.innerWidth / 2,
-    startY: window.innerHeight * (isMobile ? 0.44 : 0.46),
+    startX: window.innerWidth / 2 - startSize * START_CUBE_OFFSET_EM,
+    // The split text is positioned from its top edge. Raise its shared anchor
+    // by half an em so the cube and the full wordmark share one visual centre.
+    startY: window.innerHeight * (isMobile ? 0.44 : 0.46) - startSize / 2,
     startSize,
-    // slutläge: liten logga som landar i header-slotten uppe till vänster
     endX: targetRect.left + targetRect.width / 2,
     endY: targetRect.top + targetRect.height / 2,
     endSize: isMobile ? 18 : 20,
   };
 }
 
-const SHRINK_END = 0.45;
+function getFinePointer() {
+  return typeof window !== 'undefined' && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+}
+
+function useFinePointer() {
+  const [isFinePointer, setIsFinePointer] = useState(getFinePointer);
+
+  useEffect(() => {
+    const media = window.matchMedia('(hover: hover) and (pointer: fine)');
+    const update = () => setIsFinePointer(media.matches);
+
+    update();
+    media.addEventListener?.('change', update);
+    return () => media.removeEventListener?.('change', update);
+  }, []);
+
+  return isFinePointer;
+}
+
+function SplitWordmark({ collapsed, cubeVerticalOffset, fontSize, prefersReducedMotion }) {
+  const transition = {
+    duration: prefersReducedMotion ? 0.12 : collapsed ? 0.48 : 0.42,
+    ease: LOGO_EASE,
+  };
+  const textOffset = prefersReducedMotion ? 0 : 7;
+
+  return (
+    <motion.span
+      aria-hidden="true"
+      className="absolute left-1/2 top-1/2 h-0 w-0 -translate-x-1/2 -translate-y-1/2 font-display leading-none whitespace-nowrap"
+      style={{ fontSize }}
+    >
+      <motion.span
+        className="absolute whitespace-nowrap"
+        style={{ right: '0.47em' }}
+        animate={{
+          clipPath: collapsed ? 'inset(0 0 0 100%)' : 'inset(0 0 0 0)',
+          x: collapsed ? textOffset : 0,
+        }}
+        transition={transition}
+      >
+        <BrandJuit />
+      </motion.span>
+
+      <span className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2">
+        <motion.span className="inline-flex" style={{ y: cubeVerticalOffset }}>
+          <motion.span
+            className="inline-flex items-center justify-center"
+            animate={{
+              rotate: prefersReducedMotion ? 0 : collapsed ? 0 : 135,
+              scale: collapsed ? 1 : 0.46,
+            }}
+            transition={transition}
+          >
+            <BrandCube className="h-[0.65em] w-[0.65em] shadow-none" />
+          </motion.span>
+        </motion.span>
+      </span>
+
+      <motion.span
+        className="absolute whitespace-nowrap"
+        style={{ left: '0.47em' }}
+        animate={{
+          clipPath: collapsed ? 'inset(0 100% 0 0)' : 'inset(0 0 0 0)',
+          x: collapsed ? -textOffset : 0,
+        }}
+        transition={transition}
+      >
+        <BrandNetsec />
+      </motion.span>
+    </motion.span>
+  );
+}
 
 export function AnimatedLogo({ targetRef, progress }) {
   const prefersReducedMotion = useReducedMotion();
+  const isFinePointer = useFinePointer();
   const measureRef = useRef(null);
   const [ratio, setRatio] = useState(null);
   const [geometry, setGeometry] = useState(null);
+  const [introComplete, setIntroComplete] = useState(() => progress.get() >= INTRO_COMPLETE_AT);
+  const [isHovered, setIsHovered] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
 
-  // Mät wordmarkens bredd/font-size-förhållande från en dold referenskopia.
-  // Görs om när webbfonten laddats klart (då bredden ändras) och vid resize.
   useEffect(() => {
     function measureRatio() {
       if (!measureRef.current) {
         return;
       }
+
       const width = measureRef.current.getBoundingClientRect().width;
       if (width > 0) {
         setRatio(width / REFERENCE_FONT_SIZE);
@@ -65,7 +144,7 @@ export function AnimatedLogo({ targetRef, progress }) {
 
   useEffect(() => {
     function recalc() {
-      setGeometry(measure(targetRef, ratio));
+      setGeometry(measure(targetRef, ratio || FALLBACK_WORDMARK_RATIO));
     }
 
     recalc();
@@ -73,28 +152,40 @@ export function AnimatedLogo({ targetRef, progress }) {
     return () => window.removeEventListener('resize', recalc);
   }, [targetRef, ratio]);
 
-  const inputRange = [0, SHRINK_END];
+  useMotionValueEvent(progress, 'change', (latest) => {
+    setIntroComplete((complete) => {
+      if (complete) {
+        return latest >= INTRO_RESTORE_BELOW;
+      }
+      return latest >= INTRO_COMPLETE_AT;
+    });
+  });
 
-  const x = useTransform(progress, inputRange, geometry ? [geometry.startX, geometry.endX] : [0, 0], {
-    clamp: true,
-  });
-  const y = useTransform(progress, inputRange, geometry ? [geometry.startY, geometry.endY] : [0, 0], {
-    clamp: true,
-  });
-  // Linjär interpolation: font-size minskar lika mycket per scroll-tick hela
-  // vägen från full-bleed-storleken ner till header-storleken.
+  const x = useTransform(
+    progress,
+    [0, INTRO_COMPLETE_AT],
+    geometry ? [geometry.startX, geometry.endX] : [0, 0],
+    { clamp: true },
+  );
+  const y = useTransform(
+    progress,
+    [0, INTRO_COMPLETE_AT],
+    geometry ? [geometry.startY, geometry.endY] : [0, 0],
+    { clamp: true },
+  );
   const fontSize = useTransform(
     progress,
-    inputRange,
+    [0, INTRO_COMPLETE_AT],
     geometry ? [geometry.startSize, geometry.endSize] : [20, 20],
     { clamp: true },
   );
-  const glow = useTransform(progress, [0, SHRINK_END * 0.7, SHRINK_END], [0.85, 0.4, 0], {
-    clamp: true,
-  });
-  const textShadow = useTransform(glow, (value) => `0 0 ${value * 48}px rgba(0,200,83,${value})`);
+  const cubeVerticalOffset = useTransform(
+    progress,
+    [0, INTRO_COMPLETE_AT],
+    geometry ? [geometry.startSize / 2, 0] : [0, 0],
+    { clamp: true },
+  );
 
-  // Dold referens-wordmark som alltid renderas så bredden kan mätas.
   const measureProbe = (
     <span
       ref={measureRef}
@@ -110,47 +201,42 @@ export function AnimatedLogo({ targetRef, progress }) {
     return measureProbe;
   }
 
-  if (prefersReducedMotion) {
-    return (
-      <>
-        {measureProbe}
-        <a
-          href="/"
-          aria-label="JUIT NetSec AB, go to home page"
-          className="header-logo pointer-events-auto fixed left-0 top-0 z-[60]"
-          style={{
-            left: geometry.endX,
-            top: geometry.endY,
-            transform: 'translate(-50%, -50%)',
-            fontSize: geometry.endSize,
-          }}
-        >
-          <BrandWordmark />
-        </a>
-      </>
-    );
-  }
+  const collapsed = isFinePointer && introComplete && !isHovered && !isFocused;
+  const positionStyle = prefersReducedMotion
+    ? {
+        left: geometry.endX,
+        top: geometry.endY,
+        transform: 'translate(-50%, -50%)',
+      }
+    : {
+        x,
+        y,
+        translateX: '-50%',
+        translateY: '-50%',
+      };
 
   return (
     <>
       {measureProbe}
       <motion.a
         href="/"
-        aria-label="JUIT NetSec AB, go to home page"
-        className="header-logo pointer-events-auto fixed left-0 top-0 z-[60] grid place-items-center"
-        style={{
-          x,
-          y,
-          translateX: '-50%',
-          translateY: '-50%',
-        }}
+        aria-label="JUIT NetSec — Home"
+        data-testid="interactive-logo"
+        data-state={collapsed ? 'cube' : 'wordmark'}
+        className="header-logo pointer-events-auto fixed left-0 top-0 z-[60] grid h-11 w-40 place-items-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green"
+        style={positionStyle}
+        initial={false}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
       >
-        <motion.span
-          className="inline-block whitespace-nowrap"
-          style={{ fontSize, textShadow }}
-        >
-          <BrandWordmark />
-        </motion.span>
+        <SplitWordmark
+          collapsed={collapsed}
+          cubeVerticalOffset={prefersReducedMotion ? 0 : cubeVerticalOffset}
+          fontSize={prefersReducedMotion ? geometry.endSize : fontSize}
+          prefersReducedMotion={prefersReducedMotion}
+        />
       </motion.a>
     </>
   );
