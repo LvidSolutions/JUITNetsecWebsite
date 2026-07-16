@@ -1,70 +1,105 @@
-import { motion, useReducedMotion } from 'framer-motion';
-import { Container } from '../ui';
-import { StatCard } from './StatCard.jsx';
-import { DistortedText } from '../ui/DistortedText.jsx';
+import { useEffect, useRef } from 'react';
+import './StatsSection.css';
 
-const stats = [
-  {
-    value: 59,
-    suffix: '%',
-    heading: 'of SME respondents reported a cyberattack in the past year',
-    caption: 'Source: Hiscox Cyber Readiness Report 2025',
-  },
-  {
-    value: 88,
-    suffix: '%',
-    heading: 'of ransomware-related breaches hit SMBs in the Verizon DBIR 2025',
-    caption: 'Source: Verizon 2025 DBIR SMB Snapshot',
-  },
-  {
-    value: 43,
-    suffix: '%',
-    heading: 'of organizations reported a breach or attack in the last 12 months',
-    caption: 'Source: UK Government Cyber Security Breaches Survey 2025/26',
-  },
-  {
-    prefix: '$',
-    value: 115,
-    suffix: 'k',
-    heading: 'median amount paid to ransomware groups per the Verizon DBIR',
-    caption: 'Source: Verizon 2025 DBIR Executive Summary',
-  },
+const story = [
+  'Cyber', 'risk', 'is', 'no', 'longer', 'a', 'future', 'problem.',
+  { text: '59%', emphasis: 'stat' }, 'of', 'SME', 'respondents', 'reported', 'a', 'cyberattack', 'in', 'the', 'past', 'year.',
+  { text: '88%', emphasis: 'stat' }, 'of', 'ransomware-related', 'breaches', 'affected', 'small', 'and', 'medium-sized', 'businesses', 'in', 'the', 'Verizon', 'DBIR', '2025', 'SMB', 'snapshot.',
+  { text: '43%', emphasis: 'stat' }, 'of', 'organisations', 'reported', 'a', 'breach', 'or', 'attack', 'during', 'the', 'last', 'twelve', 'months.',
+  'The', 'median', 'amount', 'paid', 'to', 'ransomware', 'groups', 'was', { text: '$115,000', emphasis: 'stat' },
+  'For', 'many', 'organisations,', 'security', 'is', 'no', 'longer', 'about', 'a', 'single', 'product.', 'It', 'is', 'about', 'visibility,', 'control', 'and', 'the', 'ability', 'to', 'act', 'before', 'disruption', 'becomes', 'an', 'outage.',
+];
+
+const sources = [
+  'Hiscox Cyber Readiness Report 2025',
+  'Verizon 2025 DBIR SMB Snapshot',
+  'UK Government Cyber Security Breaches Survey 2025/26',
+  'Verizon 2025 DBIR Executive Summary',
 ];
 
 export function StatsSection() {
-  const prefersReducedMotion = useReducedMotion();
+  const sectionRef = useRef(null);
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return undefined;
+
+    const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let frame = 0;
+
+    function updateProgress() {
+      frame = 0;
+
+      if (motionQuery.matches) {
+        section.style.setProperty('--risk-progress', '1');
+        return;
+      }
+
+      const scrollRange = Math.max(section.offsetHeight - window.innerHeight, 1);
+      const travelled = -section.getBoundingClientRect().top;
+      const progress = Math.min(1, Math.max(0, travelled / scrollRange));
+      section.style.setProperty('--risk-progress', progress.toFixed(5));
+    }
+
+    function requestUpdate() {
+      if (!frame) frame = window.requestAnimationFrame(updateProgress);
+    }
+
+    function handleMotionChange() {
+      requestUpdate();
+    }
+
+    const resizeObserver = new ResizeObserver(requestUpdate);
+    resizeObserver.observe(section);
+    window.addEventListener('scroll', requestUpdate, { passive: true });
+    window.addEventListener('resize', requestUpdate, { passive: true });
+    motionQuery.addEventListener('change', handleMotionChange);
+    requestUpdate();
+
+    return () => {
+      if (frame) window.cancelAnimationFrame(frame);
+      resizeObserver.disconnect();
+      window.removeEventListener('scroll', requestUpdate);
+      window.removeEventListener('resize', requestUpdate);
+      motionQuery.removeEventListener('change', handleMotionChange);
+    };
+  }, []);
 
   return (
     <section
+      ref={sectionRef}
       id="risklandskapet"
-      className="relative overflow-hidden bg-black py-24 sm:py-28 lg:py-32"
+      aria-labelledby="risk-landscape-heading"
+      className="risk-progress"
+      style={{ '--risk-progress': 0 }}
     >
-      <Container className="relative">
-        <motion.div
-          initial={prefersReducedMotion ? false : { opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.5 }}
-          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          className="max-w-3xl"
-        >
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-brand-green">
-            01 / The risk landscape
-          </p>
-          <h2 className="mt-4 max-w-2xl text-3xl font-semibold leading-tight text-brand-white sm:text-4xl lg:text-5xl">
-            <DistortedText selective>Cyber risk is no longer a future problem</DistortedText>
-          </h2>
-          <p className="mt-6 max-w-2xl text-lg leading-8 text-brand-mist">
-            For many companies, security isn't about a single product — it's about visibility, control
-            and the ability to act before a breach becomes an outage.
-          </p>
-        </motion.div>
+      <div className="risk-progress__sticky">
+        <div className="risk-progress__content">
+          <p className="risk-progress__eyebrow">01 / The risk landscape</p>
+          <h2 id="risk-landscape-heading" className="sr-only">The risk landscape</h2>
+          <p className="risk-progress__text">
+            {story.map((token, index) => {
+              const { text, emphasis } = typeof token === 'string' ? { text: token } : token;
+              const isLast = index === story.length - 1;
 
-        <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {stats.map((stat, index) => (
-            <StatCard key={stat.heading} index={index} {...stat} />
-          ))}
+              return (
+                <span
+                  key={`${text}-${index}`}
+                  className={`risk-progress__word${emphasis ? ` risk-progress__word--${emphasis}` : ''}`}
+                  style={{ '--risk-word-index': index + 1, '--risk-word-total': story.length + 1 }}
+                >
+                  {text}{!isLast && '\u00A0'}
+                </span>
+              );
+            })}
+          </p>
         </div>
-      </Container>
+      </div>
+
+      <p className="risk-progress__sources">
+        <span>Sources:</span>{' '}
+        {sources.join(' · ')}
+      </p>
     </section>
   );
 }
