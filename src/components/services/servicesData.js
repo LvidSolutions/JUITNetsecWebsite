@@ -14,6 +14,11 @@ export const serviceTracks = [
     cropPosition: [0.5, 0.48],
     description:
       'Operate, support and maintain the IT environment across devices, users, networks, infrastructure, help desk and cloud so systems stay secure, documented and stable over time.',
+    selectorText: {
+      eyebrow: '01 / OPERATIONS',
+      capability: 'OPERATE / MAINTAIN / OPTIMISE',
+      alignment: 'right',
+    },
     tags: ['Device', 'Network', 'Infrastructure', 'Help Desk', 'Cloud', 'Documentation'],
     covers: [
       'Device onboarding & lifecycle',
@@ -44,6 +49,11 @@ export const serviceTracks = [
     cropPosition: [0.58, 0.5],
     description:
       'Reduce risk through practical cybersecurity guidance, cloud and identity hardening, incident readiness, compliance support and security awareness.',
+    selectorText: {
+      eyebrow: '02 / SECURITY',
+      capability: 'PROTECT / CONTROL / RESPOND',
+      alignment: 'left',
+    },
     tags: ['Strategy', 'Cloud Security', 'Identity', 'Incident Readiness', 'Compliance', 'Awareness'],
     covers: [
       'Security strategy & hardening',
@@ -74,6 +84,11 @@ export const serviceTracks = [
     cropPosition: [0.42, 0.5],
     description:
       'Connect IT and security into one operating layer across identity, tooling, visibility, ownership, governance and continuous improvement.',
+    selectorText: {
+      eyebrow: '03 / GOVERNANCE',
+      capability: 'ALIGN / GOVERN / DIRECT',
+      alignment: 'left',
+    },
     tags: ['Identity', 'Visibility', 'Governance', 'Tooling', 'Ownership', 'Improvement'],
     covers: [
       'IT & security operating model',

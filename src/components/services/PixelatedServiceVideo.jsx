@@ -63,6 +63,7 @@ export function PixelatedServiceVideo({
   reducedMotion,
   interactionTargetRef,
   revealControllerRef,
+  textControllerRef,
   isSelected,
   dimBrightRevealBackground = 0,
 }) {
@@ -93,6 +94,8 @@ export function PixelatedServiceVideo({
       hovered: false,
       imageData: null,
       lastTimestamp: 0,
+      lastTextProgress: 0,
+      lastTextUpdate: 0,
       maskCanvas: document.createElement('canvas'),
       maskContext: null,
       nextField: null,
@@ -342,6 +345,18 @@ export function PixelatedServiceVideo({
       revealContext.globalAlpha = 1;
     }
 
+    function publishTextProgress(timestamp) {
+      const progress = reducedMotion ? state.reducedOpacity : Math.min(state.globalProgress, 1);
+      const settledInactive = progress <= 0.01 && state.lastTextProgress <= 0.01;
+
+      if (settledInactive) return;
+      if (timestamp - state.lastTextUpdate < 48 && Math.abs(progress - state.lastTextProgress) < 0.03) return;
+
+      state.lastTextProgress = progress;
+      state.lastTextUpdate = timestamp;
+      textControllerRef.current?.update(progress, timestamp);
+    }
+
     function scheduleFrame() {
       if (state.animationFrame || state.disposed) return;
 
@@ -358,6 +373,8 @@ export function PixelatedServiceVideo({
             simulateField(delta);
             drawOrganicReveal();
           }
+
+          publishTextProgress(timestamp);
         }
 
         const revealIsMoving = reducedMotion
@@ -469,7 +486,7 @@ export function PixelatedServiceVideo({
       video.removeEventListener('playing', scheduleFrame);
       if (revealControllerRef.current?.enter === beginReveal) revealControllerRef.current = null;
     };
-  }, [cropPosition, dimBrightRevealBackground, interactionTargetRef, reducedMotion, revealControllerRef, src]);
+  }, [cropPosition, dimBrightRevealBackground, interactionTargetRef, reducedMotion, revealControllerRef, src, textControllerRef]);
 
   useEffect(() => {
     const state = simulationRef.current;
