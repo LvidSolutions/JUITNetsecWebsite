@@ -37,11 +37,8 @@ export function StatsSection() {
   return (
     <section
       id="risklandskapet"
-      className="relative overflow-hidden bg-brand-black py-24 sm:py-28 lg:py-32"
+      className="relative overflow-hidden bg-black py-24 sm:py-28 lg:py-32"
     >
-      <div className="hero-grid absolute inset-0 opacity-20" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_85%_0%,rgba(0,200,83,0.14),transparent_45%)]" />
-
       <Container className="relative">
         <motion.div
           initial={prefersReducedMotion ? false : { opacity: 0, y: 24 }}

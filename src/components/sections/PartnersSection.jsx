@@ -1,4 +1,3 @@
-import { useEffect, useRef } from 'react';
 import { Container } from '../ui';
 import { LogoLoop } from '../ui/LogoLoop.jsx';
 
@@ -41,67 +40,13 @@ const partnerLogos = [
   },
 ];
 
-function useShowcaseStencilWindow(sceneRef) {
-  useEffect(() => {
-    const scene = sceneRef.current;
-    if (!scene) return undefined;
-
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-    let frameId = null;
-
-    const update = () => {
-      frameId = null;
-      const viewportHeight = window.innerHeight;
-
-      if (reducedMotion.matches) {
-        scene.style.removeProperty('--partners-stencil-top');
-        scene.style.removeProperty('--partners-stencil-bottom');
-        return;
-      }
-
-      const { top, bottom } = scene.getBoundingClientRect();
-      const clipTop = Math.min(viewportHeight, Math.max(0, top));
-      const clipBottom = Math.min(viewportHeight, Math.max(0, viewportHeight - bottom));
-
-      // The artwork is fixed to the viewport. These values cut a moving window
-      // through it, so scrolling carries the showcase over the image like a stencil.
-      scene.style.setProperty('--partners-stencil-top', `${Math.round(clipTop)}px`);
-      scene.style.setProperty('--partners-stencil-bottom', `${Math.round(clipBottom)}px`);
-    };
-
-    const requestUpdate = () => {
-      if (frameId === null) frameId = window.requestAnimationFrame(update);
-    };
-
-    const resizeObserver = new ResizeObserver(requestUpdate);
-    resizeObserver.observe(scene);
-    window.addEventListener('scroll', requestUpdate, { passive: true });
-    window.addEventListener('resize', requestUpdate);
-    reducedMotion.addEventListener('change', requestUpdate);
-    requestUpdate();
-
-    return () => {
-      if (frameId !== null) window.cancelAnimationFrame(frameId);
-      resizeObserver.disconnect();
-      window.removeEventListener('scroll', requestUpdate);
-      window.removeEventListener('resize', requestUpdate);
-      reducedMotion.removeEventListener('change', requestUpdate);
-    };
-  }, [sceneRef]);
-}
-
 /**
  * Credibility-focused technology showcase directly beneath the hero. The existing
  * verified technology data and destinations remain the single source of truth.
  */
 export function PartnersSection() {
-  const sceneRef = useRef(null);
-
-  useShowcaseStencilWindow(sceneRef);
-
   return (
     <section
-      ref={sceneRef}
       id="technology-showcase"
       aria-labelledby="technology-showcase-heading"
       className="partners-reveal-scene"
