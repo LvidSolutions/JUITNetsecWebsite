@@ -5,3 +5,5 @@ dist
 
 # Local visual-regression / screenshot artifacts (not part of the app)
 visual-checks/
+test-results/
+playwright-report/
