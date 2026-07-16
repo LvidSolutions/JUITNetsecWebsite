@@ -160,8 +160,8 @@ function App() {
         {isHome && (
           <>
             <Hero heroRef={heroRef} introProgress={introProgress} />
-            <PartnersSection />
             <StatsSection />
+            <PartnersSection />
             <TerminalSignalSection />
             <NextStepPlaceholder />
             <FaqSection />
