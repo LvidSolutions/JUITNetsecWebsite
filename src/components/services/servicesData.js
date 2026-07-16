@@ -30,7 +30,8 @@ export const serviceTracks = [
     selectorText: {
       eyebrow: '02 / SECURITY',
       capability: 'PROTECT / CONTROL / RESPOND',
-      alignment: 'left',
+      alignment: 'right',
+      verticalAlignment: 'bottom',
     },
   },
   {

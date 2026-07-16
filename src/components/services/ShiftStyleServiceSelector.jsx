@@ -12,6 +12,9 @@ function Panel({ track, index, isActive, onSelect, reduce }) {
   const contentPosition = track.selectorText.alignment === 'right'
     ? 'right-[8%] text-right'
     : 'left-[8%] text-left';
+  const contentVerticalPosition = track.selectorText.verticalAlignment === 'bottom'
+    ? 'bottom-[11%]'
+    : 'top-[11%]';
   const toneClass = track.id === 'ops'
     ? 'services-selector-tone--ops'
     : track.id === 'sec'
@@ -20,7 +23,7 @@ function Panel({ track, index, isActive, onSelect, reduce }) {
   const scrambleGroups = useMemo(() => [
     {
       id: 'content',
-      className: `absolute top-[11%] ${contentPosition} w-[78%] max-w-[18rem] sm:max-w-[19rem]`,
+      className: `absolute ${contentVerticalPosition} ${contentPosition} w-[78%] max-w-[18rem] sm:max-w-[19rem]`,
       fields: [
         {
           id: `${track.id}-eyebrow`,
@@ -70,7 +73,7 @@ function Panel({ track, index, isActive, onSelect, reduce }) {
         },
       ],
     },
-  ], [contentPosition, track]);
+  ], [contentPosition, contentVerticalPosition, track]);
 
   return (
     <button
