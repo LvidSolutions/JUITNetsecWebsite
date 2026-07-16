@@ -17,13 +17,6 @@ function Panel({ track, index, isActive, onSelect, reduce }) {
     : track.id === 'sec'
       ? 'services-selector-tone--sec'
       : 'services-selector-tone--gov';
-  const readabilityShadeClass = track.id === 'ops'
-    ? 'services-selector-readability-shade--ops'
-    : track.id === 'sec'
-      ? 'services-selector-readability-shade--sec'
-    : track.id === 'gov'
-      ? 'services-selector-readability-shade--gov'
-      : null;
   const scrambleGroups = useMemo(() => [
     {
       id: 'content',
@@ -34,6 +27,7 @@ function Panel({ track, index, isActive, onSelect, reduce }) {
           text: track.selectorText.eyebrow,
           start: 0.35,
           end: 0.57,
+          shadeStrength: 0.45,
           className: 'services-selector-bitcount text-[10px] uppercase tracking-[0.16em]',
         },
         {
@@ -41,6 +35,7 @@ function Panel({ track, index, isActive, onSelect, reduce }) {
           text: track.title,
           start: 0.43,
           end: 0.78,
+          shadeStrength: 0.88,
           className: 'services-selector-bitcount mt-4 text-3xl leading-[0.98] tracking-[0.01em] sm:text-4xl',
         },
         {
@@ -48,6 +43,7 @@ function Panel({ track, index, isActive, onSelect, reduce }) {
           text: track.description,
           start: 0.62,
           end: 0.91,
+          shadeStrength: 0.72,
           className: 'services-selector-bitcount mt-5 text-[13px] leading-[1.55] tracking-[0.01em] sm:text-sm',
         },
         {
@@ -55,6 +51,7 @@ function Panel({ track, index, isActive, onSelect, reduce }) {
           text: track.selectorText.capability,
           start: 0.78,
           end: 1,
+          shadeStrength: 0.58,
           className: 'services-selector-bitcount mt-5 text-[9px] uppercase tracking-[0.12em] sm:text-[10px]',
         },
       ],
@@ -68,6 +65,7 @@ function Panel({ track, index, isActive, onSelect, reduce }) {
           text: track.number,
           start: 0.84,
           end: 1,
+          shadeStrength: 0.52,
           className: 'services-selector-bitcount text-3xl tracking-[0.05em] sm:text-4xl',
         },
       ],
@@ -109,12 +107,6 @@ function Panel({ track, index, isActive, onSelect, reduce }) {
         isSelected={isActive}
         dimBrightRevealBackground={track.id === 'sec' ? 0.42 : 0}
       />
-      {readabilityShadeClass && (
-        <span
-          aria-hidden="true"
-          className={`${readabilityShadeClass} pointer-events-none absolute z-[4]`}
-        />
-      )}
       <span id={descriptionId} className="sr-only">
         {track.title}. {track.description}. {track.selectorText.capability}.
       </span>

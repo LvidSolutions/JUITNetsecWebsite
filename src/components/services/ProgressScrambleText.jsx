@@ -64,6 +64,7 @@ function opacityForProgress(progress, reducedMotion, start) {
  */
 export function ProgressScrambleText({ groups, controllerRef, reducedMotion }) {
   const visualRefs = useRef(new Map());
+  const shadeRefs = useRef(new Map());
   const lastDisplaysRef = useRef(new Map());
   const lastUpdateRef = useRef(0);
 
@@ -85,9 +86,14 @@ export function ProgressScrambleText({ groups, controllerRef, reducedMotion }) {
           if (next !== lastDisplaysRef.current.get(field.id)) {
             lastDisplaysRef.current.set(field.id, next);
             element.textContent = next;
+            const shade = shadeRefs.current.get(field.id);
+            if (shade) shade.textContent = next;
           }
 
-          element.style.opacity = String(opacityForProgress(progress, reducedMotion, start));
+          const opacity = opacityForProgress(progress, reducedMotion, start);
+          element.style.opacity = String(opacity);
+          const shade = shadeRefs.current.get(field.id);
+          if (shade) shade.style.opacity = String(opacity * (field.shadeStrength ?? 0.72));
         });
       });
     };
@@ -107,11 +113,19 @@ export function ProgressScrambleText({ groups, controllerRef, reducedMotion }) {
               <span className="invisible">{field.text}</span>
               <span
                 ref={(element) => {
+                  if (element) shadeRefs.current.set(field.id, element);
+                  else shadeRefs.current.delete(field.id);
+                }}
+                data-scramble-text-shade={field.id}
+                className="services-selector-text-cloud absolute inset-0 z-0 whitespace-pre-wrap transition-opacity duration-100"
+              />
+              <span
+                ref={(element) => {
                   if (element) visualRefs.current.set(field.id, element);
                   else visualRefs.current.delete(field.id);
                 }}
                 data-scramble-progress-text={field.id}
-                className="absolute inset-0 whitespace-pre-wrap transition-opacity duration-100"
+                className="absolute inset-0 z-[1] whitespace-pre-wrap transition-opacity duration-100"
               />
             </span>
           ))}
