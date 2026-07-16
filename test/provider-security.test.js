@@ -1,0 +1,144 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { sendContactEmail } from '../api/_lib/resend.js';
+import { verifyTurnstile } from '../api/_lib/turnstile.js';
+
+const submission = {
+  name: '<script>alert(1)</script>',
+  company: 'Example AB',
+  email: 'reply@example.com',
+  phone: '+46 70 000 00 00',
+  need: 'Cybersecurity',
+  message: '<img src=x onerror=alert(1)>',
+};
+
+test('escapes HTML and keeps the visitor address in reply_to', async () => {
+  let payload;
+  await sendContactEmail({
+    apiKey: 'api-key',
+    fromEmail: 'JUIT Website <website@example.com>',
+    toEmail: 'contact@juit.se',
+    submission,
+    requestId: '123e4567-e89b-42d3-a456-426614174000',
+    fetchImpl: async (_url, init) => {
+      payload = JSON.parse(init.body);
+      return Response.json({ id: 'email-id' });
+    },
+  });
+
+  assert.equal(payload.from, 'JUIT Website <website@example.com>');
+  assert.equal(payload.to[0], 'contact@juit.se');
+  assert.equal(payload.reply_to, 'reply@example.com');
+  assert.equal(payload.html.includes('<script>'), false);
+  assert.equal(payload.html.includes('&lt;script&gt;'), true);
+  assert.equal(payload.html.includes('<img'), false);
+});
+
+test('removes CRLF characters from all email header values', async () => {
+  let payload;
+  await sendContactEmail({
+    apiKey: 'api-key',
+    fromEmail: 'Website <website@example.com>\r\nBcc: attacker@example.com',
+    toEmail: 'contact@juit.se\nCc: attacker@example.com',
+    submission: {
+      ...submission,
+      email: 'reply@example.com\r\nBcc: attacker@example.com',
+      need: 'Cybersecurity\r\nInjected: value',
+    },
+    requestId: '123e4567-e89b-42d3-a456-426614174000',
+    fetchImpl: async (_url, init) => {
+      payload = JSON.parse(init.body);
+      return Response.json({ id: 'email-id' });
+    },
+  });
+
+  for (const value of [payload.from, payload.to[0], payload.reply_to, payload.subject]) {
+    assert.equal(/[\r\n]/u.test(value), false);
+  }
+});
+
+test('treats a successful provider status as accepted even with a malformed optional body', async () => {
+  const result = await sendContactEmail({
+    apiKey: 'api-key',
+    fromEmail: 'JUIT Website <website@example.com>',
+    toEmail: 'contact@juit.se',
+    submission,
+    requestId: '123e4567-e89b-42d3-a456-426614174000',
+    fetchImpl: async () => new Response('not-json', { status: 202 }),
+  });
+
+  assert.deepEqual(result, { id: null });
+});
+
+test('requires matching Turnstile action and hostname', async () => {
+  const valid = await verifyTurnstile({
+    secret: 'secret',
+    token: 'token',
+    remoteIp: '203.0.113.10',
+    expectedAction: 'contact_form',
+    allowedHostnames: ['juitnetsec.se'],
+    fetchImpl: async () => Response.json({
+      success: true,
+      action: 'contact_form',
+      hostname: 'juitnetsec.se',
+    }),
+  });
+  assert.equal(valid, true);
+
+  const wrongAction = await verifyTurnstile({
+    secret: 'secret',
+    token: 'token',
+    expectedAction: 'contact_form',
+    allowedHostnames: ['juitnetsec.se'],
+    fetchImpl: async () => Response.json({
+      success: true,
+      action: 'different_action',
+      hostname: 'juitnetsec.se',
+    }),
+  });
+  assert.equal(wrongAction, false);
+
+  const wrongHostname = await verifyTurnstile({
+    secret: 'secret',
+    token: 'token',
+    expectedAction: 'contact_form',
+    allowedHostnames: ['juitnetsec.se'],
+    fetchImpl: async () => Response.json({
+      success: true,
+      action: 'contact_form',
+      hostname: 'attacker.example',
+    }),
+  });
+  assert.equal(wrongHostname, false);
+});
+
+test('reports Turnstile transport and response failures as provider errors', async () => {
+  await assert.rejects(
+    verifyTurnstile({
+      secret: 'secret',
+      token: 'token',
+      fetchImpl: async () => new Response('unavailable', { status: 503 }),
+    }),
+    { name: 'TurnstileProviderError' },
+  );
+
+  await assert.rejects(
+    verifyTurnstile({
+      secret: 'secret',
+      token: 'token',
+      fetchImpl: async () => new Response('not-json', { status: 200 }),
+    }),
+    { name: 'TurnstileProviderError' },
+  );
+
+  await assert.rejects(
+    verifyTurnstile({
+      secret: 'secret',
+      token: 'token',
+      fetchImpl: async () => {
+        throw new Error('network failure');
+      },
+    }),
+    { name: 'TurnstileProviderError' },
+  );
+});
