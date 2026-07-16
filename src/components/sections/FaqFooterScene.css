@@ -1,0 +1,103 @@
+.faq-footer-scene {
+  --faq-footer-reveal: 0;
+  /* One source of truth for both the footer content clip and white edge panels. */
+  --scene-footer-frame-x: clamp(20px, 2.7vw, 104px);
+  --scene-footer-frame-top: clamp(5rem, 8vh, 7rem);
+  --scene-footer-frame-bottom: clamp(22px, 4vh, 76px);
+  position: relative;
+  isolation: isolate;
+  background: #050505;
+}
+
+.faq-footer-scene__background {
+  position: sticky;
+  top: 0;
+  z-index: 0;
+  height: 100svh;
+  margin-bottom: -100svh;
+  overflow: hidden;
+  background: #050505;
+  pointer-events: none;
+}
+
+.faq-footer-scene__video,
+.faq-footer-scene__readability,
+.faq-footer-scene__edge {
+  position: absolute;
+}
+
+.faq-footer-scene__video {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.faq-footer-scene__readability {
+  inset: 0;
+  z-index: 1;
+  background: rgba(5, 5, 5, 0.78);
+}
+
+/* These panels reveal a smaller window by covering the unchanged video.  They
+   are intentionally not a transform, crop, or scale on the video element. */
+.faq-footer-scene__edge {
+  z-index: 2;
+  background: #fff;
+  will-change: width, height;
+}
+
+.faq-footer-scene__edge--top,
+.faq-footer-scene__edge--bottom {
+  right: 0;
+  left: 0;
+  height: calc(var(--faq-footer-reveal) * var(--scene-footer-frame-top));
+}
+
+.faq-footer-scene__edge--top {
+  top: 0;
+}
+
+.faq-footer-scene__edge--bottom {
+  bottom: 0;
+  height: calc(var(--faq-footer-reveal) * var(--scene-footer-frame-bottom));
+}
+
+.faq-footer-scene__edge--right,
+.faq-footer-scene__edge--left {
+  top: 0;
+  bottom: 0;
+  width: calc(var(--faq-footer-reveal) * var(--scene-footer-frame-x));
+}
+
+.faq-footer-scene__edge--right {
+  right: 0;
+}
+
+.faq-footer-scene__edge--left {
+  left: 0;
+}
+
+.faq-footer-scene__content {
+  position: relative;
+  z-index: 1;
+}
+
+.faq-footer-scene .faq-section {
+  background: transparent;
+}
+
+@media (max-width: 1023px) {
+  .faq-footer-scene {
+    --scene-footer-frame-x: clamp(14px, 4.5vw, 28px);
+    --scene-footer-frame-top: clamp(3.5rem, 7svh, 5rem);
+    --scene-footer-frame-bottom: clamp(16px, 3svh, 28px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .faq-footer-scene__edge {
+    will-change: auto;
+  }
+}

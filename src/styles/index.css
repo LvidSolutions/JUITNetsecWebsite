@@ -501,11 +501,11 @@
     /* Vita marginaler i Flyward-proportioner (uppmätta i referensvideon): sidor
        ~2.7% av bredden (vw), topp ~3% och botten ~4% av höjden (vh). Per-axel och
        responsiva – samma procent oavsett skärmformat (clamp ger sansade px-gränser). */
-    --footer-frame-x: clamp(20px, 2.7vw, 104px);
+    --footer-frame-x: var(--scene-footer-frame-x, clamp(20px, 2.7vw, 104px));
     /* Toppmarginalen är minst navbarens höjd, så den vita ytan fortsätter
        hela vägen bakom logotyp och länkar när scenen når viewporttoppen. */
-    --footer-frame-top: clamp(5rem, 8vh, 7rem);
-    --footer-frame-bottom: clamp(22px, 4vh, 76px);
+    --footer-frame-top: var(--scene-footer-frame-top, clamp(5rem, 8vh, 7rem));
+    --footer-frame-bottom: var(--scene-footer-frame-bottom, clamp(22px, 4vh, 76px));
     padding: 0;
     /* EN rörelse: hela inramningen animeras in på sista scroll-ticket (Flyward),
        i stället för en scroll-länkad gradvis sex-stegs-reveal. */
@@ -526,12 +526,23 @@
     will-change: clip-path;
   }
 
-  .footer-scroll-scene {
+.footer-frame--video-scene,
+.footer-frame__card--video-scene {
+  background: transparent;
+}
+
+.footer-scroll-scene {
     /* The scene ends exactly when the frame reaches 100%; no inert scroll
        distance remains after the white-margin transition has completed. */
     min-height: calc(100svh + min(42svh, 360px));
-    background: #fff;
-  }
+  background: #fff;
+}
+
+/* This must be more specific than the default white scene, which is declared
+   above, so the shared video can remain visible through the footer centre. */
+.footer-scroll-scene.footer-scroll-scene--video-scene {
+  background: transparent;
+}
 
   @media (min-width: 1024px) {
     .footer-stage {

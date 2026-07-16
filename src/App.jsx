@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { Header } from './components/layout/Header.jsx';
-import { Footer } from './components/layout/Footer.jsx';
 import { AnimatedLogo } from './components/layout/AnimatedLogo.jsx';
 import { AboutSection } from './components/sections/AboutSection.jsx';
 import { ContactPage } from './components/contact/ContactPage.jsx';
@@ -11,7 +10,7 @@ import { PartnersSection } from './components/sections/PartnersSection.jsx';
 import { StatsSection } from './components/sections/StatsSection.jsx';
 import { TerminalSignalSection } from './components/sections/TerminalSignalSection.jsx';
 import { NextStepPlaceholder } from './components/sections/NextStepPlaceholder.jsx';
-import { FaqSection } from './components/sections/FaqSection.jsx';
+import { FaqFooterScene } from './components/sections/FaqFooterScene.jsx';
 import { ServicesSection } from './components/sections/ServicesSection.jsx';
 import { HomeCursor } from './components/ui/HomeCursor.jsx';
 import { useHeroIntroProgress } from './lib/useHeroIntroProgress.js';
@@ -164,14 +163,14 @@ function App() {
             <PartnersSection />
             <TerminalSignalSection />
             <NextStepPlaceholder />
-            <FaqSection />
+            <FaqFooterScene />
           </>
         )}
         {currentPath === '/tjanster' && <ServicesSection />}
         {(currentPath === '/om-oss' || currentPath === '/about') && <AboutSection />}
         {(currentPath === '/kontakt' || currentPath === '/contact') && <ContactPage />}
       </main>
-      <Footer homeEffects={isHome} />
+      {!isHome && <Footer />}
       {isHome && <HomeCursor />}
     </>
   );

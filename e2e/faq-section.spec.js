@@ -42,13 +42,47 @@ test('FAQ accordion is accessible and keeps one panel open @home', async ({ page
   await expect(first).toHaveAttribute('aria-expanded', 'true');
 
   await expect(section.getByRole('link', { name: /contact us/i })).toHaveAttribute('href', '/kontakt');
-  const faqPrecedesFooter = await page.locator('main').evaluate(
-    (main) =>
-      main.lastElementChild?.classList.contains('faq-section') &&
-      main.nextElementSibling?.classList.contains('footer-scroll-scene') &&
-      Boolean(main.nextElementSibling?.querySelector('footer')),
-  );
-  expect(faqPrecedesFooter).toBe(true);
+  const faqSharesSceneWithFooter = await page.locator('main').evaluate((main) => {
+    const scene = main.lastElementChild;
+    return Boolean(
+      scene?.classList.contains('faq-footer-scene') &&
+      scene.querySelector('.faq-section') &&
+      scene.querySelector('.footer-scroll-scene footer'),
+    );
+  });
+  expect(faqSharesSceneWithFooter).toBe(true);
+
+  const video = page.locator('.faq-footer-scene__video');
+  await expect(video).toHaveAttribute('preload', 'metadata');
+  expect(await video.evaluate((element) => ({
+    autoplay: element.autoplay,
+    muted: element.muted,
+    playsInline: element.playsInline,
+  }))).toEqual({ autoplay: true, muted: true, playsInline: true });
+});
+
+test('footer reveal masks the shared video without changing its viewport dimensions @home', async ({ page }) => {
+  const footer = page.locator('.footer-scroll-scene');
+  const video = page.locator('.faq-footer-scene__video');
+
+  await page.evaluate(() => { document.documentElement.style.scrollBehavior = 'auto'; });
+  await footer.evaluate((element) => window.scrollBy(0, element.getBoundingClientRect().top));
+  await page.waitForTimeout(50);
+  const before = await video.evaluate((element) => {
+    const { width, height } = element.getBoundingClientRect();
+    return { width, height };
+  });
+
+  await page.evaluate(() => window.scrollBy(0, Math.min(window.innerHeight * 0.42, 360)));
+  await page.waitForTimeout(50);
+  const after = await video.evaluate((element) => {
+    const { width, height } = element.getBoundingClientRect();
+    return { width, height };
+  });
+  const edge = page.locator('.faq-footer-scene__edge--left');
+
+  expect(before).toEqual(after);
+  expect(await edge.evaluate((element) => element.getBoundingClientRect().width)).toBeGreaterThan(0);
 });
 
 test('FAQ has no horizontal overflow with reduced motion @reduced', async ({ page }) => {

@@ -18,7 +18,7 @@ const company = {
   addressLines: ['Stockholm, Sweden'],
 };
 
-export function Footer({ homeEffects = false }) {
+export function Footer({ homeEffects = false, videoScene = false, revealTargetRef = null }) {
   const footerRef = useRef(null);
   const frameRef = useRef(null);
 
@@ -40,7 +40,8 @@ export function Footer({ homeEffects = false }) {
       // riktningbyte precis vid dess startpunkt.
       const rect = el.getBoundingClientRect();
       const raw = Math.min(Math.max(-rect.top / Math.min(window.innerHeight * 0.42, 360), 0), 1);
-      const progress = raw * raw * (3 - 2 * raw);
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const progress = prefersReducedMotion ? (rect.top <= 0 ? 1 : 0) : raw * raw * (3 - 2 * raw);
 
       // The header is driven by the very same continuous value as the frame.
       // Do not use a midpoint class toggle here: that created a visible one-frame
@@ -50,6 +51,7 @@ export function Footer({ homeEffects = false }) {
         const progressValue = progress.toFixed(4);
         frame.style.setProperty('--ff', progressValue);
         document.body.style.setProperty('--footer-frame-progress', progressValue);
+        revealTargetRef?.current?.style.setProperty('--faq-footer-reveal', progressValue);
       }
     };
     const requestUpdate = () => {
@@ -69,14 +71,14 @@ export function Footer({ homeEffects = false }) {
   return (
     <div
       ref={footerRef}
-      className="footer-scroll-scene relative"
+      className={`footer-scroll-scene relative${videoScene ? ' footer-scroll-scene--video-scene' : ''}`}
       data-home-cursor-scope={homeEffects ? 'true' : undefined}
     >
       <div
         ref={frameRef}
-        className="footer-frame"
+        className={`footer-frame${videoScene ? ' footer-frame--video-scene' : ''}`}
       >
-        <footer className="footer-frame__card relative isolate overflow-hidden bg-brand-black">
+        <footer className={`footer-frame__card relative isolate overflow-hidden${videoScene ? ' footer-frame__card--video-scene' : ' bg-brand-black'}`}>
           <svg
             aria-hidden="true"
             focusable="false"
@@ -96,14 +98,18 @@ export function Footer({ homeEffects = false }) {
           </svg>
 
           {/* Full-bleed bakgrund + animerat filmkorn – kant-till-kant, ingen ram. */}
-          <div
-            aria-hidden="true"
-            className="footer-glow pointer-events-none absolute inset-0 -z-10"
-          />
-          <div
-            aria-hidden="true"
-            className="footer-noise footer-noise--animated pointer-events-none absolute inset-[-25%] -z-10"
-          />
+          {!videoScene && (
+            <>
+              <div
+                aria-hidden="true"
+                className="footer-glow pointer-events-none absolute inset-0 -z-10"
+              />
+              <div
+                aria-hidden="true"
+                className="footer-noise footer-noise--animated pointer-events-none absolute inset-[-25%] -z-10"
+              />
+            </>
+          )}
 
           {/* Desktop följer referensens scen: övre datafält, stor tom mitt,
               varumärke och kontakt lågt placerade. Mobil/tablet staplar tryggt. */}
