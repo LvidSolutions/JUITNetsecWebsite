@@ -146,7 +146,7 @@
 .contact-monitor-cta__tilt[data-active='true'] .contact-monitor-cta__screen,
 .contact-monitor-cta__tilt:is(:hover, :focus-within) .contact-monitor-cta__screen {
   border-color: rgba(128, 255, 151, 0.92);
-  background-color: rgba(0, 200, 83, 0.95);
+  background-color: #00c853;
   box-shadow:
     inset 0 0 34px rgba(157, 255, 177, 0.32),
     0 0 22px rgba(72, 255, 112, 0.78),

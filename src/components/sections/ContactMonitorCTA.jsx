@@ -326,15 +326,9 @@ export function ContactMonitorCTA() {
                 window.clearTimeout(timeout);
                 if (!mountedRef.current) return;
                 api.setBackground({ color: [0, 0, 0] });
-                api.getCameraLookAt((cameraError, camera) => {
-                  if (!cameraError && camera) {
-                    api.setCameraLookAt(
-                      [camera.target[0], camera.target[1] - 8.4, camera.target[2] + 0.1],
-                      camera.target,
-                      0,
-                    );
-                  }
-                });
+                // Use the model's authored camera. Deriving a new position from
+                // its target could produce a side-on view while the viewer was
+                // still settling after load.
                 setMode('viewer');
 
                 const captureCleanRender = () => {

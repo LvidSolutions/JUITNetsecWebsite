@@ -37,7 +37,9 @@
 .faq-footer-scene__readability {
   inset: 0;
   z-index: 1;
-  background: rgba(5, 5, 5, 0.78);
+  background:
+    linear-gradient(rgba(0, 200, 83, 0.12), rgba(0, 200, 83, 0.12)),
+    rgba(5, 5, 5, 0.78);
 }
 
 /* These panels reveal a smaller window by covering the unchanged video.  They
