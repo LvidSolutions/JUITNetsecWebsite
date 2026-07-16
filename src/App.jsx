@@ -11,6 +11,7 @@ import { PartnersSection } from './components/sections/PartnersSection.jsx';
 import { StatsSection } from './components/sections/StatsSection.jsx';
 import { TerminalSignalSection } from './components/sections/TerminalSignalSection.jsx';
 import { NextStepPlaceholder } from './components/sections/NextStepPlaceholder.jsx';
+import { FaqSection } from './components/sections/FaqSection.jsx';
 import { ServicesSection } from './components/sections/ServicesSection.jsx';
 import { HomeCursor } from './components/ui/HomeCursor.jsx';
 import { useHeroIntroProgress } from './lib/useHeroIntroProgress.js';
@@ -163,6 +164,7 @@ function App() {
             <StatsSection />
             <TerminalSignalSection />
             <NextStepPlaceholder />
+            <FaqSection />
           </>
         )}
         {currentPath === '/tjanster' && <ServicesSection />}
