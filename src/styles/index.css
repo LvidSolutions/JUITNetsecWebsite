@@ -104,42 +104,44 @@
      governance copy sits over the left-hand darkness. The middle panel keeps
      its bright, unshaded treatment. */
   .services-selector-readability-shade--ops {
-    top: 7%;
-    right: 4%;
-    width: min(86%, 24rem);
-    height: 56%;
-    background: linear-gradient(
-      90deg,
-      rgba(5, 5, 5, 0) 18%,
-      rgba(5, 5, 5, 0.18) 47%,
-      rgba(5, 5, 5, 0.82) 100%
+    top: 4%;
+    right: 2%;
+    width: min(96%, 26rem);
+    height: 62%;
+    background: radial-gradient(
+      ellipse at 72% 32%,
+      rgba(5, 5, 5, 0.82) 0%,
+      rgba(5, 5, 5, 0.58) 34%,
+      rgba(5, 5, 5, 0.16) 62%,
+      rgba(5, 5, 5, 0) 82%
     );
   }
 
   .services-selector-readability-shade--sec {
-    top: 7%;
-    left: 4%;
-    width: min(86%, 24rem);
-    height: 56%;
-    background: linear-gradient(
-      90deg,
-      rgba(246, 247, 241, 0.86) 0%,
-      rgba(246, 247, 241, 0.66) 48%,
-      rgba(246, 247, 241, 0.16) 78%,
-      rgba(246, 247, 241, 0) 100%
+    top: 4%;
+    left: 2%;
+    width: min(92%, 24rem);
+    height: 58%;
+    background: radial-gradient(
+      ellipse at 34% 32%,
+      rgba(246, 247, 241, 0.9) 0%,
+      rgba(246, 247, 241, 0.76) 38%,
+      rgba(246, 247, 241, 0.26) 64%,
+      rgba(246, 247, 241, 0) 84%
     );
   }
 
   .services-selector-readability-shade--gov {
-    top: 7%;
-    left: 4%;
-    width: min(86%, 24rem);
-    height: 56%;
-    background: linear-gradient(
-      90deg,
+    top: 4%;
+    left: 2%;
+    width: min(92%, 24rem);
+    height: 62%;
+    background: radial-gradient(
+      ellipse at 30% 32%,
       rgba(5, 5, 5, 0.82) 0%,
-      rgba(5, 5, 5, 0.28) 48%,
-      rgba(5, 5, 5, 0) 82%
+      rgba(5, 5, 5, 0.56) 36%,
+      rgba(5, 5, 5, 0.15) 64%,
+      rgba(5, 5, 5, 0) 84%
     );
   }
 
