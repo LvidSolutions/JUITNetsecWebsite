@@ -63,7 +63,12 @@
   align-items: center;
 }
 
-.logoloop__item img {
+.logoloop__logo {
+  position: relative;
+  display: inline-block;
+}
+
+.logoloop__item img:not(.logoloop__logo-color) {
   height: var(--logoloop-logoHeight);
   width: auto;
   display: block;
@@ -74,11 +79,22 @@
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+.logoloop__logo-color {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.26s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 .logoloop--scale-hover .logoloop__item {
   overflow: visible;
 }
 
-.logoloop--scale-hover .logoloop__item:hover img,
+.logoloop--scale-hover .logoloop__item:hover .logoloop__logo,
 .logoloop--scale-hover .logoloop__item:hover .logoloop__node {
   transform: scale(1.2);
   transform-origin: center center;
@@ -168,6 +184,7 @@
   }
 
   .logoloop__item img,
+  .logoloop__logo-color,
   .logoloop__node {
     transition: none !important;
   }
