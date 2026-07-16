@@ -15,6 +15,7 @@ function Panel({ track, index, isActive, onSelect, reduce }) {
   const contentVerticalPosition = track.selectorText.verticalAlignment === 'bottom'
     ? 'bottom-[11%]'
     : 'top-[11%]';
+  const isSecurityPanel = track.id === 'sec';
   const toneClass = track.id === 'ops'
     ? 'services-selector-tone--ops'
     : track.id === 'sec'
@@ -23,7 +24,10 @@ function Panel({ track, index, isActive, onSelect, reduce }) {
   const scrambleGroups = useMemo(() => [
     {
       id: 'content',
-      className: `absolute ${contentVerticalPosition} ${contentPosition} w-[78%] max-w-[18rem] sm:max-w-[19rem]`,
+      className: isSecurityPanel
+        ? 'absolute w-[78%] max-w-[18rem] sm:max-w-[19rem]'
+        : `absolute ${contentVerticalPosition} ${contentPosition} w-[78%] max-w-[18rem] sm:max-w-[19rem]`,
+      style: isSecurityPanel ? { bottom: '11%', right: '8%', textAlign: 'right' } : undefined,
       fields: [
         {
           id: `${track.id}-eyebrow`,
@@ -73,7 +77,7 @@ function Panel({ track, index, isActive, onSelect, reduce }) {
         },
       ],
     },
-  ], [contentPosition, contentVerticalPosition, track]);
+  ], [contentPosition, contentVerticalPosition, isSecurityPanel, track]);
 
   return (
     <button

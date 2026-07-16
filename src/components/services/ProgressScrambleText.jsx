@@ -107,7 +107,7 @@ export function ProgressScrambleText({ groups, controllerRef, reducedMotion }) {
   return (
     <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-10">
       {groups.map((group) => (
-        <div key={group.id} className={group.className}>
+        <div key={group.id} className={group.className} style={group.style}>
           {group.fields.map((field) => (
             <span key={field.id} className={`relative block ${field.className ?? ''}`}>
               <span className="invisible">{field.text}</span>
