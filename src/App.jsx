@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Header } from './components/layout/Header.jsx';
 import { AnimatedLogo } from './components/layout/AnimatedLogo.jsx';
+import { Footer } from './components/layout/Footer.jsx';
 import { AboutSection } from './components/sections/AboutSection.jsx';
 import { ContactPage } from './components/contact/ContactPage.jsx';
 import { Hero } from './components/sections/Hero.jsx';
