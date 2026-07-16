@@ -143,34 +143,159 @@
     );
   }
 
-  /* Partnerremsa (LogoLoop): rendera alla logotyper i ren vit monokrom så de
-     matchar den mörka identiteten, med dämpad vila och full styrka vid hover.
-     brightness(0) invert(1) gör vilken enfärgad/flerfärgad logotyp som helst vit
-     och bevarar formen (igenkänning intakt). */
-  .partners-strip .logoloop__item img {
+  /* The supplied image is a viewport-sized layer, clipped to this component's
+     visible bounds. As the page scrolls, the component moves across the fixed
+     image like a stencil: no standalone image panel is introduced. */
+  .partners-reveal-scene {
+    position: relative;
+    isolation: isolate;
+    background: #050505;
+    --partners-stencil-top: 100vh;
+    --partners-stencil-bottom: 0px;
+  }
+
+  .partners-reveal-scene__background,
+  .partners-reveal-scene__shade {
+    pointer-events: none;
+  }
+
+  .partners-reveal-scene__background {
+    position: fixed;
+    z-index: 0;
+    inset: 0;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    clip-path: inset(var(--partners-stencil-top) 0 var(--partners-stencil-bottom));
+    will-change: clip-path;
+  }
+
+  .partners-reveal-scene__shade {
+    position: absolute;
+    z-index: 0;
+    inset: 0;
+    background: rgba(5, 5, 5, 0.68);
+  }
+
+  .partners-showcase {
+    position: relative;
+    z-index: 1;
+    min-height: clamp(560px, 48vw, 730px);
+  }
+
+  /* Partner showcase: neutral white marks establish a consistent baseline over
+     the image treatment. Official-color interaction is added separately. */
+  .partners-strip .logoloop__logo-base {
     filter: brightness(0) invert(1);
-    opacity: 0.6;
+    opacity: 0.78;
     transition:
       opacity 0.3s ease,
       transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  .partners-strip .logoloop__item:hover img {
+  .partners-showcase .logoloop__link {
+    display: inline-flex;
+    padding: 8px;
+    transition: transform 0.26s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .partners-showcase .logoloop__link:hover,
+  .partners-showcase .logoloop__link:focus-visible,
+  .partners-showcase .logoloop__link:active {
+    transform: scale(1.03);
+  }
+
+  .partners-showcase .logoloop__link:hover .logoloop__logo--layered .logoloop__logo-base,
+  .partners-showcase .logoloop__link:focus-visible .logoloop__logo--layered .logoloop__logo-base,
+  .partners-showcase .logoloop__link:active .logoloop__logo--layered .logoloop__logo-base {
+    opacity: 0;
+  }
+
+  .partners-showcase .logoloop__link:hover .logoloop__logo--layered .logoloop__logo-color,
+  .partners-showcase .logoloop__link:focus-visible .logoloop__logo--layered .logoloop__logo-color,
+  .partners-showcase .logoloop__link:active .logoloop__logo--layered .logoloop__logo-color {
     opacity: 1;
   }
 
-  /* Optisk balansering efter tight viewBox-beskärning: breda ordmärken dämpas
-     något i höjd så att deras versalhöjd väger jämnt mot de kvadratiska ikon-
-     märkena (konvention: wordmark-höjd < ikon-höjd). */
-  .partners-strip .logoloop__item img[alt='VMware'],
-  .partners-strip .logoloop__item img[alt='Veeam'],
-  .partners-strip .logoloop__item img[alt='Microsoft'],
-  .partners-strip .logoloop__item img[alt='Smart Cloud Solutions'] {
-    height: calc(var(--logoloop-logoHeight) * 0.7);
+  .partners-showcase .logoloop__link:hover .logoloop__logo:not(.logoloop__logo--layered) .logoloop__logo-base,
+  .partners-showcase .logoloop__link:focus-visible .logoloop__logo:not(.logoloop__logo--layered) .logoloop__logo-base,
+  .partners-showcase .logoloop__link:active .logoloop__logo:not(.logoloop__logo--layered) .logoloop__logo-base {
+    opacity: 1;
   }
 
-  .partners-strip .logoloop__item img[alt='Amazon Web Services'] {
-    height: calc(var(--logoloop-logoHeight) * 0.86);
+  .partners-showcase .logoloop__link:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 5px;
+  }
+
+  .partners-showcase__marquee.logoloop {
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent);
+    mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent);
+  }
+
+  /* Wide wordmarks use less cap-height than compact symbols so the marquee is
+     balanced by perceived mass rather than identical bounding boxes. */
+  .partners-strip .logoloop__logo-base[alt='VMware'],
+  .partners-strip .logoloop__logo-base[alt='Veeam'],
+  .partners-strip .logoloop__logo-base[alt='Microsoft'],
+  .partners-strip .logoloop__logo-base[alt='Smart Cloud Solutions'] {
+    height: calc(var(--logoloop-logoHeight) * 0.68);
+  }
+
+  .partners-strip .logoloop__logo-base[alt='Amazon Web Services'] {
+    height: calc(var(--logoloop-logoHeight) * 0.82);
+  }
+
+  @media (max-width: 639px) {
+    .partners-showcase__marquee.logoloop {
+      -webkit-mask-image: linear-gradient(to right, transparent, #000 9%, #000 91%, transparent);
+      mask-image: linear-gradient(to right, transparent, #000 9%, #000 91%, transparent);
+    }
+  }
+
+  @media (max-width: 767px) {
+    .partners-showcase {
+      min-height: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .partners-reveal-scene__background {
+      position: absolute;
+      clip-path: none;
+      will-change: auto;
+    }
+
+    .partners-showcase {
+      min-height: 0;
+    }
+
+    .partners-showcase__marquee.logoloop {
+      overflow: visible;
+      -webkit-mask-image: none;
+      mask-image: none;
+    }
+
+    .partners-showcase__marquee .logoloop__track,
+    .partners-showcase__marquee .logoloop__list {
+      width: 100%;
+      transform: none !important;
+    }
+
+    .partners-showcase__marquee .logoloop__list {
+      flex-wrap: wrap;
+      justify-content: center;
+      column-gap: clamp(24px, 5vw, 52px);
+      row-gap: 18px;
+    }
+
+    .partners-showcase__marquee .logoloop__list:not(:first-child) {
+      display: none;
+    }
+
+    .partners-showcase__marquee .logoloop__item {
+      margin-right: 0;
+    }
   }
 
   .hero-grid {

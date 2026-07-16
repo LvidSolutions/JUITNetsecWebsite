@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Interaction variant of the existing documented text fallback. This uses JUIT's
+  existing green accent rather than claiming an unverified Smart Cloud brand color.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 64" role="img" aria-label="Smart Cloud Solutions">
+  <title>Smart Cloud Solutions</title>
+  <g fill="#00C853" font-family="'Space Grotesk','Segoe UI',Arial,sans-serif" font-weight="700" text-anchor="middle">
+    <text x="130" y="28" font-size="21" letter-spacing="2">SMART CLOUD</text>
+    <text x="130" y="53" font-size="21" letter-spacing="6">SOLUTIONS</text>
+  </g>
+</svg>
