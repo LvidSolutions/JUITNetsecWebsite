@@ -112,7 +112,7 @@ function Panel({ track, index, isActive, onSelect, reduce }) {
       {readabilityShadeClass && (
         <span
           aria-hidden="true"
-          className={`${readabilityShadeClass} pointer-events-none absolute inset-0 z-[4]`}
+          className={`${readabilityShadeClass} pointer-events-none absolute z-[4]`}
         />
       )}
       <span id={descriptionId} className="sr-only">
