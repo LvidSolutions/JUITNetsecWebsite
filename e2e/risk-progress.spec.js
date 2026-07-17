@@ -49,6 +49,27 @@ test('risk landscape follows actual scroll progress without overflow @home', asy
   await scrollSectionToProgress(page, 0.98);
   await expect(words.nth(82)).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, 0)');
 
+  await scrollSectionToProgress(page, 1);
+  const finalLayout = await section.evaluate((element) => {
+    const sticky = element.querySelector('.risk-progress__sticky').getBoundingClientRect();
+    const text = element.querySelector('.risk-progress__text').getBoundingClientRect();
+    const sources = element.querySelector('.risk-progress__sources').getBoundingClientRect();
+    const lastWord = element.querySelector('.risk-progress__word:last-child').getBoundingClientRect();
+
+    return {
+      stickyTop: sticky.top,
+      textTop: text.top,
+      textBottom: text.bottom,
+      sourcesTop: sources.top,
+      lastWordBottom: lastWord.bottom,
+    };
+  });
+
+  // The final words must stay inside the sticky viewport and clear the source line.
+  expect(finalLayout.textTop).toBeGreaterThanOrEqual(finalLayout.stickyTop);
+  expect(finalLayout.textBottom).toBeLessThanOrEqual(finalLayout.sourcesTop - 16);
+  expect(finalLayout.lastWordBottom).toBeLessThanOrEqual(finalLayout.sourcesTop - 16);
+
   await scrollSectionToProgress(page, 0.1);
   const reversedProgress = await section.evaluate((element) => Number.parseFloat(getComputedStyle(element).getPropertyValue('--risk-progress')));
   expect(reversedProgress).toBeGreaterThan(0.09);
