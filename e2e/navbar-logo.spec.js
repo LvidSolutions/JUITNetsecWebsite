@@ -72,6 +72,41 @@ test('homepage logo collapses after landing, reverses on hover and leaves naviga
   await expect(logo).toHaveAttribute('data-state', 'wordmark');
 });
 
+test('expanded navbar wordmark keeps its text level with the cube and remains centered @home', async ({ page }) => {
+  await skipIntroLoader(page);
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  await setHeroProgress(page, 0.47);
+
+  const logo = page.getByTestId('interactive-logo');
+  await logo.hover();
+  await expect(logo).toHaveAttribute('data-state', 'wordmark');
+  await page.waitForTimeout(550);
+
+  const alignment = await page.evaluate(() => {
+    const juit = document.querySelector('[data-testid="interactive-logo"] .bw-juit');
+    const netsec = document.querySelector('[data-testid="interactive-logo"] .bw-netsec');
+    const cube = document.querySelector('[data-testid="animated-logo-cube"]');
+    if (!juit || !netsec || !cube) return null;
+
+    const rect = (element) => element.getBoundingClientRect();
+    const juitRect = rect(juit);
+    const netsecRect = rect(netsec);
+    const cubeRect = rect(cube);
+    return {
+      cubeCenterY: cubeRect.top + cubeRect.height / 2,
+      juitCenterY: juitRect.top + juitRect.height / 2,
+      netsecCenterY: netsecRect.top + netsecRect.height / 2,
+      wordmarkCenterX: (juitRect.left + netsecRect.right) / 2,
+      viewportCenterX: window.innerWidth / 2,
+    };
+  });
+
+  expect(alignment).not.toBeNull();
+  expect(Math.abs(alignment.juitCenterY - alignment.cubeCenterY)).toBeLessThan(2);
+  expect(Math.abs(alignment.netsecCenterY - alignment.cubeCenterY)).toBeLessThan(2);
+  expect(Math.abs(alignment.wordmarkCenterX - alignment.viewportCenterX)).toBeLessThan(3);
+});
+
 test('logo remains readable on touch devices and interactive on non-homepage routes @home', async ({ page }) => {
   await skipIntroLoader(page);
   await page.goto('/', { waitUntil: 'domcontentloaded' });

@@ -48,7 +48,17 @@ function useFinePointer() {
   return isFinePointer;
 }
 
-function SplitWordmark({ collapsed, cubeAlignmentOffset, cubeVerticalOffset, fontSize, isLanded, prefersReducedMotion, resetToWordmark }) {
+function SplitWordmark({
+  collapsed,
+  cubeVerticalOffset,
+  fontSize,
+  isLanded,
+  juitVerticalOffset,
+  netsecVerticalOffset,
+  prefersReducedMotion,
+  resetToWordmark,
+  revealHorizontalOffset,
+}) {
   const transition = {
     duration: resetToWordmark ? 0 : prefersReducedMotion ? 0.12 : collapsed ? 0.48 : 0.42,
     ease: LOGO_EASE,
@@ -60,10 +70,12 @@ function SplitWordmark({ collapsed, cubeAlignmentOffset, cubeVerticalOffset, fon
       aria-hidden="true"
       className="absolute left-1/2 top-1/2 h-0 w-0 -translate-x-1/2 -translate-y-1/2 font-display leading-none whitespace-nowrap"
       style={{ fontSize }}
+      animate={{ x: collapsed || !isLanded ? 0 : -revealHorizontalOffset }}
+      transition={transition}
     >
       <motion.span
         className="absolute whitespace-nowrap"
-        style={{ right: '0.47em' }}
+        style={{ right: '0.47em', y: juitVerticalOffset }}
         animate={{
           clipPath: collapsed ? 'inset(0 0 0 100%)' : 'inset(0 0 0 0)',
           x: collapsed ? textOffset : 0,
@@ -77,7 +89,7 @@ function SplitWordmark({ collapsed, cubeAlignmentOffset, cubeVerticalOffset, fon
         <motion.span
           className="inline-flex"
           style={isLanded ? undefined : { y: cubeVerticalOffset }}
-          animate={isLanded ? { y: collapsed ? 0 : cubeAlignmentOffset } : undefined}
+          animate={isLanded ? { y: 0 } : undefined}
           transition={transition}
         >
           <motion.span
@@ -95,7 +107,7 @@ function SplitWordmark({ collapsed, cubeAlignmentOffset, cubeVerticalOffset, fon
 
       <motion.span
         className="absolute whitespace-nowrap"
-        style={{ left: '0.47em' }}
+        style={{ left: '0.47em', y: netsecVerticalOffset }}
         animate={{
           clipPath: collapsed ? 'inset(0 100% 0 0)' : 'inset(0 0 0 0)',
           x: collapsed ? -textOffset : 0,
@@ -158,6 +170,14 @@ export function AnimatedLogo({ compact = false, targetRef, progress }) {
   const y = useTransform(progress, [0, INTRO_COMPLETE_AT], geometry ? [geometry.startY, geometry.endY] : [0, 0], { clamp: true });
   const fontSize = useTransform(progress, [0, INTRO_COMPLETE_AT], geometry ? [geometry.startSize, geometry.endSize] : [20, 20], { clamp: true });
   const cubeVerticalOffset = useTransform(progress, [0, INTRO_COMPLETE_AT], geometry ? [geometry.startSize / 2, 0] : [0, 0], { clamp: true });
+  const juitVerticalOffset = useTransform(
+    [cubeVerticalOffset, fontSize],
+    ([cubeOffset, currentFontSize]) => cubeOffset - currentFontSize / 2,
+  );
+  const netsecVerticalOffset = useTransform(
+    [cubeVerticalOffset, fontSize],
+    ([cubeOffset, currentFontSize]) => cubeOffset - currentFontSize * 0.62,
+  );
 
   const measureProbe = (
     <span
@@ -187,12 +207,14 @@ export function AnimatedLogo({ compact = false, targetRef, progress }) {
   const wordmark = (
     <SplitWordmark
       collapsed={collapsed}
-      cubeAlignmentOffset={geometry.endSize / 2}
       cubeVerticalOffset={prefersReducedMotion ? 0 : cubeVerticalOffset}
       fontSize={compact || prefersReducedMotion ? geometry.endSize : fontSize}
       isLanded={isLanded}
+      juitVerticalOffset={compact || prefersReducedMotion ? -geometry.endSize / 2 : juitVerticalOffset}
+      netsecVerticalOffset={compact || prefersReducedMotion ? -geometry.endSize * 0.62 : netsecVerticalOffset}
       prefersReducedMotion={prefersReducedMotion}
       resetToWordmark={returningFromCompact}
+      revealHorizontalOffset={geometry.endSize * START_CUBE_OFFSET_EM}
     />
   );
 
