@@ -17,11 +17,20 @@ import { useHeroIntroProgress } from './lib/useHeroIntroProgress.js';
 
 const titles = {
   '/': 'JUIT NetSec AB – IT security, networking and infrastructure',
-  '/tjanster': 'Services – JUIT NetSec AB',
+  '/tjanster': 'Cybersecurity, networking & secure IT services | JUIT NetSec',
   '/om-oss': 'About – JUIT NetSec AB',
   '/about': 'About – JUIT NetSec AB',
   '/kontakt': 'Contact – JUIT NetSec AB',
   '/contact': 'Contact – JUIT NetSec AB',
+};
+
+const descriptions = {
+  '/': 'JUIT NetSec AB helps companies with cybersecurity, networking, cloud, data centers and secure IT infrastructure.',
+  '/tjanster': 'Cybersecurity, networking and secure IT services from JUIT NetSec: practical support for resilient infrastructure, secure operations and technical decision-making.',
+  '/om-oss': 'Learn about JUIT NetSec AB and our practical approach to cybersecurity, networking and resilient IT infrastructure.',
+  '/about': 'Learn about JUIT NetSec AB and our practical approach to cybersecurity, networking and resilient IT infrastructure.',
+  '/kontakt': 'Contact JUIT NetSec AB for cybersecurity, networking and secure IT infrastructure support.',
+  '/contact': 'Contact JUIT NetSec AB for cybersecurity, networking and secure IT infrastructure support.',
 };
 
 const INTRO_SEEN_KEY = 'juit:introSeen';
@@ -122,7 +131,18 @@ function App() {
 
   useEffect(() => {
     document.title = title;
-  }, [title]);
+    const description = descriptions[currentPath] || descriptions['/'];
+    const descriptionTag = document.querySelector('meta[name="description"]');
+    if (descriptionTag) descriptionTag.setAttribute('content', description);
+
+    let canonical = document.querySelector('link[rel="canonical"]');
+    if (!canonical) {
+      canonical = document.createElement('link');
+      canonical.setAttribute('rel', 'canonical');
+      document.head.append(canonical);
+    }
+    canonical.setAttribute('href', new URL(currentPath, window.location.origin).href);
+  }, [currentPath, title]);
 
   return (
     <>

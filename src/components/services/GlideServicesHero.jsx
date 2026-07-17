@@ -1,168 +1,197 @@
 import { useEffect, useRef, useState } from 'react';
 import { useReducedMotion } from 'framer-motion';
 
-const PANELS = [
-  { id: 'outer-left', glide: 1 },
-  { id: 'inner-left', glide: 0.5 },
-  { id: 'centre', glide: 0 },
-  { id: 'inner-right', glide: 0.5 },
-  { id: 'outer-right', glide: 1 },
-];
-
 const VIDEO_SOURCE = '/assets/cosmos-services-columns.mp4';
+const PANEL_GLIDE = [1, 0.5, 0, 0.5, 1];
+const PANEL_MEDIA_Y = [0.58, 0.53, 0.48, 0.43, 0.38];
 
 function clamp(value, minimum, maximum) {
   return Math.min(Math.max(value, minimum), maximum);
 }
 
-function useDesktopGlide() {
-  const [enabled, setEnabled] = useState(() =>
+function useDesktopLayout() {
+  const [desktop, setDesktop] = useState(() =>
     typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches,
   );
 
   useEffect(() => {
     const query = window.matchMedia('(min-width: 768px)');
-    const update = () => setEnabled(query.matches);
+    const update = () => setDesktop(query.matches);
     update();
     query.addEventListener('change', update);
     return () => query.removeEventListener('change', update);
   }, []);
 
-  return enabled;
+  return desktop;
+}
+
+function drawGlideFrame(context, video, width, height, glideOffset) {
+  const gap = clamp(width * 0.005, 6, 18);
+  const columnWidth = (width - gap * 13) / 14;
+  const panelWidth = columnWidth * 2 + gap;
+  const panelHeight = panelWidth * 2.4;
+  const step = clamp(width * 0.02, 12, 32);
+  const videoScale = Math.max(width / video.videoWidth, panelHeight / video.videoHeight);
+  const videoWidth = video.videoWidth * videoScale;
+  const videoHeight = video.videoHeight * videoScale;
+  const videoX = (width - videoWidth) / 2;
+
+  context.clearRect(0, 0, width, height);
+
+  PANEL_GLIDE.forEach((glide, index) => {
+    const x = (index * 2 + 2) * (columnWidth + gap);
+    const y = step * (4 - index) + glideOffset * glide;
+    const videoY = -(videoHeight - panelHeight) * PANEL_MEDIA_Y[index];
+
+    context.save();
+    context.beginPath();
+    context.rect(x, y, panelWidth, panelHeight);
+    context.clip();
+    context.drawImage(video, videoX, y + videoY, videoWidth, videoHeight);
+
+    const shade = context.createLinearGradient(0, y, 0, y + panelHeight);
+    shade.addColorStop(0, 'rgba(0, 0, 0, 0.1)');
+    shade.addColorStop(0.35, 'rgba(0, 0, 0, 0)');
+    shade.addColorStop(1, 'rgba(0, 0, 0, 0.22)');
+    context.fillStyle = shade;
+    context.fillRect(x, y, panelWidth, panelHeight);
+    context.restore();
+  });
 }
 
 /**
- * Five crop windows use the same source and are kept in lockstep.  A single
- * moving media element cannot be clipped into independently gliding windows,
- * so each window gets a native decoder while this controller corrects drift.
+ * The original version mounted five copies of the same MP4 and then corrected
+ * decoder drift with a timer. This canvas keeps the five visual windows but
+ * uses a single decoder and only paints on real video frames.
  */
-export function GlideServicesHero() {
-  const heroRef = useRef(null);
-  const gridRef = useRef(null);
-  const panelRefs = useRef([]);
-  const reduceMotion = useReducedMotion();
-  const desktopGlide = useDesktopGlide();
+function DesktopGlideCanvas({ reduceMotion }) {
+  const stageRef = useRef(null);
+  const canvasRef = useRef(null);
+  const videoRef = useRef(null);
 
   useEffect(() => {
-    const hero = heroRef.current;
-    const grid = gridRef.current;
-    const panels = panelRefs.current.filter(Boolean);
-    if (!desktopGlide || !hero || !grid || !panels.length) return undefined;
+    const stage = stageRef.current;
+    const canvas = canvasRef.current;
+    const video = videoRef.current;
+    if (!stage || !canvas || !video) return undefined;
 
-    const videos = panels
-      .map((panel) => panel.querySelector('video'))
-      .filter(Boolean);
-    let frameId = 0;
+    const context = canvas.getContext('2d', { alpha: true, desynchronized: true });
+    if (!context) return undefined;
+
+    let frameRequest = 0;
+    let videoFrameRequest = 0;
     let lastScrollY = window.scrollY;
-    let velocity = 0;
+    let targetOffset = 0;
+    let currentOffset = 0;
+    let visible = false;
+    let width = 0;
+    let height = 0;
+    const pixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
 
-    function alignVideoWindows() {
-      const gridBounds = grid.getBoundingClientRect();
-
-      panels.forEach((panel) => {
-        const bounds = panel.getBoundingClientRect();
-        panel.style.setProperty('--glide-media-width', `${gridBounds.width}px`);
-        panel.style.setProperty('--glide-media-x', `${gridBounds.left - bounds.left}px`);
-      });
+    function paint() {
+      if (!visible || video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA || !width || !height) return;
+      currentOffset += (targetOffset - currentOffset) * 0.2;
+      targetOffset *= 0.86;
+      if (Math.abs(targetOffset) < 0.05) targetOffset = 0;
+      if (Math.abs(currentOffset) < 0.05) currentOffset = 0;
+      drawGlideFrame(context, video, width, height, reduceMotion ? 0 : currentOffset);
     }
 
-    function renderGlide() {
-      frameId = 0;
-      const displacement = reduceMotion ? 0 : velocity;
-
-      panels.forEach((panel, index) => {
-        const glide = PANELS[index].glide;
-        const amount = -displacement * window.innerHeight * 0.1 * glide;
-        panel.style.setProperty('--glide-y', `${amount.toFixed(2)}px`);
-      });
-
-      velocity *= 0.82;
-      if (Math.abs(velocity) > 0.003) frameId = window.requestAnimationFrame(renderGlide);
+    function queuePaint() {
+      if (!frameRequest) {
+        frameRequest = window.requestAnimationFrame(() => {
+          frameRequest = 0;
+          paint();
+        });
+      }
     }
 
-    function queueGlide() {
-      if (!frameId) frameId = window.requestAnimationFrame(renderGlide);
+    function onVideoFrame() {
+      paint();
+      if (visible && 'requestVideoFrameCallback' in HTMLVideoElement.prototype) {
+        videoFrameRequest = video.requestVideoFrameCallback(onVideoFrame);
+      }
+    }
+
+    function resize() {
+      const bounds = stage.getBoundingClientRect();
+      width = Math.max(1, Math.round(bounds.width));
+      height = Math.max(1, Math.round(bounds.height));
+      canvas.width = Math.round(width * pixelRatio);
+      canvas.height = Math.round(height * pixelRatio);
+      context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+      queuePaint();
     }
 
     function onScroll() {
       const nextScrollY = window.scrollY;
       const delta = nextScrollY - lastScrollY;
       lastScrollY = nextScrollY;
-      velocity = clamp(velocity * 0.56 + delta / 52, -1, 1);
-      queueGlide();
+      if (!reduceMotion) targetOffset = clamp(targetOffset - delta * 0.26, -56, 56);
+      queuePaint();
     }
 
-    function playAll() {
-      videos.forEach((video) => {
-        video.play().catch(() => {});
-      });
+    function startVideo() {
+      video.play().catch(() => {});
+      queuePaint();
+      if ('requestVideoFrameCallback' in HTMLVideoElement.prototype && !videoFrameRequest) {
+        videoFrameRequest = video.requestVideoFrameCallback(onVideoFrame);
+      }
     }
 
-    function correctVideoDrift() {
-      const source = videos[0];
-      if (!source || source.paused || source.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        visible = entry.isIntersecting;
+        if (visible) startVideo();
+        else video.pause();
+      },
+      { rootMargin: '160px 0px' },
+    );
+    const resizeObserver = new ResizeObserver(resize);
 
-      videos.slice(1).forEach((video) => {
-        if (Math.abs(video.currentTime - source.currentTime) > 0.04) {
-          video.currentTime = source.currentTime;
-        }
-      });
-    }
-
-    function syncLateVideo(event) {
-      const video = event.currentTarget;
-      const source = videos[0];
-      if (!source || video === source || source.readyState < HTMLMediaElement.HAVE_METADATA) return;
-      if (Math.abs(video.currentTime - source.currentTime) > 0.01) video.currentTime = source.currentTime;
-      if (!source.paused) video.play().catch(() => {});
-    }
-
-    const resizeObserver = new ResizeObserver(alignVideoWindows);
-    resizeObserver.observe(grid);
-    alignVideoWindows();
-    playAll();
-    videos.forEach((video) => video.addEventListener('canplay', syncLateVideo));
-    videos[0]?.addEventListener('timeupdate', correctVideoDrift);
-    const driftTimer = window.setInterval(correctVideoDrift, 250);
+    observer.observe(stage);
+    resizeObserver.observe(stage);
+    video.addEventListener('loadeddata', resize, { once: true });
     window.addEventListener('scroll', onScroll, { passive: true });
+    resize();
 
     return () => {
-      window.removeEventListener('scroll', onScroll);
-      window.clearInterval(driftTimer);
-      videos.forEach((video) => video.removeEventListener('canplay', syncLateVideo));
-      videos[0]?.removeEventListener('timeupdate', correctVideoDrift);
+      observer.disconnect();
       resizeObserver.disconnect();
-      if (frameId) window.cancelAnimationFrame(frameId);
+      window.removeEventListener('scroll', onScroll);
+      video.removeEventListener('loadeddata', resize);
+      if (frameRequest) window.cancelAnimationFrame(frameRequest);
+      if (videoFrameRequest && 'cancelVideoFrameCallback' in HTMLVideoElement.prototype) {
+        video.cancelVideoFrameCallback(videoFrameRequest);
+      }
     };
-  }, [desktopGlide, reduceMotion]);
+  }, [reduceMotion]);
 
   return (
-    <section ref={heroRef} className="glide-services-hero" aria-labelledby="services-hero-title">
-      <h1 id="services-hero-title" className="sr-only">Netsec services</h1>
+    <div ref={stageRef} className="glide-services-hero__canvas-stage" aria-hidden="true">
+      <canvas ref={canvasRef} className="glide-services-hero__canvas" />
+      <video ref={videoRef} loop muted playsInline preload="metadata" src={VIDEO_SOURCE} />
+    </div>
+  );
+}
+
+export function GlideServicesHero() {
+  const reduceMotion = useReducedMotion();
+  const desktop = useDesktopLayout();
+
+  return (
+    <section className="glide-services-hero" aria-labelledby="services-hero-title">
       <div className="glide-services-hero__composition">
-        <p className="glide-services-hero__label">Services</p>
-        {desktopGlide ? (
-          <div ref={gridRef} className="glide-services-hero__grid" aria-hidden="true">
-            {PANELS.map((panel, index) => (
-              <figure
-                key={panel.id}
-                ref={(element) => {
-                  panelRefs.current[index] = element;
-                }}
-                className="glide-services-hero__panel"
-              >
-                <video
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  preload="auto"
-                  src={VIDEO_SOURCE}
-                  tabIndex="-1"
-                />
-              </figure>
-            ))}
-          </div>
+        <div className="glide-services-hero__intro">
+          <p className="glide-services-hero__label">Services</p>
+          <h1 id="services-hero-title">Cybersecurity, networking and secure IT services</h1>
+          <p>
+            Practical expertise for resilient infrastructure, secure operations and technical
+            decision-making.
+          </p>
+        </div>
+        {desktop ? (
+          <DesktopGlideCanvas reduceMotion={reduceMotion} />
         ) : (
           <div className="glide-services-hero__mobile-media" aria-hidden="true">
             <video autoPlay loop muted playsInline preload="metadata" src={VIDEO_SOURCE} />
