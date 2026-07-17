@@ -2,6 +2,7 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { Container } from '../ui';
 import { ScrambleText } from './ScrambleText.jsx';
 import { ScrollFeatureSection } from './ScrollFeatureSection.jsx';
+import { AboutRevealGallery } from './AboutRevealGallery.jsx';
 import { cn } from '../../lib/cn';
 
 // ---------------------------------------------------------------------------
@@ -12,44 +13,6 @@ import { cn } from '../../lib/cn';
 // (svart, vitt och grön accent) och med eget, korrekt innehåll från underlaget.
 // Inga påhittade partnerskap, certifieringar, awards, kundcase eller siffror.
 // ---------------------------------------------------------------------------
-
-const principles = [
-  {
-    title: 'Security first',
-    description:
-      'Every recommendation starts with risk, resilience and the practical controls needed to protect business-critical systems.',
-    area: 'Risk reduction',
-    imageLabel: 'Image placeholder: secured infrastructure',
-  },
-  {
-    title: 'Clarity over complexity',
-    description:
-      'We make technical choices understandable, so stakeholders can see the trade-offs, priorities and next steps.',
-    area: 'Guidance',
-    imageLabel: 'Image placeholder: clear architecture',
-  },
-  {
-    title: 'Built on trust',
-    description:
-      'Security work depends on confidence, discretion and honest advice, especially when decisions affect long-term operations.',
-    area: 'Partnership',
-    imageLabel: 'Image placeholder: trusted collaboration',
-  },
-  {
-    title: 'Practical expertise',
-    description:
-      'Advice should be grounded in real technical environments and shaped for implementation, not presentation value.',
-    area: 'Execution',
-    imageLabel: 'Image placeholder: hands-on operations',
-  },
-  {
-    title: 'Solve before we sell',
-    description:
-      'We focus on the actual problem first, then recommend the simplest durable path for the environment and the team.',
-    area: 'Advisory',
-    imageLabel: 'Image placeholder: problem solving',
-  },
-];
 
 // Liten mono-label med grön bullet (återkommer genom hela sidan).
 function Label({ children, className = '' }) {
@@ -79,29 +42,6 @@ function Reveal({ children, className = '', delay = 0 }) {
     >
       {children}
     </motion.div>
-  );
-}
-
-function PrincipleImagePlaceholder({ label, index }) {
-  return (
-    <div className="relative aspect-[16/11] min-h-[14rem] overflow-hidden rounded-[2px] border border-brand-line bg-[linear-gradient(135deg,rgba(0,200,83,0.16),rgba(255,255,255,0.04)_52%,rgba(0,0,0,0.18))]">
-      {/* Image placeholder: replace this block with a principle-specific image when assets are ready. */}
-      <div className="absolute inset-0 hero-grid opacity-30" />
-      <div className="absolute left-1/2 top-1/2 h-36 w-36 -translate-x-1/2 -translate-y-1/2 rounded-full border border-brand-green/25 bg-brand-green/[0.035]" />
-      <div className="absolute left-[18%] top-[18%] h-16 w-16 rounded-[2px] border border-brand-green/35" />
-      <div className="absolute bottom-[18%] right-[18%] h-24 w-24 rounded-full border border-brand-mist/15" />
-      <div className="absolute inset-x-6 top-6 flex items-center justify-between">
-        <span className="font-mono text-[10px] uppercase tracking-[0.28em] text-brand-green">
-          {String(index + 1).padStart(2, '0')}
-        </span>
-        <span className="h-1.5 w-1.5 rounded-[1px] bg-brand-green" />
-      </div>
-      <div className="relative flex h-full items-end p-6">
-        <p className="max-w-[15rem] font-mono text-[10px] uppercase leading-5 tracking-[0.24em] text-brand-mist/60">
-          {label}
-        </p>
-      </div>
-    </div>
   );
 }
 
@@ -191,42 +131,8 @@ export function AboutSection() {
             </div>
           </Reveal>
 
-          <div className="mt-16 overflow-hidden rounded-[2px] border border-brand-line bg-white/[0.018]">
-            {principles.map((item, index) => (
-              <article key={item.title} className="border-b border-brand-line last:border-b-0">
-                <Reveal delay={index * 0.04}>
-                  <div className="grid gap-8 p-6 transition-colors duration-200 hover:bg-white/[0.025] sm:p-8 lg:grid-cols-[0.92fr_1.08fr] lg:items-center lg:gap-14 lg:p-12">
-                    <div>
-                      <div className="flex items-center gap-4">
-                        <ScrambleText
-                          as="span"
-                          text={String(index + 1).padStart(2, '0')}
-                          durationMs={500}
-                          className="font-mono text-xs tracking-[0.24em] text-brand-green"
-                        />
-                        <span className="h-px w-10 bg-brand-green/45" />
-                        <span className="font-mono text-[10px] uppercase tracking-[0.24em] text-brand-mist/45">
-                          {item.area}
-                        </span>
-                      </div>
-                      <ScrambleText
-                        as="h3"
-                        text={item.title}
-                        durationMs={850}
-                        className="mt-8 max-w-xl font-display text-3xl font-semibold leading-[1.04] tracking-tight text-brand-white sm:text-5xl"
-                      />
-                      <p className="mt-6 max-w-xl text-base leading-7 text-brand-mist/70 sm:text-lg sm:leading-8">
-                        {item.description}
-                      </p>
-                    </div>
-
-                    <div>
-                      <PrincipleImagePlaceholder label={item.imageLabel} index={index} />
-                    </div>
-                  </div>
-                </Reveal>
-              </article>
-            ))}
+          <div className="relative mt-16">
+            <AboutRevealGallery />
           </div>
         </Container>
       </section>
