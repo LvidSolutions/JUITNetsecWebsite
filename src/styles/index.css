@@ -114,31 +114,48 @@
     will-change: opacity;
   }
 
-  /* Keep the artwork inside its own section. A fixed, scroll-updated clip path
-     could expose the page background for a frame at the section boundary. */
+  .services-selector-readability-shade--sec {
+    top: 7%;
+    left: 4%;
+    width: min(86%, 24rem);
+    height: 56%;
+    background: linear-gradient(
+      90deg,
+      rgba(246, 247, 241, 0.86) 0%,
+      rgba(246, 247, 241, 0.66) 48%,
+      rgba(246, 247, 241, 0.16) 78%,
+      rgba(246, 247, 241, 0) 100%
+    );
+  }
+
+  .services-selector-readability-shade--gov {
+    top: 7%;
+    left: 4%;
+    width: min(86%, 24rem);
+    height: 56%;
+    background: linear-gradient(
+      90deg,
+      rgba(5, 5, 5, 0.82) 0%,
+      rgba(5, 5, 5, 0.28) 48%,
+      rgba(5, 5, 5, 0) 82%
+    );
+  }
+
+  /* The viewport-fixed artwork is painted only inside the section. The section
+     therefore acts as the stencil: scrolling moves its window across the image
+     without a detached image panel or JavaScript-managed clipping. */
   .partners-reveal-scene {
     position: relative;
     isolation: isolate;
     background: #050505;
-  }
-
-  .partners-reveal-scene__background,
-  .partners-reveal-scene__shade {
-    pointer-events: none;
-  }
-
-  .partners-reveal-scene__background {
-    position: absolute;
-    z-index: 0;
-    inset: 0;
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
-    clip-path: none;
-    will-change: auto;
+    background-attachment: fixed;
   }
 
   .partners-reveal-scene__shade {
+    pointer-events: none;
     position: absolute;
     z-index: 0;
     inset: 0;
@@ -228,6 +245,10 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .partners-reveal-scene {
+      background-attachment: scroll;
+    }
+
     .partners-showcase {
       min-height: 0;
     }

@@ -50,12 +50,8 @@ export function PartnersSection() {
       id="technology-showcase"
       aria-labelledby="technology-showcase-heading"
       className="partners-reveal-scene"
+      style={{ backgroundImage: "url('/assets/partners/partner-technology-background.png')" }}
     >
-      <div
-        aria-hidden="true"
-        className="partners-reveal-scene__background"
-        style={{ backgroundImage: "url('/assets/partners/partner-technology-background.png')" }}
-      />
       <div aria-hidden="true" className="partners-reveal-scene__shade" />
 
       <div className="partners-showcase relative z-10 overflow-hidden border-y border-brand-line/60">
