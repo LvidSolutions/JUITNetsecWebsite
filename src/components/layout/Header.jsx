@@ -45,7 +45,9 @@ export function Header({ currentPath = '/', logoSlotRef, hideStaticLogo = false 
           <a
             href="/"
             aria-label="JUIT NetSec AB, go to home page"
+            aria-hidden={hideStaticLogo || undefined}
             ref={logoSlotRef}
+            tabIndex={hideStaticLogo ? -1 : undefined}
             className={cn(
               'header-logo absolute left-1/2 z-40 -translate-x-1/2 text-[20px] transition-opacity duration-200 hover:opacity-80',
               hideStaticLogo && 'invisible',

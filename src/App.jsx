@@ -148,9 +148,9 @@ function App() {
       <Header
         currentPath={currentPath}
         logoSlotRef={logoSlotRef}
-        hideStaticLogo={isHome}
+        hideStaticLogo
       />
-      {isHome && <AnimatedLogo targetRef={logoSlotRef} progress={introProgress} />}
+      <AnimatedLogo compact={!isHome} targetRef={logoSlotRef} progress={introProgress} />
       <main
         id="huvudinnehall"
         className="min-h-screen bg-brand-black text-brand-white"
