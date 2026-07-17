@@ -96,6 +96,24 @@ test('logo remains readable on touch devices and interactive on non-homepage rou
   }
 });
 
+test('returning home immediately restores the full wordmark instead of a full-size cube @home', async ({ page }) => {
+  await skipIntroLoader(page);
+  await page.goto('/tjanster', { waitUntil: 'domcontentloaded' });
+
+  const routeLogo = page.getByTestId('interactive-logo');
+  await expect(routeLogo).toHaveAttribute('data-state', 'cube');
+  await routeLogo.click();
+  await page.waitForURL('**/');
+
+  const homeLogo = page.getByTestId('interactive-logo');
+  await expect(homeLogo).toHaveAttribute('data-state', 'wordmark');
+  const cubeSize = await page.getByTestId('animated-logo-cube').evaluate((cube) => {
+    const rect = cube.getBoundingClientRect();
+    return Math.max(rect.width, rect.height);
+  });
+  expect(cubeSize).toBeLessThan(100);
+});
+
 test('reduced motion retains the state model without cube rotation @reduced', async ({ page }) => {
   await skipIntroLoader(page);
   await page.emulateMedia({ reducedMotion: 'reduce' });

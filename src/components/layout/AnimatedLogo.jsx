@@ -48,9 +48,9 @@ function useFinePointer() {
   return isFinePointer;
 }
 
-function SplitWordmark({ collapsed, cubeAlignmentOffset, cubeVerticalOffset, fontSize, isLanded, prefersReducedMotion }) {
+function SplitWordmark({ collapsed, cubeAlignmentOffset, cubeVerticalOffset, fontSize, isLanded, prefersReducedMotion, resetToWordmark }) {
   const transition = {
-    duration: prefersReducedMotion ? 0.12 : collapsed ? 0.48 : 0.42,
+    duration: resetToWordmark ? 0 : prefersReducedMotion ? 0.12 : collapsed ? 0.48 : 0.42,
     ease: LOGO_EASE,
   };
   const textOffset = prefersReducedMotion ? 0 : 7;
@@ -88,7 +88,7 @@ function SplitWordmark({ collapsed, cubeAlignmentOffset, cubeVerticalOffset, fon
             }}
             transition={transition}
           >
-            <BrandCube className="h-[0.65em] w-[0.65em] shadow-none" />
+            <BrandCube data-testid="animated-logo-cube" className="h-[0.65em] w-[0.65em] shadow-none" />
           </motion.span>
         </motion.span>
       </span>
@@ -117,6 +117,7 @@ export function AnimatedLogo({ compact = false, targetRef, progress }) {
   const [introComplete, setIntroComplete] = useState(() => compact || progress.get() >= INTRO_COMPLETE_AT);
   const [isHovered, setIsHovered] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
+  const wasCompactRef = useRef(compact);
 
   useEffect(() => {
     function measureRatio() {
@@ -143,8 +144,9 @@ export function AnimatedLogo({ compact = false, targetRef, progress }) {
   }, [targetRef, ratio]);
 
   useEffect(() => {
-    if (compact) setIntroComplete(true);
-  }, [compact]);
+    setIntroComplete(compact || progress.get() >= INTRO_COMPLETE_AT);
+    wasCompactRef.current = compact;
+  }, [compact, progress]);
 
   useMotionValueEvent(progress, 'change', (latest) => {
     if (compact) return;
@@ -170,7 +172,11 @@ export function AnimatedLogo({ compact = false, targetRef, progress }) {
 
   if (!geometry) return measureProbe;
 
-  const isLanded = compact || introComplete;
+  // The logo component persists while the SPA changes routes. On the first
+  // home render after a compact route, its previous "landed" state would
+  // otherwise expose a full-size collapsed cube for one frame.
+  const returningFromCompact = !compact && wasCompactRef.current;
+  const isLanded = compact || (!returningFromCompact && introComplete && progress.get() >= INTRO_RESTORE_BELOW);
   const collapsed = isFinePointer && isLanded && !isHovered && !isFocused;
   const interactionProps = {
     onMouseEnter: () => setIsHovered(true),
@@ -186,6 +192,7 @@ export function AnimatedLogo({ compact = false, targetRef, progress }) {
       fontSize={compact || prefersReducedMotion ? geometry.endSize : fontSize}
       isLanded={isLanded}
       prefersReducedMotion={prefersReducedMotion}
+      resetToWordmark={returningFromCompact}
     />
   );
 

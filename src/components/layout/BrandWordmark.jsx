@@ -10,9 +10,10 @@ export function BrandJuit({ className = '' }) {
   return <span className={cn('bw-juit font-bold tracking-[-0.02em] text-brand-white', className)}>JUIT</span>;
 }
 
-export function BrandCube({ className = '' }) {
+export function BrandCube({ className = '', ...props }) {
   return (
     <span
+      {...props}
       aria-hidden="true"
       className={cn(
         'inline-block h-[0.3em] w-[0.3em] rounded-[1px] bg-brand-green shadow-[0_0_0.5em_rgba(0,200,83,0.65)]',
