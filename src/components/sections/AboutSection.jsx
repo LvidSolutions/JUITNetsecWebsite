@@ -13,20 +13,6 @@ import { cn } from '../../lib/cn';
 // Inga påhittade partnerskap, certifieringar, awards, kundcase eller siffror.
 // ---------------------------------------------------------------------------
 
-const contactProfile = {
-  name: 'Ulf Wernersson',
-  role: 'CEO',
-  email: 'contact@juit.se',
-  phone: '+46 708-25 63 93',
-  phoneHref: 'tel:+46708256393',
-};
-
-const companyContact = [
-  { k: 'Company', v: 'JUIT NetSec AB' },
-  { k: 'Location', v: 'Stockholm, Sweden' },
-  { k: 'Web', v: 'www.juit.se', href: 'https://www.juit.se' },
-];
-
 const principles = [
   {
     title: 'Security first',
@@ -115,30 +101,6 @@ function PrincipleImagePlaceholder({ label, index }) {
           {label}
         </p>
       </div>
-    </div>
-  );
-}
-
-function ContactRow({ row }) {
-  return (
-    <div className="grid gap-1 border-b border-brand-line py-5 last:border-b-0 sm:grid-cols-[8rem_minmax(0,1fr)] sm:gap-8">
-      <dt className="text-[11px] uppercase tracking-[0.24em] text-brand-mist/45">
-        {row.k}
-      </dt>
-      <dd className="text-sm leading-6 text-brand-white/90 sm:text-base">
-        {row.href ? (
-          <a
-            href={row.href}
-            target={row.href.startsWith('http') ? '_blank' : undefined}
-            rel={row.href.startsWith('http') ? 'noreferrer' : undefined}
-            className="transition-colors duration-200 hover:text-brand-green"
-          >
-            {row.v}
-          </a>
-        ) : (
-          row.v
-        )}
-      </dd>
     </div>
   );
 }
@@ -269,73 +231,6 @@ export function AboutSection() {
         </Container>
       </section>
 
-      {/* ---------------------------------------------------------------- */}
-      {/* KONTAKT / SLUTSEKTION – kontaktperson och bolagsinformation       */}
-      {/* ---------------------------------------------------------------- */}
-      <section className="relative overflow-hidden pt-24 sm:pt-28 lg:pt-32">
-        <Container>
-          <div className="grid gap-x-12 gap-y-12 lg:grid-cols-[0.75fr_1.25fr]">
-            <Reveal>
-              <Label>Contact</Label>
-              <div className="mt-7 font-display text-3xl font-semibold tracking-tight text-brand-white sm:text-4xl">
-                JUIT <span className="text-brand-mist/60">NetSec AB</span>
-              </div>
-              <p className="mt-5 max-w-sm text-base leading-7 text-brand-mist/65">
-                Direct senior contact for infrastructure, communication, security and computer
-                operations.
-              </p>
-            </Reveal>
-
-            <Reveal delay={0.08}>
-              <div className="rounded-[2px] border border-brand-line bg-white/[0.025] transition-colors duration-200 hover:border-brand-green/40">
-                <div className="flex flex-col gap-8 border-b border-brand-line p-6 sm:p-8 lg:flex-row lg:items-start lg:justify-between">
-                  <div>
-                    <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-brand-green">
-                      Contact person
-                    </p>
-                    <h2 className="mt-5 font-display text-3xl font-semibold leading-tight tracking-tight text-brand-white sm:text-4xl">
-                      {contactProfile.name}
-                    </h2>
-                    <p className="mt-3 text-base leading-7 text-brand-mist/70">{contactProfile.role}</p>
-                  </div>
-                  <div className="flex flex-col gap-3 text-sm leading-6 text-brand-mist/85 sm:min-w-[17rem]">
-                    <a
-                      href={`mailto:${contactProfile.email}`}
-                      className="group flex items-center justify-between gap-4 border border-brand-line px-4 py-3 transition-colors duration-200 hover:border-brand-green/45 hover:text-brand-green"
-                    >
-                      <span>{contactProfile.email}</span>
-                      <span aria-hidden="true" className="text-brand-green">-&gt;</span>
-                    </a>
-                    <a
-                      href={contactProfile.phoneHref}
-                      className="group flex items-center justify-between gap-4 border border-brand-line px-4 py-3 transition-colors duration-200 hover:border-brand-green/45 hover:text-brand-green"
-                    >
-                      <span>{contactProfile.phone}</span>
-                      <span aria-hidden="true" className="text-brand-green">-&gt;</span>
-                    </a>
-                  </div>
-                </div>
-
-                <dl className="px-6 font-mono sm:px-8">
-                  {companyContact.map((row) => (
-                    <ContactRow key={row.k} row={row} />
-                  ))}
-                </dl>
-              </div>
-            </Reveal>
-          </div>
-
-          {/* Stor dekorativ avslutningstext (motsvarar referensens bottentext). */}
-          <div
-            aria-hidden="true"
-            className="pointer-events-none mt-16 select-none overflow-hidden"
-          >
-            <p className="font-display text-[clamp(3rem,15vw,12rem)] font-semibold uppercase leading-[0.9] tracking-[-0.03em] text-brand-white/[0.05]">
-              JUIT NETSEC
-            </p>
-          </div>
-        </Container>
-      </section>
     </div>
   );
 }
