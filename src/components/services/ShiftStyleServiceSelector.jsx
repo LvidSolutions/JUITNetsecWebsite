@@ -137,7 +137,7 @@ export function ShiftStyleServiceSelector({ activeIndex, onSelect }) {
         className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgba(255,255,255,0.018),transparent_34%,rgba(255,255,255,0.014))]"
       />
 
-      <div className="mx-auto flex w-full max-w-[1700px] flex-col divide-y divide-brand-line border-y border-brand-line lg:flex-row lg:divide-x lg:divide-y-0">
+      <div className="services-selector-frame">
         {serviceTracks.map((track, i) => (
           <Panel
             key={track.id}

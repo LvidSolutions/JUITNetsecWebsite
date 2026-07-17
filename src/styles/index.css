@@ -843,6 +843,39 @@
   display: none;
 }
 
+/* The three Services panels sit inside a measured black frame: at the
+   2048 x 768 reference viewport it is 50px / 66px / 60px with 16px gutters. */
+.services-selector-frame {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.services-selector-frame > .group + .group {
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+@media (min-width: 1024px) {
+  .services-selector-frame {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    border: 0;
+    padding: 66px 50px 60px;
+  }
+
+  .services-selector-frame > .group {
+    min-height: 0;
+    aspect-ratio: 1 / 1;
+  }
+
+  .services-selector-frame > .group + .group {
+    border-top: 0;
+  }
+}
+
 @media (max-width: 767px) {
   .glide-services-hero {
     min-height: calc(100svh - 5rem);
