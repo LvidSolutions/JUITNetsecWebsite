@@ -25,6 +25,7 @@ let viewerScriptPromise;
  *   getSceneGraph: (callback: (error: unknown, graph?: unknown) => void) => void,
  *   getCameraLookAt: (callback: (error: unknown, camera?: { position: number[], target: number[] }) => void) => void,
  *   setCameraLookAt: (position: number[], target: number[], duration?: number, callback?: (error: unknown) => void) => void,
+ *   setCameraLookAtEndAnimationCallback: (callback: (error: unknown) => void) => void,
  *   getScreenShot: (width: number, height: number, mimeType: string, callback: (error: unknown, image?: string) => void) => void,
  *   addTexture: (source: string, callback: (error: unknown, textureUid?: string) => void) => void,
  *   setMaterial: (material: SketchfabMaterial, callback?: () => void) => void
@@ -211,6 +212,33 @@ function applyTextureToScreen(api, materials, textureUid) {
   });
 }
 
+function setStraightOnCamera(api, callback) {
+  api.getCameraLookAt((error, camera) => {
+    const position = camera?.position;
+    const target = camera?.target;
+
+    if (error || !Array.isArray(position) || !Array.isArray(target) || position.length < 3 || target.length < 3) {
+      callback();
+      return;
+    }
+
+    // This model uses Y as depth and Z as elevation. Remove the authored orbit
+    // around both axes for a straight-on, level front view.
+    const offsetX = position[0] - target[0];
+    const offsetY = position[1] - target[1];
+    const horizontalDistance = Math.hypot(offsetX, offsetY);
+    const frontDirection = Math.sign(offsetY) || 1;
+    const frontPosition = [
+      target[0],
+      target[1] + frontDirection * horizontalDistance,
+      target[2],
+    ];
+
+    api.setCameraLookAtEndAnimationCallback(() => callback());
+    api.setCameraLookAt(frontPosition, target, 1);
+  });
+}
+
 export function ContactMonitorCTA() {
   const containerRef = useRef(null);
   const frameRef = useRef(null);
@@ -326,12 +354,11 @@ export function ContactMonitorCTA() {
                 window.clearTimeout(timeout);
                 if (!mountedRef.current) return;
                 api.setBackground({ color: [0, 0, 0] });
-                // Use the model's authored camera. Deriving a new position from
-                // its target could produce a side-on view while the viewer was
-                // still settling after load.
-                setMode('viewer');
+                const initializeMonitor = () => {
+                  if (!mountedRef.current) return;
+                  setMode('viewer');
 
-                const captureCleanRender = () => {
+                  const captureCleanRender = () => {
                   if (snapshotRequestedRef.current) return;
                   snapshotRequestedRef.current = true;
                   window.setTimeout(() => {
@@ -342,58 +369,61 @@ export function ContactMonitorCTA() {
                         api.stop();
                       }
                     });
-                  }, 450);
-                };
+                  }, 900);
+                  };
 
-                const texture = createContactTexture();
-                if (!texture) {
-                  setMode('viewer-fallback');
-                  captureCleanRender();
-                  return;
-                }
-
-                api.getTextureList(() => {});
-                api.getSceneGraph(() => {});
-                api.getMaterialList((error, materials = []) => {
-                  if (error || !materials.length || !mountedRef.current) {
-                    if (mountedRef.current) setMode('viewer-fallback');
-                    captureCleanRender();
-                    return;
-                  }
-
-                  const candidate = findScreenMaterial(materials);
-                  if (!isDedicatedScreenMaterial(candidate)) {
-                    setScreenMaterial(candidate?.material?.name || candidate?.material?.id || 'none');
-                    setTextureStatus('fallback');
+                  const texture = createContactTexture();
+                  if (!texture) {
                     setMode('viewer-fallback');
                     captureCleanRender();
                     return;
                   }
 
-                  api.addTexture(texture, (textureError, textureUid) => {
-                    if (textureError || !textureUid || !mountedRef.current) {
-                      if (mountedRef.current) {
-                        setMode('viewer-fallback');
-                        captureCleanRender();
-                      }
+                  api.getTextureList(() => {});
+                  api.getSceneGraph(() => {});
+                  api.getMaterialList((error, materials = []) => {
+                    if (error || !materials.length || !mountedRef.current) {
+                      if (mountedRef.current) setMode('viewer-fallback');
+                      captureCleanRender();
                       return;
                     }
 
-                    applyTextureToScreen(api, materials, textureUid).then(({ applied, material }) => {
-                      if (!mountedRef.current) return;
-                      if (applied) {
-                        setScreenMaterial(material?.name || material?.id || material?.stateSetID || 'screen');
-                        setTextureStatus('applied');
-                        setTextureUid(textureUid);
-                        captureCleanRender();
-                      } else {
-                        setTextureStatus('fallback');
-                        setMode('viewer-fallback');
-                        captureCleanRender();
+                    const candidate = findScreenMaterial(materials);
+                    if (!isDedicatedScreenMaterial(candidate)) {
+                      setScreenMaterial(candidate?.material?.name || candidate?.material?.id || 'none');
+                      setTextureStatus('fallback');
+                      setMode('viewer-fallback');
+                      captureCleanRender();
+                      return;
+                    }
+
+                    api.addTexture(texture, (textureError, textureUid) => {
+                      if (textureError || !textureUid || !mountedRef.current) {
+                        if (mountedRef.current) {
+                          setMode('viewer-fallback');
+                          captureCleanRender();
+                        }
+                        return;
                       }
+
+                      applyTextureToScreen(api, materials, textureUid).then(({ applied, material }) => {
+                        if (!mountedRef.current) return;
+                        if (applied) {
+                          setScreenMaterial(material?.name || material?.id || material?.stateSetID || 'screen');
+                          setTextureStatus('applied');
+                          setTextureUid(textureUid);
+                          captureCleanRender();
+                        } else {
+                          setTextureStatus('fallback');
+                          setMode('viewer-fallback');
+                          captureCleanRender();
+                        }
+                      });
                     });
                   });
-                });
+                };
+
+                setStraightOnCamera(api, initializeMonitor);
               });
             },
             error() {

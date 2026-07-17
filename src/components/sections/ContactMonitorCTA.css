@@ -55,9 +55,6 @@
   z-index: 1;
   border: 0;
   background: transparent;
-  /* The source model is authored from the opposite three-quarter angle.
-     Mirror only the 3D layer; the separate contact-screen text remains readable. */
-  transform: scaleX(-1);
   -webkit-mask-image:
     radial-gradient(ellipse 37% 36% at 50% 43%, #000 66%, transparent 100%),
     radial-gradient(ellipse 22% 23% at 50% 70%, #000 58%, transparent 100%);
