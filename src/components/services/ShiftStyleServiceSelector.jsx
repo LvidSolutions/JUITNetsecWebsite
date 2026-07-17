@@ -129,14 +129,8 @@ export function ShiftStyleServiceSelector({ activeIndex, onSelect }) {
     <section
       id="service-selector"
       aria-label="Service tracks selector"
-      className="relative isolate overflow-hidden bg-brand-black"
+      className="services-selector-surface relative isolate overflow-hidden"
     >
-      <div aria-hidden="true" className="service-static pointer-events-none absolute inset-[-20%] -z-10" />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgba(255,255,255,0.018),transparent_34%,rgba(255,255,255,0.014))]"
-      />
-
       <div className="services-selector-frame">
         {serviceTracks.map((track, i) => (
           <Panel
