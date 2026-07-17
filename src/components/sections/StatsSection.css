@@ -1,0 +1,141 @@
+.risk-progress {
+  --risk-progress: 0;
+  position: relative;
+  min-height: 900svh;
+  overflow: clip;
+  background: #000;
+  color: #fff;
+}
+
+.risk-progress__sticky {
+  position: sticky;
+  top: 0;
+  display: grid;
+  height: 100svh;
+  box-sizing: border-box;
+  align-items: center;
+  padding: 6rem clamp(1rem, 3.1vw, 4.5rem) 7rem;
+}
+
+.risk-progress__content {
+  width: min(100%, 70rem);
+  margin-inline: auto;
+}
+
+.risk-progress__eyebrow {
+  margin: 0 0 clamp(1.5rem, 3vw, 3rem);
+  color: rgba(255, 255, 255, 0.58);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: clamp(0.625rem, 0.75vw, 0.75rem);
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.risk-progress__text {
+  margin: 0;
+  font-size: clamp(2.25rem, 3.6vw, 4.75rem);
+  font-weight: 500;
+  letter-spacing: -0.05em;
+  line-height: 0.98;
+  text-wrap: balance;
+}
+
+.risk-progress__word {
+  --risk-word-turn: calc((var(--risk-word-index) - 3) / var(--risk-word-total));
+  --risk-word-step: calc(1 / var(--risk-word-total));
+  --risk-word-progress: clamp(0, calc((var(--risk-progress) - var(--risk-word-turn)) / var(--risk-word-step)), 1);
+  display: inline-block;
+  transform: translate3d(0, calc(100% - var(--risk-word-progress) * 100%), 0);
+  clip-path: inset(-15% 0 calc(115% - var(--risk-word-progress) * 130%) 0);
+  will-change: transform, clip-path;
+}
+
+.risk-progress__word--stat {
+  color: #00C853;
+}
+
+.risk-progress__sources {
+  position: absolute;
+  right: clamp(1rem, 3.1vw, 4.5rem);
+  bottom: clamp(1.25rem, 3vw, 3rem);
+  left: clamp(1rem, 3.1vw, 4.5rem);
+  max-width: 70rem;
+  margin: 0 auto;
+  color: rgba(255, 255, 255, 0.56);
+  font-size: clamp(0.625rem, 0.75vw, 0.75rem);
+  letter-spacing: 0.025em;
+  line-height: 1.5;
+}
+
+.risk-progress__sources span {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+@media (max-width: 1023px) {
+  .risk-progress {
+    min-height: 650svh;
+  }
+
+  .risk-progress__sticky {
+    padding-top: 5.75rem;
+  }
+
+  .risk-progress__text {
+    font-size: clamp(2rem, 5.5vw, 3.6rem);
+    line-height: 1;
+  }
+}
+
+@media (max-width: 639px) {
+  .risk-progress {
+    min-height: 520svh;
+  }
+
+  .risk-progress__sticky {
+    padding-top: 7rem;
+  }
+
+  .risk-progress__content {
+    width: 100%;
+  }
+
+  .risk-progress__eyebrow {
+    margin-bottom: 1.5rem;
+  }
+
+  .risk-progress__text {
+    font-size: clamp(1.55rem, 6.8vw, 2rem);
+    letter-spacing: -0.045em;
+    text-wrap: pretty;
+  }
+
+  .risk-progress__sources {
+    font-size: 0.625rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .risk-progress {
+    min-height: 0;
+    overflow: visible;
+  }
+
+  .risk-progress__sticky {
+    position: relative;
+    height: auto;
+    padding-bottom: 2rem;
+  }
+
+  .risk-progress__word {
+    clip-path: none;
+    transform: none;
+    will-change: auto;
+  }
+
+  .risk-progress__sources {
+    position: static;
+    padding: 0 clamp(1rem, 3.1vw, 4.5rem) 2rem;
+  }
+}
