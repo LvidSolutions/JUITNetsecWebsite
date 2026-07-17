@@ -10,7 +10,6 @@ import { IntroSequence } from './components/intro/IntroSequence.jsx';
 import { PartnersSection } from './components/sections/PartnersSection.jsx';
 import { StatsSection } from './components/sections/StatsSection.jsx';
 import { TerminalSignalSection } from './components/sections/TerminalSignalSection.jsx';
-import { NextStepPlaceholder } from './components/sections/NextStepPlaceholder.jsx';
 import { FaqFooterScene } from './components/sections/FaqFooterScene.jsx';
 import { ServicesSection } from './components/sections/ServicesSection.jsx';
 import { HomeCursor } from './components/ui/HomeCursor.jsx';
@@ -163,7 +162,6 @@ function App() {
             <StatsSection />
             <PartnersSection />
             <TerminalSignalSection />
-            <NextStepPlaceholder />
             <FaqFooterScene />
           </>
         )}
