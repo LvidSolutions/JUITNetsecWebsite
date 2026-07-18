@@ -1,146 +1,266 @@
-const fields = [
-  { id: 'name', label: 'Name', type: 'text', autoComplete: 'name', placeholder: 'First and last name' },
-  { id: 'company', label: 'Company', type: 'text', autoComplete: 'organization', placeholder: 'Organization' },
-  { id: 'email', label: 'Email', type: 'email', autoComplete: 'email', placeholder: 'Your email address' },
-  { id: 'phone', label: 'Phone', type: 'tel', autoComplete: 'tel', placeholder: '+46 ...' },
-];
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { useEffect, useId, useRef, useState } from 'react';
 
-const needs = [
-  'IT infrastructure',
-  'Networking & communication',
-  'Cybersecurity',
-  'Computer operations',
-  'IT advisory',
-  'Technical project management',
-  'Other',
-];
+const EASE = [0.16, 1, 0.3, 1];
+const EMPTY_VALUES = { name: '', email: '', phone: '', message: '' };
+const FORM_HEADLINE = ['Give', 'us', 'more', 'deets,', 'please!'];
 
-const labelClass = 'mb-2.5 block text-[11px] font-medium uppercase tracking-[0.2em] text-brand-mist/55';
+function validate(values) {
+  const errors = {};
+  const name = values.name.trim();
+  const email = values.email.trim();
+  const phone = values.phone.trim();
+  const message = values.message.trim();
 
-function Field({ id, label, type, autoComplete, placeholder }) {
+  if (!name) errors.name = 'Please enter your name.';
+  else if (name.length < 2 || name.length > 100) errors.name = 'Enter a name between 2 and 100 characters.';
+
+  if (!email) errors.email = 'Please enter your email address.';
+  else if (!isValidEmail(email)) errors.email = 'Enter a valid email address.';
+
+  if (phone && !isValidPhone(phone)) errors.phone = 'Enter a valid phone number or leave this field empty.';
+
+  if (!message || message.length < 10) errors.message = 'Please provide a little more detail.';
+  else if (message.length > 5000) errors.message = 'Keep your message under 5,000 characters.';
+
+  return errors;
+}
+
+function isValidEmail(value) {
+  if (value.length > 254 || /\s/u.test(value)) return false;
+  const at = value.lastIndexOf('@');
+  if (at < 1 || at !== value.indexOf('@')) return false;
+  const local = value.slice(0, at);
+  const domain = value.slice(at + 1);
+  if (local.length > 64 || local.startsWith('.') || local.endsWith('.') || local.includes('..')) return false;
+  if (domain.length < 3 || domain.startsWith('.') || domain.endsWith('.') || domain.includes('..')) return false;
+  const labels = domain.split('.');
+  return labels.length >= 2 && labels.every((label) => /^[\p{L}\p{N}](?:[\p{L}\p{N}-]{0,61}[\p{L}\p{N}])?$/u.test(label));
+}
+
+function isValidPhone(value) {
+  if (!/^[+()\-\s\d.]+$/u.test(value)) return false;
+  return value.replace(/\D/g, '').length >= 6 && value.replace(/\D/g, '').length <= 20;
+}
+
+function Turnstile({ onToken }) {
+  const ref = useRef(null);
+  const siteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
+
+  useEffect(() => {
+    if (!siteKey || !ref.current) return undefined;
+    let widgetId;
+    const render = () => {
+      if (!window.turnstile || !ref.current) return;
+      widgetId = window.turnstile.render(ref.current, {
+        sitekey: siteKey,
+        action: 'contact_form',
+        theme: 'dark',
+        size: 'invisible',
+        callback: onToken,
+        'expired-callback': () => onToken(''),
+        'error-callback': () => onToken(''),
+      });
+    };
+    const existing = document.querySelector('script[data-turnstile-script]');
+    if (window.turnstile) render();
+    else if (existing) existing.addEventListener('load', render, { once: true });
+    else {
+      const script = document.createElement('script');
+      script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+      script.async = true;
+      script.defer = true;
+      script.dataset.turnstileScript = 'true';
+      script.addEventListener('load', render, { once: true });
+      document.head.append(script);
+    }
+    return () => {
+      if (widgetId !== undefined && window.turnstile) window.turnstile.remove(widgetId);
+    };
+  }, [onToken, siteKey]);
+
+  return <div ref={ref} className="contact-turnstile" aria-hidden="true" />;
+}
+
+function Field({ field, label, values, errors, touched, onChange, onBlur, ...props }) {
+  const errorId = `${field}-error`;
+  const hasError = touched[field] && errors[field];
+  const Component = field === 'message' ? 'textarea' : 'input';
   return (
-    <label className="block" htmlFor={id}>
-      <span className={labelClass}>{label}</span>
-      <input
-        id={id}
-        name={id}
-        type={type}
-        autoComplete={autoComplete}
-        placeholder={placeholder}
+    <div className="contact-control">
+      <label className="contact-visually-hidden" htmlFor={field}>{label}</label>
+      <Component
+        id={field}
+        name={field}
+        value={values[field]}
+        onChange={onChange}
+        onBlur={onBlur}
+        aria-invalid={Boolean(hasError)}
+        aria-describedby={hasError ? errorId : undefined}
         className="contact-field"
+        {...props}
       />
-    </label>
+      {hasError && <p id={errorId} className="contact-error">{errors[field]}</p>}
+    </div>
   );
 }
 
-/**
- * Kontaktformulär i Sohub-anda: en enda stor, mjuk "full-bleed"-panel med stor
- * radie där hela kompositionen (etikett, rubrik, paragraf, kontaktuppgifter och
- * formulär) läses som en sammanhållen, redaktionell yta – inte ett smalt, hårt
- * kantat kort. Fältnamn, select, textarea och submit-handler är oförändrade, så
- * funktionalitet/validering och en framtida EmailJS/API-koppling fungerar som förr.
- */
 export function ContactForm() {
+  const reduce = useReducedMotion();
+  const [state, setState] = useState('intro');
+  const [values, setValues] = useState(EMPTY_VALUES);
+  const [touched, setTouched] = useState({});
+  const [errors, setErrors] = useState({});
+  const [status, setStatus] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [token, setToken] = useState('');
+  const [startedAt, setStartedAt] = useState(0);
+  const [submissionId, setSubmissionId] = useState('');
+  const headingRef = useRef(null);
+  const triggerRef = useRef(null);
+  const formRef = useRef(null);
+  const previousStateRef = useRef(state);
+  const formId = useId();
+
+  useEffect(() => {
+    if (state === 'form') headingRef.current?.focus();
+    if (state === 'intro' && previousStateRef.current !== 'intro') triggerRef.current?.focus();
+    previousStateRef.current = state;
+  }, [state]);
+
+  const updateField = (event) => {
+    const next = { ...values, [event.target.name]: event.target.value };
+    setValues(next);
+    if (touched[event.target.name]) setErrors(validate(next));
+  };
+
+  const blurField = (event) => {
+    setTouched((current) => ({ ...current, [event.target.name]: true }));
+    setErrors(validate(values));
+  };
+
+  const openForm = () => {
+    setStartedAt(Date.now());
+    setSubmissionId(crypto.randomUUID());
+    setStatus('');
+    setState('form');
+  };
+
+  const goBack = () => {
+    setState('intro');
+    setStatus('');
+  };
+
+  const submit = async (event) => {
+    event.preventDefault();
+    const nextErrors = validate(values);
+    setErrors(nextErrors);
+    setTouched({ name: true, email: true, phone: true, message: true });
+    if (Object.keys(nextErrors).length) {
+      formRef.current?.querySelector('[aria-invalid="true"]')?.focus();
+      return;
+    }
+    if (!token) {
+      setStatus('Your message could not be sent. Please try again or contact us directly by email.');
+      return;
+    }
+
+    setSubmitting(true);
+    setStatus('');
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...values,
+          website: '',
+          turnstileToken: token,
+          submissionId,
+          formStartedAt: startedAt,
+        }),
+      });
+      const result = await response.json().catch(() => null);
+      if (!response.ok || !result?.ok) throw new Error('Contact request failed');
+      setState('success');
+    } catch {
+      setStatus('Your message could not be sent. Please try again or contact us directly by email.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const motionProps = reduce ? {} : { initial: { opacity: 0, y: 18 }, animate: { opacity: 1, y: 0 }, exit: { opacity: 0, y: -12 }, transition: { duration: 0.55, ease: EASE } };
+  const formMotionProps = reduce ? {} : {
+    initial: { opacity: 0, y: 24, scale: 0.985, clipPath: 'inset(8% 7% round 2.4rem)' },
+    animate: { opacity: 1, y: 0, scale: 1, clipPath: 'inset(0% 0% round 2.4rem)' },
+    exit: { opacity: 0, y: -12, scale: 0.99, clipPath: 'inset(7% 7% round 2.4rem)' },
+    transition: { duration: 0.7, ease: EASE },
+  };
+
   return (
-    <section
-      id="kontaktformular"
-      aria-labelledby="contact-form-title"
-      className="relative px-4 py-20 sm:px-6 lg:py-28"
-    >
-      <div
-        aria-hidden="true"
-        className="contact-form-glow pointer-events-none absolute inset-x-0 top-1/2 -z-10 -translate-y-1/2"
-      />
-
-      <div className="contact-panel mx-auto w-full max-w-5xl overflow-hidden rounded-[28px] px-6 py-14 sm:rounded-[40px] sm:px-12 sm:py-16 lg:px-20 lg:py-[5.5rem]">
-        {/* Texthierarki – centrerad överst. */}
-        <div className="mx-auto max-w-2xl text-center">
-          <p className="font-mono text-xs font-medium uppercase tracking-[0.32em] text-brand-green sm:text-sm">
-            Write to us
-          </p>
-          <h2
-            id="contact-form-title"
-            className="mt-5 font-display text-3xl font-semibold leading-[1.1] tracking-tight text-brand-white sm:text-[2.6rem]"
-          >
-            Tell us briefly about your needs
-          </h2>
-          <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-brand-mist/60 sm:text-lg sm:leading-8">
-            Describe your current situation, needs or project and we'll get back to you for a first
-            conversation. The more context, the better we can prepare.
-          </p>
-        </div>
-
-        {/* Kontaktuppgifter – diskret, centrerad rad (ingen hård ram). */}
-        <div className="mx-auto mt-9 flex max-w-md flex-col items-center justify-center gap-5 text-center sm:flex-row sm:gap-12">
-          <div>
-            <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-brand-green/70">Email</p>
-            <a
-              href="mailto:contact@juit.se"
-              className="mt-1.5 inline-block font-display text-base font-medium text-brand-white transition-colors hover:text-brand-green"
-            >
-              contact@juit.se
-            </a>
-          </div>
-          <div aria-hidden="true" className="hidden h-8 w-px bg-brand-line sm:block" />
-          <div>
-            <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-brand-green/70">Phone</p>
-            <a
-              href="tel:+46708256393"
-              className="mt-1.5 inline-block font-display text-base font-medium text-brand-white transition-colors hover:text-brand-green"
-            >
-              +46 708-25 63 93
-            </a>
-          </div>
-        </div>
-
-        {/* Formulär – integrerat i panelen, generösa mellanrum. */}
-        {/* Koppla senare till Formspree, API, CMS eller annan vald lösning. */}
-        <form
-          className="mx-auto mt-12 grid max-w-3xl gap-6 text-left sm:mt-14"
-          onSubmit={(event) => event.preventDefault()}
-        >
-          <div className="grid gap-6 sm:grid-cols-2">
-            {fields.map((field) => (
-              <Field key={field.id} {...field} />
-            ))}
-          </div>
-
-          <label className="block" htmlFor="need">
-            <span className={labelClass}>Type of need</span>
-            <select id="need" name="need" defaultValue="" className="contact-field appearance-none">
-              <option value="" disabled>
-                Choose an area …
-              </option>
-              {needs.map((option) => (
-                <option key={option} value={option} className="bg-brand-black text-brand-white">
-                  {option}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label className="block" htmlFor="message">
-            <span className={labelClass}>Message</span>
-            <textarea
-              id="message"
-              name="message"
-              rows="5"
-              placeholder="Describe your current situation, needs or project …"
-              className="contact-field contact-field--area"
-            />
-          </label>
-
-          <button
-            type="submit"
-            className="group mt-2 inline-flex min-h-[3.5rem] w-full items-center justify-center gap-3 rounded-full bg-brand-green px-8 text-[13px] font-semibold uppercase tracking-[0.18em] text-brand-black transition-all duration-200 ease-smooth hover:bg-brand-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green"
-          >
-            Send request
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" className="transition-transform duration-300 ease-smooth group-hover:translate-x-0.5">
-              <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
-        </form>
-      </div>
+    <section id="kontaktformular" className="contact-experience" aria-labelledby={`${formId}-heading`}>
+      <AnimatePresence mode="wait">
+        {state === 'intro' && (
+          <motion.div key="intro" className="contact-stage contact-stage--intro" {...motionProps}>
+            <p className="contact-eyebrow">Contact</p>
+            <h1 id={`${formId}-heading`}>Start a conversation.</h1>
+            <p className="contact-lede">Tell us what you need help with and we&apos;ll get back to you.</p>
+            <button ref={triggerRef} type="button" className="contact-say-hi" onClick={openForm}>
+              <span>Say hi</span><span aria-hidden="true">↗</span>
+            </button>
+          </motion.div>
+        )}
+        {state === 'form' && (
+          <motion.div key="form" className="contact-stage contact-stage--form" {...formMotionProps}>
+            <div className="contact-form-heading">
+              <p className="contact-eyebrow">Say hi</p>
+              <motion.h1
+                id={`${formId}-heading`}
+                ref={headingRef}
+                tabIndex="-1"
+                aria-label={FORM_HEADLINE.join(' ')}
+              >
+                {FORM_HEADLINE.map((word, index) => (
+                  <motion.span
+                    key={word}
+                    className="contact-heading-word"
+                    initial={reduce ? false : { opacity: 0, y: '115%' }}
+                    animate={reduce ? undefined : { opacity: 1, y: '0%' }}
+                    transition={{ duration: 0.58, ease: EASE, delay: 0.16 + index * 0.07 }}
+                  >
+                    {word}{index < FORM_HEADLINE.length - 1 ? ' ' : ''}
+                  </motion.span>
+                ))}
+              </motion.h1>
+            </div>
+            <form ref={formRef} noValidate onSubmit={submit} className="contact-form-grid">
+              <div className="contact-honeypot" aria-hidden="true">
+                <label htmlFor="website">Website</label><input id="website" name="website" tabIndex="-1" autoComplete="off" />
+              </div>
+              <Field field="name" label="Full Name" placeholder="Full Name" values={values} errors={errors} touched={touched} onChange={updateField} onBlur={blurField} type="text" autoComplete="name" maxLength="100" />
+              <div className="contact-field-row">
+                <Field field="email" label="Email" placeholder="Email" values={values} errors={errors} touched={touched} onChange={updateField} onBlur={blurField} type="email" autoComplete="email" inputMode="email" spellCheck="false" autoCapitalize="none" maxLength="254" />
+                <Field field="phone" label="Phone (optional)" placeholder="Phone (optional)" values={values} errors={errors} touched={touched} onChange={updateField} onBlur={blurField} type="tel" autoComplete="tel" inputMode="tel" maxLength="40" />
+              </div>
+              <Field field="message" label="Message" placeholder="Message" values={values} errors={errors} touched={touched} onChange={updateField} onBlur={blurField} rows="7" autoComplete="off" maxLength="5000" />
+              <Turnstile onToken={setToken} />
+              <div className="contact-actions">
+                <button type="button" className="contact-back" onClick={goBack} disabled={submitting}>Back</button>
+                <button type="submit" className="contact-submit" disabled={submitting}>{submitting ? 'Sending…' : 'Send message'}</button>
+              </div>
+              <div aria-live="polite" className="contact-status">{status && <p>{status} <a href="mailto:contact@juit.se">contact@juit.se</a></p>}</div>
+            </form>
+          </motion.div>
+        )}
+        {state === 'success' && (
+          <motion.div key="success" className="contact-stage contact-stage--success" {...motionProps} role="status" aria-live="polite">
+            <p className="contact-eyebrow">Message sent</p>
+            <h1>Thank you for reaching out.</h1>
+            <p className="contact-lede">We&apos;ll get back to you as soon as possible.</p>
+            <button type="button" className="contact-say-hi" onClick={() => { setValues(EMPTY_VALUES); setTouched({}); setErrors({}); setToken(''); goBack(); }}>Return to contact</button>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }

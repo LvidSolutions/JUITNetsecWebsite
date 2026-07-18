@@ -5,14 +5,13 @@ import { ConfigurationError } from '../api/_lib/errors.js';
 
 const submission = {
   name: 'Sensitive Person',
-  company: 'Sensitive Company AB',
   email: 'sensitive@example.com',
   phone: '+46 70 123 45 67',
-  need: 'Cybersecurity',
   message: 'Sensitive incident details that must never enter application logs.',
   website: '',
   turnstileToken: 'turnstile-token',
   submissionId: '123e4567-e89b-42d3-a456-426614174000',
+  formStartedAt: Date.now() - 2_000,
 };
 
 const config = {
@@ -65,7 +64,6 @@ function dependencies(overrides = {}) {
 function assertNoSensitiveData(logText) {
   for (const value of [
     submission.name,
-    submission.company,
     submission.email,
     submission.phone,
     submission.message,

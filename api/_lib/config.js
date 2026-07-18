@@ -55,6 +55,7 @@ export function loadContactConfig(env = process.env) {
     upstashToken: env.UPSTASH_REDIS_REST_TOKEN.trim(),
     rateLimitHashSecret: env.RATE_LIMIT_HASH_SECRET.trim(),
     rateLimitMax: readPositiveInteger(env.CONTACT_RATE_LIMIT_MAX, 5, { min: 1, max: 50 }),
+    rateLimitEmailMax: readPositiveInteger(env.CONTACT_RATE_LIMIT_EMAIL_MAX, 2, { min: 1, max: 20 }),
     rateLimitWindowSeconds: readPositiveInteger(env.CONTACT_RATE_LIMIT_WINDOW_SECONDS, 900, {
       min: 60,
       max: 86_400,

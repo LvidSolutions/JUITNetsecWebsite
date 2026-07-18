@@ -40,6 +40,10 @@ export async function handleContactRequest(
   let requestId = randomUUID();
 
   try {
+    if (request.method !== 'POST') {
+      throw new HttpError(405, 'Method not allowed.', { headers: { Allow: 'POST' } });
+    }
+
     const config = loadConfig(env);
     if (!config.enabled) {
       throw new HttpError(503, 'The contact form is temporarily unavailable.');
@@ -48,15 +52,17 @@ export async function handleContactRequest(
     assertSameOrigin(request);
 
     const body = await readJsonBody(request);
-    const submission = validateContactSubmission(body);
+    const submission = validateContactSubmission(body, now);
     requestId = submission.submissionId;
 
     const rateLimit = await consumeRateLimit({
       request,
+      email: submission.email,
       upstashUrl: config.upstashUrl,
       upstashToken: config.upstashToken,
       hashSecret: config.rateLimitHashSecret,
       max: config.rateLimitMax,
+      emailMax: config.rateLimitEmailMax,
       windowSeconds: config.rateLimitWindowSeconds,
       now,
       fetchImpl,

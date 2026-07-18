@@ -5,14 +5,13 @@ import { HttpError } from '../api/_lib/errors.js';
 
 const submission = {
   name: 'Test Person',
-  company: 'Example AB',
   email: 'test@example.com',
   phone: '+46 70 000 00 00',
-  need: 'Cybersecurity',
   message: 'We need help reviewing our security environment.',
   website: '',
   turnstileToken: 'turnstile-token',
   submissionId: '123e4567-e89b-42d3-a456-426614174000',
+  formStartedAt: Date.now() - 2_000,
 };
 
 const config = {
