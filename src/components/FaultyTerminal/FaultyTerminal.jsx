@@ -155,12 +155,13 @@ vec3 getColor(vec2 p){
 
   float middle = digit(p);
 
+  // A five-tap cross keeps the CRT-like pixel bloom while halving the most
+  // expensive procedural work compared with the former nine-neighbour kernel.
   const float off = 0.002;
-  float sum = digit(p + vec2(-off, -off)) + digit(p + vec2(0.0, -off)) + digit(p + vec2(off, -off)) +
-              digit(p + vec2(-off, 0.0)) + digit(p + vec2(0.0, 0.0)) + digit(p + vec2(off, 0.0)) +
-              digit(p + vec2(-off, off)) + digit(p + vec2(0.0, off)) + digit(p + vec2(off, off));
+  float sum = middle + digit(p + vec2(-off, 0.0)) + digit(p + vec2(off, 0.0)) +
+              digit(p + vec2(0.0, -off)) + digit(p + vec2(0.0, off));
 
-  vec3 baseColor = vec3(0.9) * middle + sum * 0.1 * vec3(1.0) * bar;
+  vec3 baseColor = vec3(0.88) * middle + sum * 0.16 * vec3(1.0) * bar;
   return baseColor;
 }
 
@@ -220,6 +221,7 @@ export default function FaultyTerminal({
   digitSize = 1.5,
   timeScale = 0.3,
   pause = false,
+  active = true,
   scanlineIntensity = 0.3,
   glitchAmount = 1,
   flickerAmount = 1,
@@ -242,8 +244,12 @@ export default function FaultyTerminal({
   const rendererRef = useRef(null);
   const mouseRef = useRef({ x: 0.5, y: 0.5 });
   const smoothMouseRef = useRef({ x: 0.5, y: 0.5 });
+  const boundsRef = useRef({ left: 0, top: 0, width: 1, height: 1 });
+  const activeRef = useRef(active);
   const frozenTimeRef = useRef(0);
   const rafRef = useRef(0);
+  const resizeFrameRef = useRef(0);
+  const resumeRef = useRef(null);
   const loadAnimationStartRef = useRef(0);
   const timeOffsetRef = useRef(Math.random() * 100);
 
@@ -251,14 +257,31 @@ export default function FaultyTerminal({
 
   const ditherValue = useMemo(() => (typeof dither === 'boolean' ? (dither ? 1 : 0) : dither), [dither]);
 
-  const handleMouseMove = useCallback(e => {
+  const measureBounds = useCallback(() => {
     const ctn = containerRef.current;
     if (!ctn) return;
     const rect = ctn.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width;
-    const y = 1 - (e.clientY - rect.top) / rect.height;
-    mouseRef.current = { x, y };
+    boundsRef.current.left = rect.left;
+    boundsRef.current.top = rect.top;
+    boundsRef.current.width = Math.max(rect.width, 1);
+    boundsRef.current.height = Math.max(rect.height, 1);
   }, []);
+
+  const handlePointerMove = useCallback(e => {
+    const bounds = boundsRef.current;
+    mouseRef.current.x = Math.min(1, Math.max(0, (e.clientX - bounds.left) / bounds.width));
+    mouseRef.current.y = Math.min(1, Math.max(0, 1 - (e.clientY - bounds.top) / bounds.height));
+  }, []);
+
+  const handlePointerLeave = useCallback(() => {
+    mouseRef.current.x = 0.5;
+    mouseRef.current.y = 0.5;
+  }, []);
+
+  useEffect(() => {
+    activeRef.current = active;
+    if (active) resumeRef.current?.();
+  }, [active]);
 
   useEffect(() => {
     const ctn = containerRef.current;
@@ -305,22 +328,40 @@ export default function FaultyTerminal({
 
     const mesh = new Mesh(gl, { geometry, program });
 
+    let width = 0;
+    let height = 0;
     function resize() {
       if (!ctn || !renderer) return;
-      renderer.setSize(ctn.offsetWidth, ctn.offsetHeight);
+      const nextWidth = Math.round(ctn.clientWidth);
+      const nextHeight = Math.round(ctn.clientHeight);
+      if (!nextWidth || !nextHeight || (nextWidth === width && nextHeight === height)) return;
+      width = nextWidth;
+      height = nextHeight;
+      renderer.setSize(width, height);
       program.uniforms.iResolution.value = new Color(
         gl.canvas.width,
         gl.canvas.height,
         gl.canvas.width / gl.canvas.height
       );
+      measureBounds();
     }
 
-    const resizeObserver = new ResizeObserver(() => resize());
+    const scheduleResize = () => {
+      if (resizeFrameRef.current) return;
+      resizeFrameRef.current = requestAnimationFrame(() => {
+        resizeFrameRef.current = 0;
+        resize();
+      });
+    };
+    const resizeObserver = new ResizeObserver(scheduleResize);
     resizeObserver.observe(ctn);
     resize();
 
-    const update = t => {
-      rafRef.current = requestAnimationFrame(update);
+    const render = t => {
+      if (!activeRef.current) {
+        rafRef.current = 0;
+        return;
+      }
 
       if (pageLoadAnimation && loadAnimationStartRef.current === 0) {
         loadAnimationStartRef.current = t;
@@ -339,6 +380,7 @@ export default function FaultyTerminal({
         const animationElapsed = t - loadAnimationStartRef.current;
         const progress = Math.min(animationElapsed / animationDuration, 1);
         program.uniforms.uPageLoadProgress.value = progress;
+        if (progress === 1) program.uniforms.uUsePageLoadAnimation.value = 0;
       }
 
       if (mouseReact) {
@@ -354,18 +396,35 @@ export default function FaultyTerminal({
       }
 
       renderer.render({ scene: mesh });
+      rafRef.current = requestAnimationFrame(render);
     };
-    rafRef.current = requestAnimationFrame(update);
-    ctn.appendChild(gl.canvas);
 
-    if (mouseReact) ctn.addEventListener('mousemove', handleMouseMove);
+    const resume = () => {
+      if (activeRef.current && !rafRef.current) rafRef.current = requestAnimationFrame(render);
+    };
+    resumeRef.current = resume;
+    ctn.appendChild(gl.canvas);
+    renderer.render({ scene: mesh });
+
+    if (mouseReact) {
+      ctn.addEventListener('pointerenter', measureBounds, { passive: true });
+      ctn.addEventListener('pointermove', handlePointerMove, { passive: true });
+      ctn.addEventListener('pointerleave', handlePointerLeave, { passive: true });
+    }
+    resume();
 
     return () => {
       cancelAnimationFrame(rafRef.current);
+      cancelAnimationFrame(resizeFrameRef.current);
       resizeObserver.disconnect();
-      if (mouseReact) ctn.removeEventListener('mousemove', handleMouseMove);
+      if (mouseReact) {
+        ctn.removeEventListener('pointerenter', measureBounds);
+        ctn.removeEventListener('pointermove', handlePointerMove);
+        ctn.removeEventListener('pointerleave', handlePointerLeave);
+      }
       if (gl.canvas.parentElement === ctn) ctn.removeChild(gl.canvas);
       gl.getExtension('WEBGL_lose_context')?.loseContext();
+      resumeRef.current = null;
       loadAnimationStartRef.current = 0;
       timeOffsetRef.current = Math.random() * 100;
     };
@@ -388,7 +447,9 @@ export default function FaultyTerminal({
     mouseStrength,
     pageLoadAnimation,
     brightness,
-    handleMouseMove
+    handlePointerLeave,
+    handlePointerMove,
+    measureBounds,
   ]);
 
   return <div ref={containerRef} className={`faulty-terminal-container ${className ?? ''}`} style={style} {...rest} />;

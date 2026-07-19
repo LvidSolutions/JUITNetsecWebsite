@@ -1,10 +1,13 @@
 import { Component, Suspense, lazy, useEffect, useRef, useState } from 'react';
 import { Container } from '../ui';
-import { DistortedText } from '../ui/DistortedText.jsx';
+import './TerminalSignalSection.css';
 
-// ogl (WebGL) ligger i sin egen chunk och laddas först när sektionen behövs,
-// så att startsidans initiala JS-bundle hålls liten.
-const FaultyTerminal = lazy(() => import('../FaultyTerminal/FaultyTerminal.jsx'));
+// Keep OGL in a separate chunk, but fetch it well before the section becomes
+// visible so shader compilation is not competing with the scroll transition.
+const loadFaultyTerminal = () => import('../FaultyTerminal/FaultyTerminal.jsx');
+const FaultyTerminal = lazy(loadFaultyTerminal);
+const desktopGrid = [2, 1];
+const compactGrid = [1.55, 0.82];
 
 // Liten felgräns: om WebGL/ogl kastar vid runtime faller vi tillbaka till en
 // statisk grön gradient + grid i stället för att krascha hela startsidan.
@@ -47,64 +50,105 @@ function supportsWebGL() {
 }
 
 export function TerminalSignalSection() {
-  // Klient-detektering: pekare av "fine"-typ + tillräcklig bredd = desktop,
-  // där musreaktionen aktiveras. På touch/mobil hålls effekten passiv och
-  // lugnare. prefers-reduced-motion pausar animationen helt.
-  const [env, setEnv] = useState({ ready: false, desktop: false, reducedMotion: false, webgl: true });
+  const [env, setEnv] = useState({
+    ready: false,
+    desktop: false,
+    reducedMotion: false,
+    webgl: true,
+    quality: 'low',
+  });
   const sectionRef = useRef(null);
-  // Rendera/montera bara WebGL när sektionen är (nära) i viewporten. När man
-  // är i hero, footern eller på en annan sida rivs GL-kontexten och rAF-loopen
-  // stoppas helt – ingen GPU/CPU-kostnad när effekten inte syns.
-  const [inView, setInView] = useState(false);
+  const [nearby, setNearby] = useState(false);
+  const [active, setActive] = useState(false);
 
   useEffect(() => {
     const desktopMq = window.matchMedia('(min-width: 768px) and (pointer: fine)');
     const reducedMq = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-    const sync = () =>
-      setEnv({
-        ready: true,
-        desktop: desktopMq.matches,
-        reducedMotion: reducedMq.matches,
-        webgl: supportsWebGL(),
+    const sync = () => {
+      const desktop = desktopMq.matches;
+      const pixelRatio = window.devicePixelRatio || 1;
+      const quality = !desktop
+        ? 'low'
+        : window.innerWidth < 1180 || pixelRatio > 1.5
+          ? 'medium'
+          : 'high';
+
+      setEnv((previous) => {
+        const next = {
+          ready: true,
+          desktop,
+          reducedMotion: reducedMq.matches,
+          webgl: previous.ready ? previous.webgl : supportsWebGL(),
+          quality,
+        };
+        return previous.ready &&
+          previous.desktop === next.desktop &&
+          previous.reducedMotion === next.reducedMotion &&
+          previous.quality === next.quality
+          ? previous
+          : next;
       });
+    };
 
     sync();
     desktopMq.addEventListener('change', sync);
     reducedMq.addEventListener('change', sync);
+    window.addEventListener('resize', sync, { passive: true });
     return () => {
       desktopMq.removeEventListener('change', sync);
       reducedMq.removeEventListener('change', sync);
+      window.removeEventListener('resize', sync);
     };
   }, []);
 
   useEffect(() => {
     const node = sectionRef.current;
     if (!node || typeof IntersectionObserver === 'undefined') {
-      setInView(true);
+      setNearby(true);
+      setActive(true);
       return undefined;
     }
-    const observer = new IntersectionObserver(
-      ([entry]) => setInView(entry.isIntersecting),
-      { rootMargin: '200px 0px' },
+
+    // The module and context are prepared a viewport ahead of the section. The
+    // scene remains mounted after first use, but its animation loop is stopped
+    // whenever the visual is outside its small active margin.
+    const preparationObserver = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        setNearby(true);
+        loadFaultyTerminal().catch(() => {});
+        preparationObserver.disconnect();
+      },
+      { rootMargin: '1000px 0px' },
     );
-    observer.observe(node);
-    return () => observer.disconnect();
+    const activityObserver = new IntersectionObserver(
+      ([entry]) => setActive(entry.isIntersecting),
+      { rootMargin: '700px 0px' },
+    );
+
+    preparationObserver.observe(node);
+    activityObserver.observe(node);
+    return () => {
+      preparationObserver.disconnect();
+      activityObserver.disconnect();
+    };
   }, []);
 
-  const { ready, desktop, reducedMotion, webgl } = env;
+  const { ready, desktop, reducedMotion, webgl, quality } = env;
   const mouseReact = ready && desktop && !reducedMotion;
-  const showTerminal = ready && webgl && inView;
+  const showTerminal = ready && webgl && nearby;
+  const dpr = quality === 'high' ? 1.35 : quality === 'medium' ? 1.2 : 1;
 
   return (
     <section
       ref={sectionRef}
       id="signal"
-      aria-label="Reactive signal visualization"
+      aria-labelledby="signal-title"
       className="relative isolate flex min-h-[600px] items-center overflow-hidden bg-brand-black py-24 sm:py-28 lg:min-h-[85vh] lg:py-32"
     >
       {/* WebGL-bakgrund (eller fallback). Ligger absolut bakom innehållet. */}
-      <div className="absolute inset-0 z-0">
+      <div aria-hidden="true" className="absolute inset-0 z-0">
         {/* Statisk fallback ligger alltid kvar och syns tills WebGL ritats,
             samt när effekten är avmonterad utanför viewporten. */}
         <TerminalFallback />
@@ -114,10 +158,11 @@ export function TerminalSignalSection() {
               <FaultyTerminal
                 className="absolute inset-0 h-full w-full"
                 scale={1.5}
-                gridMul={[2, 1]}
-                digitSize={1.2}
-                timeScale={reducedMotion ? 0 : 0.3}
+                gridMul={quality === 'low' ? compactGrid : desktopGrid}
+                digitSize={quality === 'low' ? 1.05 : 1.2}
+                timeScale={reducedMotion ? 0 : quality === 'low' ? 0.2 : 0.3}
                 pause={reducedMotion}
+                active={active && !reducedMotion}
                 scanlineIntensity={0.4}
                 glitchAmount={1}
                 flickerAmount={reducedMotion ? 0 : 0.6}
@@ -127,7 +172,7 @@ export function TerminalSignalSection() {
                 tint="#00C853"
                 mouseReact={mouseReact}
                 mouseStrength={0.35}
-                dpr={desktop ? 1.5 : 1}
+                dpr={dpr}
                 pageLoadAnimation={!reducedMotion}
                 brightness={desktop ? 1.05 : 0.9}
               />
@@ -147,21 +192,27 @@ export function TerminalSignalSection() {
         className="pointer-events-none absolute inset-0 z-[1] bg-[linear-gradient(180deg,rgba(5,5,5,0.55)_0%,transparent_24%,transparent_78%,rgba(5,5,5,0.7)_100%)]"
       />
 
-      {/* Innehåll ovanpå effekten. pointer-events-none gör att musrörelser når
-          canvasen bakom (det finns inga klickbara element här att blockera). */}
+      {/* Content stays above the canvas; only intended interactive elements opt in. */}
       <Container className="pointer-events-none relative z-10">
         <p className="font-mono text-xs font-medium uppercase tracking-[0.32em] text-brand-green sm:text-sm">
           Signal / Infrastructure / Control
         </p>
-        <h2 className="mt-6 max-w-4xl font-display text-4xl font-semibold leading-[1.05] tracking-tight text-brand-white sm:text-5xl lg:text-6xl">
-          <DistortedText selective className="pointer-events-auto">
-            Behind every stable IT environment is technical control.
-          </DistortedText>
+        <h2
+          id="signal-title"
+          className="mt-6 max-w-4xl font-display text-4xl font-semibold leading-[1.05] tracking-tight text-brand-white sm:text-5xl lg:text-6xl"
+        >
+          Behind every stable IT environment is technical control.
         </h2>
-        <p className="mt-6 max-w-2xl text-base leading-relaxed text-brand-mist/80 sm:text-lg sm:leading-8">
-          JUIT NetSec helps organizations create order in complex environments — from networking and
-          secure communication to operations, documentation and long-term management.
-        </p>
+        <a
+          href="/tjanster"
+          aria-label="Explore JUIT NetSec services"
+          className="signal-cta group pointer-events-auto mt-10 inline-flex min-h-[58px] items-center gap-4 px-7 text-base font-medium text-brand-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-green"
+        >
+          <span className="signal-cta__label">Explore our services</span>
+          <span aria-hidden="true" className="signal-cta__arrow">
+            ↗
+          </span>
+        </a>
         <p className="mt-10 flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.28em] text-brand-mist/50 sm:text-xs">
           <span aria-hidden="true" className="h-1.5 w-1.5 rounded-[1px] bg-brand-green" />
           Reactive visualization: networks, signals and operations layers.
