@@ -1,21 +1,21 @@
 .signal-cta {
   --signal-x: 50%;
   --signal-y: 50%;
-  --signal-size: 54px;
+  --signal-size: 26px;
   position: relative;
   isolation: isolate;
   overflow: hidden;
   border: 0;
   border-radius: 999px;
-  background: #050505;
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+  background: transparent;
+  box-shadow: none;
   letter-spacing: -0.01em;
   transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
 }
 
 .signal-cta:hover {
   --signal-size: 104px;
-  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.4);
+  box-shadow: none;
   transform: translateY(-1px);
 }
 
@@ -36,7 +36,7 @@
     transparent 74%
   );
   mix-blend-mode: screen;
-  opacity: 0.82;
+  opacity: 0.18;
   transition: opacity 180ms ease;
 }
 
@@ -58,6 +58,10 @@
   transform: translate(3px, -2px);
 }
 
+.signal-cta:hover .signal-cta__field {
+  opacity: 0.82;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .signal-cta,
   .signal-cta:hover,
@@ -66,7 +70,7 @@
   }
 
   .signal-cta {
-    background: #050505;
+    background: transparent;
   }
 
   .signal-cta__field {
