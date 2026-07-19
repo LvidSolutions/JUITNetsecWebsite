@@ -5,8 +5,8 @@
   border: 1.5px solid #00c853;
   border-radius: 999px;
   background: transparent;
-  -webkit-backdrop-filter: grayscale(1) contrast(2.25) invert(1);
-  backdrop-filter: grayscale(1) contrast(2.25) invert(1);
+  -webkit-backdrop-filter: grayscale(1) brightness(1.28) contrast(1.15);
+  backdrop-filter: grayscale(1) brightness(1.28) contrast(1.15);
   box-shadow:
     inset 0 0 0 1px rgba(255, 255, 255, 0.22),
     0 0 0 1px rgba(0, 200, 83, 0.18),
