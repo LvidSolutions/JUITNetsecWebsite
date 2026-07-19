@@ -58,6 +58,7 @@ export function TerminalSignalSection() {
     quality: 'low',
   });
   const sectionRef = useRef(null);
+  const ctaBoundsRef = useRef({ left: 0, top: 0, width: 1, height: 1 });
   const [nearby, setNearby] = useState(false);
   const [active, setActive] = useState(false);
 
@@ -140,6 +141,28 @@ export function TerminalSignalSection() {
   const showTerminal = ready && webgl && nearby;
   const dpr = quality === 'high' ? 1.35 : quality === 'medium' ? 1.2 : 1;
 
+  const updateCtaBounds = (event) => {
+    const bounds = event.currentTarget.getBoundingClientRect();
+    ctaBoundsRef.current = {
+      left: bounds.left,
+      top: bounds.top,
+      width: Math.max(bounds.width, 1),
+      height: Math.max(bounds.height, 1),
+    };
+  };
+
+  const moveCtaSignal = (event) => {
+    const bounds = ctaBoundsRef.current;
+    const button = event.currentTarget;
+    button.style.setProperty('--signal-x', `${((event.clientX - bounds.left) / bounds.width) * 100}%`);
+    button.style.setProperty('--signal-y', `${((event.clientY - bounds.top) / bounds.height) * 100}%`);
+  };
+
+  const resetCtaSignal = (event) => {
+    event.currentTarget.style.setProperty('--signal-x', '50%');
+    event.currentTarget.style.setProperty('--signal-y', '50%');
+  };
+
   return (
     <section
       ref={sectionRef}
@@ -206,8 +229,12 @@ export function TerminalSignalSection() {
         <a
           href="/tjanster"
           aria-label="Explore JUIT NetSec services"
-          className="signal-cta group pointer-events-auto mt-10 inline-flex min-h-[58px] items-center gap-4 px-7 text-base font-medium text-brand-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-green"
+          className="signal-cta group pointer-events-auto mt-10 inline-flex min-h-[68px] items-center gap-5 px-9 text-lg font-medium text-brand-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-green"
+          onPointerEnter={updateCtaBounds}
+          onPointerMove={moveCtaSignal}
+          onPointerLeave={resetCtaSignal}
         >
+          <span aria-hidden="true" className="signal-cta__field" />
           <span className="signal-cta__label">Explore our services</span>
           <span aria-hidden="true" className="signal-cta__arrow">
             ↗
