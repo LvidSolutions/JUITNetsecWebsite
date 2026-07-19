@@ -1,43 +1,26 @@
 .signal-cta {
-  --signal-x: 50%;
-  --signal-y: 50%;
-  --signal-size: 26px;
   position: relative;
   isolation: isolate;
   overflow: hidden;
   border: 0;
   border-radius: 999px;
   background: transparent;
+  -webkit-backdrop-filter: grayscale(1) contrast(1.18);
+  backdrop-filter: grayscale(1) contrast(1.18);
   box-shadow: none;
   letter-spacing: -0.01em;
-  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+  transition: transform 180ms ease, -webkit-backdrop-filter 180ms ease, backdrop-filter 180ms ease;
 }
 
 .signal-cta:hover {
-  --signal-size: 104px;
   box-shadow: none;
+  -webkit-backdrop-filter: grayscale(1) contrast(1.42);
+  backdrop-filter: grayscale(1) contrast(1.42);
   transform: translateY(-1px);
 }
 
 .signal-cta:active {
   transform: translateY(0);
-}
-
-.signal-cta__field {
-  position: absolute;
-  z-index: 0;
-  inset: 0;
-  pointer-events: none;
-  background: radial-gradient(
-    circle var(--signal-size) at var(--signal-x) var(--signal-y),
-    rgba(255, 255, 255, 0.58) 0%,
-    rgba(255, 255, 255, 0.22) 26%,
-    rgba(255, 255, 255, 0.08) 48%,
-    transparent 74%
-  );
-  mix-blend-mode: screen;
-  opacity: 0.18;
-  transition: opacity 180ms ease;
 }
 
 .signal-cta__label,
@@ -58,10 +41,6 @@
   transform: translate(3px, -2px);
 }
 
-.signal-cta:hover .signal-cta__field {
-  opacity: 0.82;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .signal-cta,
   .signal-cta:hover,
@@ -71,9 +50,7 @@
 
   .signal-cta {
     background: transparent;
-  }
-
-  .signal-cta__field {
-    display: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
   }
 }
