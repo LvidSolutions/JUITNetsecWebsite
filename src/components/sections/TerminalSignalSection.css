@@ -5,8 +5,8 @@
   border: 0;
   border-radius: 999px;
   background: transparent;
-  -webkit-backdrop-filter: grayscale(1) contrast(1.18);
-  backdrop-filter: grayscale(1) contrast(1.18);
+  -webkit-backdrop-filter: grayscale(1) brightness(3) contrast(1.22);
+  backdrop-filter: grayscale(1) brightness(3) contrast(1.22);
   box-shadow: none;
   letter-spacing: -0.01em;
   transition: transform 180ms ease, -webkit-backdrop-filter 180ms ease, backdrop-filter 180ms ease;
@@ -14,8 +14,8 @@
 
 .signal-cta:hover {
   box-shadow: none;
-  -webkit-backdrop-filter: grayscale(1) contrast(1.42);
-  backdrop-filter: grayscale(1) contrast(1.42);
+  -webkit-backdrop-filter: grayscale(1) brightness(3.6) contrast(1.35);
+  backdrop-filter: grayscale(1) brightness(3.6) contrast(1.35);
   transform: translateY(-1px);
 }
 
