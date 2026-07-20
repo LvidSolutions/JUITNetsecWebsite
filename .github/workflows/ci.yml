@@ -16,7 +16,7 @@ concurrency:
 jobs:
   quality:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
 
     steps:
       - name: Check out repository
@@ -30,14 +30,33 @@ jobs:
           node-version: 24
           cache: npm
 
+      - name: Reject committed environment files
+        shell: bash
+        run: |
+          tracked_files="$(git ls-files | grep -E '(^|/)\.env($|\.)' | grep -vE '(^|/)\.env\.example$' || true)"
+          if [ -n "$tracked_files" ]; then
+            echo "Environment files must not be committed:"
+            echo "$tracked_files"
+            exit 1
+          fi
+
       - name: Install locked dependencies
         run: npm ci
 
       - name: Audit production and development dependencies
         run: npm audit --audit-level=high
 
+      - name: Run source checks
+        run: npm run lint
+
       - name: Run API and security tests
         run: npm test
 
       - name: Build production frontend
         run: npm run build
+
+      - name: Report build size
+        run: npm run report:build
+
+      - name: Smoke-test production build
+        run: npm run smoke:local
