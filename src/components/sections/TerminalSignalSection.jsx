@@ -219,7 +219,7 @@ export function TerminalSignalSection() {
         <a
           href="/tjanster"
           aria-label="Explore JUIT NetSec services"
-          className="signal-cta group pointer-events-auto mt-10 inline-flex min-h-[68px] items-center gap-5 px-9 text-lg font-medium text-brand-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-green"
+          className="signal-cta group pointer-events-auto mt-10 inline-flex min-h-[68px] items-center gap-5 px-9 text-lg font-semibold text-brand-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-green"
           onPointerEnter={(event) => forwardCtaPointer(event, 'pointerenter')}
           onPointerMove={(event) => forwardCtaPointer(event, 'pointermove')}
           onPointerLeave={(event) => forwardCtaPointer(event, 'pointerleave')}
