@@ -16,44 +16,87 @@ function readPositiveInteger(value, fallback, { min, max }) {
   return parsed;
 }
 
+function requireSingleLine(env, key, maxLength = 512) {
+  const value = env[key]?.trim();
+  if (!value) throw new ConfigurationError([key]);
+  if (value.length > maxLength || /[\r\n]/u.test(value)) {
+    throw new ConfigurationError([`${key} has an invalid value`]);
+  }
+  return value;
+}
+
+function readHttpsUrl(env, key) {
+  const value = requireSingleLine(env, key, 2048);
+  let url;
+  try {
+    url = new URL(value);
+  } catch {
+    throw new ConfigurationError([`${key} must be a valid URL`]);
+  }
+  if (url.protocol !== 'https:' || url.username || url.password || url.search || url.hash) {
+    throw new ConfigurationError([`${key} must be a credential-free HTTPS URL`]);
+  }
+  return url.href.replace(/\/$/u, '');
+}
+
+function readAllowedHostnames(value) {
+  const hostnames = splitCsv(value).map((hostname) => hostname.toLowerCase());
+  for (const hostname of hostnames) {
+    if (
+      hostname.length > 253 ||
+      hostname.includes('://') ||
+      hostname.includes('/') ||
+      hostname.includes('*') ||
+      !/^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)*[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/u.test(hostname)
+    ) {
+      throw new ConfigurationError([`invalid Turnstile hostname: ${hostname}`]);
+    }
+  }
+  return [...new Set(hostnames)];
+}
+
+function readRecipientEmail(env) {
+  const email = requireSingleLine(env, 'CONTACT_TO_EMAIL', 254).toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/u.test(email)) {
+    throw new ConfigurationError(['CONTACT_TO_EMAIL must be a valid email address']);
+  }
+  return email;
+}
+
 export function loadContactConfig(env = process.env) {
   const enabled = env.CONTACT_FORM_ENABLED === 'true';
+  const environment = env.VERCEL_ENV || env.NODE_ENV || 'development';
 
   if (!enabled) {
     return {
       enabled: false,
-      environment: env.VERCEL_ENV || env.NODE_ENV || 'development',
+      environment,
     };
   }
 
-  const requiredKeys = [
-    'RESEND_API_KEY',
-    'CONTACT_FROM_EMAIL',
-    'CONTACT_TO_EMAIL',
-    'TURNSTILE_SECRET_KEY',
-    'UPSTASH_REDIS_REST_URL',
-    'UPSTASH_REDIS_REST_TOKEN',
-    'RATE_LIMIT_HASH_SECRET',
-  ];
+  const resendApiKey = requireSingleLine(env, 'RESEND_API_KEY');
+  const fromEmail = requireSingleLine(env, 'CONTACT_FROM_EMAIL', 320);
+  const toEmail = readRecipientEmail(env);
+  const turnstileSecretKey = requireSingleLine(env, 'TURNSTILE_SECRET_KEY');
+  const upstashUrl = readHttpsUrl(env, 'UPSTASH_REDIS_REST_URL');
+  const upstashToken = requireSingleLine(env, 'UPSTASH_REDIS_REST_TOKEN', 4096);
+  const rateLimitHashSecret = requireSingleLine(env, 'RATE_LIMIT_HASH_SECRET', 4096);
 
-  const missingKeys = requiredKeys.filter((key) => !env[key]?.trim());
-  if (missingKeys.length > 0) throw new ConfigurationError(missingKeys);
-
-  if (env.RATE_LIMIT_HASH_SECRET.trim().length < 32) {
+  if (rateLimitHashSecret.length < 32) {
     throw new ConfigurationError(['RATE_LIMIT_HASH_SECRET must be at least 32 characters']);
   }
 
   return {
     enabled: true,
-    environment: env.VERCEL_ENV || env.NODE_ENV || 'development',
-    resendApiKey: env.RESEND_API_KEY.trim(),
-    fromEmail: env.CONTACT_FROM_EMAIL.trim(),
-    toEmail: env.CONTACT_TO_EMAIL.trim(),
-    turnstileSecretKey: env.TURNSTILE_SECRET_KEY.trim(),
-    allowedTurnstileHostnames: splitCsv(env.TURNSTILE_ALLOWED_HOSTNAMES),
-    upstashUrl: env.UPSTASH_REDIS_REST_URL.trim().replace(/\/$/, ''),
-    upstashToken: env.UPSTASH_REDIS_REST_TOKEN.trim(),
-    rateLimitHashSecret: env.RATE_LIMIT_HASH_SECRET.trim(),
+    environment,
+    resendApiKey,
+    fromEmail,
+    toEmail,
+    turnstileSecretKey,
+    allowedTurnstileHostnames: readAllowedHostnames(env.TURNSTILE_ALLOWED_HOSTNAMES),
+    upstashUrl,
+    upstashToken,
+    rateLimitHashSecret,
     rateLimitMax: readPositiveInteger(env.CONTACT_RATE_LIMIT_MAX, 5, { min: 1, max: 50 }),
     rateLimitEmailMax: readPositiveInteger(env.CONTACT_RATE_LIMIT_EMAIL_MAX, 2, { min: 1, max: 20 }),
     rateLimitWindowSeconds: readPositiveInteger(env.CONTACT_RATE_LIMIT_WINDOW_SECONDS, 900, {
