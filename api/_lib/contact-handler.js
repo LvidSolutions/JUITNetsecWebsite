@@ -61,6 +61,7 @@ export async function handleContactRequest(
       upstashUrl: config.upstashUrl,
       upstashToken: config.upstashToken,
       hashSecret: config.rateLimitHashSecret,
+      keyPrefix: `juit:${config.environment || 'unknown'}:contact`,
       max: config.rateLimitMax,
       emailMax: config.rateLimitEmailMax,
       windowSeconds: config.rateLimitWindowSeconds,
