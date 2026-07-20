@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [merge]
+  pull_request:
+    branches: [merge]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Use Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Audit production and development dependencies
+        run: npm audit --audit-level=high
+
+      - name: Run API and security tests
+        run: npm test
+
+      - name: Build production frontend
+        run: npm run build
