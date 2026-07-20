@@ -1,9 +1,11 @@
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useEffect, useId, useRef, useState } from 'react';
+import { ContactRequestError, submitContact } from '../../lib/contactClient.js';
 
 const EASE = [0.16, 1, 0.3, 1];
 const EMPTY_VALUES = { name: '', email: '', phone: '', message: '' };
 const FORM_HEADLINE = ['Give', 'us', 'more', 'deets,', 'please!'];
+const GENERIC_DELIVERY_ERROR = 'Your message could not be sent. Please try again or contact us directly by email.';
 
 function validate(values) {
   const errors = {};
@@ -50,6 +52,8 @@ function Turnstile({ onToken }) {
   useEffect(() => {
     if (!siteKey || !ref.current) return undefined;
     let widgetId;
+    let existing;
+    const clearToken = () => onToken('');
     const render = () => {
       if (!window.turnstile || !ref.current) return;
       widgetId = window.turnstile.render(ref.current, {
@@ -58,11 +62,14 @@ function Turnstile({ onToken }) {
         theme: 'dark',
         size: 'invisible',
         callback: onToken,
-        'expired-callback': () => onToken(''),
-        'error-callback': () => onToken(''),
+        'expired-callback': clearToken,
+        'error-callback': clearToken,
+        'timeout-callback': clearToken,
+        'unsupported-callback': clearToken,
       });
     };
-    const existing = document.querySelector('script[data-turnstile-script]');
+
+    existing = document.querySelector('script[data-turnstile-script]');
     if (window.turnstile) render();
     else if (existing) existing.addEventListener('load', render, { once: true });
     else {
@@ -72,9 +79,14 @@ function Turnstile({ onToken }) {
       script.defer = true;
       script.dataset.turnstileScript = 'true';
       script.addEventListener('load', render, { once: true });
+      script.addEventListener('error', clearToken, { once: true });
       document.head.append(script);
+      existing = script;
     }
+
     return () => {
+      existing?.removeEventListener('load', render);
+      existing?.removeEventListener('error', clearToken);
       if (widgetId !== undefined && window.turnstile) window.turnstile.remove(widgetId);
     };
   }, [onToken, siteKey]);
@@ -114,6 +126,7 @@ export function ContactForm() {
   const [status, setStatus] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [token, setToken] = useState('');
+  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
   const [startedAt, setStartedAt] = useState(0);
   const [submissionId, setSubmissionId] = useState('');
   const headingRef = useRef(null);
@@ -139,6 +152,11 @@ export function ContactForm() {
     setErrors(validate(values));
   };
 
+  const resetTurnstile = () => {
+    setToken('');
+    setTurnstileResetKey((current) => current + 1);
+  };
+
   const openForm = () => {
     setStartedAt(Date.now());
     setSubmissionId(crypto.randomUUID());
@@ -147,6 +165,7 @@ export function ContactForm() {
   };
 
   const goBack = () => {
+    resetTurnstile();
     setState('intro');
     setStatus('');
   };
@@ -161,29 +180,27 @@ export function ContactForm() {
       return;
     }
     if (!token) {
-      setStatus('Your message could not be sent. Please try again or contact us directly by email.');
+      setStatus(GENERIC_DELIVERY_ERROR);
       return;
     }
 
+    const formData = new FormData(event.currentTarget);
     setSubmitting(true);
     setStatus('');
+
     try {
-      const response = await fetch('/api/contact', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...values,
-          website: '',
-          turnstileToken: token,
-          submissionId,
-          formStartedAt: startedAt,
-        }),
+      await submitContact({
+        ...values,
+        website: String(formData.get('website') || ''),
+        turnstileToken: token,
+        submissionId,
+        formStartedAt: startedAt,
       });
-      const result = await response.json().catch(() => null);
-      if (!response.ok || !result?.ok) throw new Error('Contact request failed');
+      setToken('');
       setState('success');
-    } catch {
-      setStatus('Your message could not be sent. Please try again or contact us directly by email.');
+    } catch (error) {
+      setStatus(error instanceof ContactRequestError ? error.publicMessage : GENERIC_DELIVERY_ERROR);
+      resetTurnstile();
     } finally {
       setSubmitting(false);
     }
@@ -243,7 +260,7 @@ export function ContactForm() {
                 <Field field="phone" label="Phone (optional)" placeholder="Phone (optional)" values={values} errors={errors} touched={touched} onChange={updateField} onBlur={blurField} type="tel" autoComplete="tel" inputMode="tel" maxLength="40" />
               </div>
               <Field field="message" label="Message" placeholder="Message" values={values} errors={errors} touched={touched} onChange={updateField} onBlur={blurField} rows="7" autoComplete="off" maxLength="5000" />
-              <Turnstile onToken={setToken} />
+              <Turnstile key={turnstileResetKey} onToken={setToken} />
               <div className="contact-actions">
                 <button type="button" className="contact-back" onClick={goBack} disabled={submitting}>Back</button>
                 <button type="submit" className="contact-submit" disabled={submitting}>{submitting ? 'Sending…' : 'Send message'}</button>
@@ -257,7 +274,7 @@ export function ContactForm() {
             <p className="contact-eyebrow">Message sent</p>
             <h1>Thank you for reaching out.</h1>
             <p className="contact-lede">We&apos;ll get back to you as soon as possible.</p>
-            <button type="button" className="contact-say-hi" onClick={() => { setValues(EMPTY_VALUES); setTouched({}); setErrors({}); setToken(''); goBack(); }}>Return to contact</button>
+            <button type="button" className="contact-say-hi" onClick={() => { setValues(EMPTY_VALUES); setTouched({}); setErrors({}); goBack(); }}>Return to contact</button>
           </motion.div>
         )}
       </AnimatePresence>
