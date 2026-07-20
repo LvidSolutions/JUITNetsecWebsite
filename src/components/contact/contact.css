@@ -1,4 +1,4 @@
-.contact-page { position: relative; isolation: isolate; min-height: 100svh; overflow: hidden; background: #050505; }
+.contact-page { position: relative; isolation: isolate; min-height: 100svh; overflow: visible; background: #050505; }
 .contact-grid { pointer-events: none; position: absolute; inset: 0; z-index: -1; opacity: .38; background-image: linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px); background-size: 56px 56px; mask-image: radial-gradient(ellipse 85% 65% at 50% 40%, #000, transparent); }
 .contact-form-section { position: relative; border-top: 1px solid rgba(255,255,255,.09); }
 .contact-experience { display: grid; min-height: 100svh; padding: clamp(5rem, 9vw, 8rem) clamp(1.1rem, 6.4vw, 6.5rem); place-items: center; scroll-margin-top: 5rem; }

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Header } from './components/layout/Header.jsx';
 import { AnimatedLogo } from './components/layout/AnimatedLogo.jsx';
 import { Footer } from './components/layout/Footer.jsx';
+import { CinematicFooterScene } from './components/layout/CinematicFooterScene.jsx';
 import { AboutSection } from './components/sections/AboutSection.jsx';
 import { ContactPage } from './components/contact/ContactPage.jsx';
 import { Hero } from './components/sections/Hero.jsx';
@@ -185,11 +186,37 @@ function App() {
             <FaqFooterScene />
           </>
         )}
-        {currentPath === '/tjanster' && <ServicesSection />}
+        {currentPath === '/tjanster' && (
+          <ServicesSection
+            renderClosingScene={(operatingModel) => (
+            <CinematicFooterScene variant="services" source="/videos/services-footer.mp4">
+              {(sceneRef) => (
+                <>
+                  {operatingModel}
+                  <Footer homeEffects videoScene revealTargetRef={sceneRef} />
+                </>
+              )}
+            </CinematicFooterScene>
+            )}
+          />
+        )}
         {(currentPath === '/om-oss' || currentPath === '/about') && <AboutSection />}
-        {(currentPath === '/kontakt' || currentPath === '/contact') && <ContactPage />}
+        {(currentPath === '/kontakt' || currentPath === '/contact') && (
+          <ContactPage
+            renderClosingScene={(formSection) => (
+              <CinematicFooterScene variant="contact" source="/videos/contact-footer.mp4">
+                {(sceneRef) => (
+                  <>
+                    {formSection}
+                    <Footer videoScene revealTargetRef={sceneRef} />
+                  </>
+                )}
+              </CinematicFooterScene>
+            )}
+          />
+        )}
       </main>
-      {!isHome && <Footer />}
+      {!isHome && currentPath !== '/tjanster' && currentPath !== '/kontakt' && currentPath !== '/contact' && <Footer />}
       {isHome && <HomeCursor />}
     </>
   );

@@ -6,7 +6,7 @@ import { GlideServicesHero } from '../services/GlideServicesHero.jsx';
 /**
  * Services-sidan består av den interaktiva trepanelsväljaren och arbetsprocessen.
  */
-export function ServicesSection() {
+export function ServicesSection({ renderClosingScene }) {
   const [activeTrack, setActiveTrack] = useState(0);
   const [activeStage, setActiveStage] = useState(0);
 
@@ -14,7 +14,11 @@ export function ServicesSection() {
     <div id="tjanster" className="bg-brand-black text-brand-white">
       <GlideServicesHero />
       <ShiftStyleServiceSelector activeIndex={activeTrack} onSelect={setActiveTrack} />
-      <NetsecOperatingModel activeIndex={activeStage} onSelect={setActiveStage} />
+      {renderClosingScene
+        ? renderClosingScene(
+          <NetsecOperatingModel cinematic activeIndex={activeStage} onSelect={setActiveStage} />,
+        )
+        : <NetsecOperatingModel activeIndex={activeStage} onSelect={setActiveStage} />}
     </div>
   );
 }

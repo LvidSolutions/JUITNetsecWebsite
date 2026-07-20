@@ -52,6 +52,7 @@ export function Footer({ homeEffects = false, videoScene = false, revealTargetRe
         frame.style.setProperty('--ff', progressValue);
         document.body.style.setProperty('--footer-frame-progress', progressValue);
         revealTargetRef?.current?.style.setProperty('--faq-footer-reveal', progressValue);
+        revealTargetRef?.current?.style.setProperty('--cinematic-footer-reveal', progressValue);
       }
     };
     const requestUpdate = () => {

@@ -139,7 +139,7 @@ function SquareProcess({ hoverG, onActivate, onClear, reduce }) {
   );
 }
 
-export function NetsecOperatingModel({ activeIndex, onSelect }) {
+export function NetsecOperatingModel({ activeIndex, onSelect, cinematic = false }) {
   const reduce = useReducedMotion();
   // hoverG = hovrat geometri-lager (0 = yttersta, 3 = botten-boxen) eller null.
   const [hoverG, setHoverG] = useState(null);
@@ -157,15 +157,19 @@ export function NetsecOperatingModel({ activeIndex, onSelect }) {
   return (
     <section
       aria-label="How Netsec works - square process"
-      className="relative isolate overflow-hidden border-b border-brand-line bg-brand-black pb-20 pt-28 sm:pb-24 sm:pt-32 lg:py-28"
+      className={`relative isolate overflow-hidden border-b border-brand-line ${cinematic ? 'bg-transparent' : 'bg-brand-black'} pb-20 pt-28 sm:pb-24 sm:pt-32 lg:py-28`}
     >
-      {/* Sidövergripande Shift5-static ligger bakom innehållet; den opaka rutan
-          blockerar den, så det finns ingen static inuti själva rutan. */}
-      <div aria-hidden="true" className="service-static pointer-events-none absolute inset-0 -z-10" />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(255,255,255,0.018),transparent_42%,rgba(255,255,255,0.012))]"
-      />
+      {!cinematic && (
+        <>
+          {/* Sidövergripande Shift5-static ligger bakom innehållet; den opaka rutan
+              blockerar den, så det finns ingen static inuti själva rutan. */}
+          <div aria-hidden="true" className="service-static pointer-events-none absolute inset-0 -z-10" />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(255,255,255,0.018),transparent_42%,rgba(255,255,255,0.012))]"
+          />
+        </>
+      )}
 
       <Container className="relative">
         <div className="max-w-3xl">

@@ -1,0 +1,151 @@
+.cinematic-footer-scene {
+  --cinematic-footer-reveal: 0;
+  --scene-footer-frame-x: clamp(20px, 2.7vw, 104px);
+  --scene-footer-frame-top: clamp(5rem, 8vh, 7rem);
+  --scene-footer-frame-bottom: clamp(22px, 4vh, 76px);
+  position: relative;
+  isolation: isolate;
+  background: #050505;
+}
+
+.cinematic-footer-scene__background {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 72% 28%, rgba(0, 200, 83, .15), transparent 36%),
+    #050505;
+  pointer-events: none;
+}
+
+.cinematic-footer-scene__video,
+.cinematic-footer-scene__grade,
+.cinematic-footer-scene__edge-fade {
+  position: absolute;
+  inset: 0;
+}
+
+.cinematic-footer-scene__video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity .7s ease;
+}
+
+.cinematic-footer-scene.is-entered.is-ready .cinematic-footer-scene__video {
+  opacity: 1;
+}
+
+.cinematic-footer-scene__grade {
+  background:
+    linear-gradient(rgba(0, 200, 83, .14), rgba(0, 200, 83, .14)),
+    linear-gradient(90deg, rgba(5, 5, 5, .88), rgba(5, 5, 5, .65) 58%, rgba(5, 5, 5, .82)),
+    rgba(5, 5, 5, .36);
+}
+
+.cinematic-footer-scene__edge-fade {
+  background: linear-gradient(to bottom, #050505 0%, transparent 16%, transparent 78%, #050505 100%);
+}
+
+.cinematic-footer-scene__frame-edge {
+  position: absolute;
+  z-index: 2;
+  background: #fff;
+  will-change: width, height;
+}
+
+.cinematic-footer-scene__frame-edge--top,
+.cinematic-footer-scene__frame-edge--bottom {
+  right: 0;
+  left: 0;
+  height: calc(var(--cinematic-footer-reveal) * var(--scene-footer-frame-top));
+}
+
+.cinematic-footer-scene__frame-edge--top { top: 0; }
+.cinematic-footer-scene__frame-edge--bottom {
+  bottom: 0;
+  height: calc(var(--cinematic-footer-reveal) * var(--scene-footer-frame-bottom));
+}
+
+.cinematic-footer-scene__frame-edge--right,
+.cinematic-footer-scene__frame-edge--left {
+  top: 0;
+  bottom: 0;
+  width: calc(var(--cinematic-footer-reveal) * var(--scene-footer-frame-x));
+}
+
+.cinematic-footer-scene__frame-edge--right {
+  right: 0;
+}
+.cinematic-footer-scene__frame-edge--left { left: 0; }
+
+.cinematic-footer-scene__content {
+  position: relative;
+  z-index: 1;
+}
+
+/* Homepage-derived sticky visual layer: it remains behind the footer through
+   its entire scroll lifetime, while Footer owns the existing frame reveal. */
+.cinematic-footer-scene--services .cinematic-footer-scene__background,
+.cinematic-footer-scene--contact .cinematic-footer-scene__background {
+  position: sticky;
+  top: 0;
+  right: 0;
+  bottom: auto;
+  left: 0;
+  height: 100svh;
+  margin-bottom: -100svh;
+}
+
+.cinematic-footer-scene--services .cinematic-footer-scene__video {
+  object-position: center 44%;
+}
+
+.cinematic-footer-scene--services .cinematic-footer-scene__grade {
+  background:
+    linear-gradient(rgba(0, 200, 83, .12), rgba(0, 200, 83, .12)),
+    linear-gradient(90deg, rgba(5, 5, 5, .86), rgba(5, 5, 5, .63) 54%, rgba(5, 5, 5, .8)),
+    rgba(5, 5, 5, .48);
+}
+
+.cinematic-footer-scene--contact .cinematic-footer-scene__video {
+  object-position: center 38%;
+  filter: grayscale(.72) contrast(1.25) saturate(.62) hue-rotate(74deg);
+}
+
+.cinematic-footer-scene--contact .cinematic-footer-scene__grade {
+  background:
+    linear-gradient(rgba(0, 200, 83, .18), rgba(0, 200, 83, .08)),
+    linear-gradient(90deg, rgba(5, 5, 5, .86), rgba(5, 5, 5, .5) 58%, rgba(5, 5, 5, .84)),
+    rgba(5, 5, 5, .48);
+  mix-blend-mode: multiply;
+}
+
+.cinematic-footer-scene--contact .cinematic-footer-scene__edge-fade {
+  background: linear-gradient(to bottom, #050505 0%, transparent 14%, transparent 82%, #050505 100%);
+}
+
+@media (max-width: 767px) {
+  .cinematic-footer-scene {
+    --scene-footer-frame-x: clamp(14px, 4.5vw, 28px);
+    --scene-footer-frame-top: clamp(3.5rem, 7svh, 5rem);
+    --scene-footer-frame-bottom: clamp(16px, 3svh, 28px);
+  }
+
+  .cinematic-footer-scene--services .cinematic-footer-scene__video {
+    object-position: center 38%;
+  }
+
+  .cinematic-footer-scene--contact .cinematic-footer-scene__video {
+    object-position: center 32%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cinematic-footer-scene__video,
+  .cinematic-footer-scene__frame-edge {
+    transition: none;
+  }
+}
