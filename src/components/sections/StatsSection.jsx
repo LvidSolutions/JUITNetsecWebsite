@@ -27,6 +27,27 @@ export function StatsSection() {
     const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
     let frame = 0;
     let maxProgress = 0;
+    let isCompacted = false;
+
+    function compactCompletedSection() {
+      if (isCompacted || motionQuery.matches) return;
+
+      isCompacted = true;
+      const bottomBefore = section.getBoundingClientRect().bottom;
+      section.classList.add('risk-progress--complete');
+      const bottomAfter = section.getBoundingClientRect().bottom;
+      const collapsedBy = bottomBefore - bottomAfter;
+
+      if (collapsedBy > 0) {
+        const scrollRoot = document.scrollingElement;
+
+        if (scrollRoot) {
+          scrollRoot.scrollTop = Math.max(0, scrollRoot.scrollTop - collapsedBy);
+        } else {
+          window.scrollBy(0, -collapsedBy);
+        }
+      }
+    }
 
     function updateProgress() {
       frame = 0;
@@ -43,6 +64,8 @@ export function StatsSection() {
 
       maxProgress = Math.max(maxProgress, progress);
       section.style.setProperty('--risk-progress', maxProgress.toFixed(5));
+
+      if (maxProgress >= 1) compactCompletedSection();
     }
 
     function requestUpdate() {
