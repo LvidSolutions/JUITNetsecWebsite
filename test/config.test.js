@@ -29,6 +29,7 @@ test('loads and normalizes valid configuration', () => {
   const config = loadContactConfig(completeEnv);
   assert.equal(config.enabled, true);
   assert.equal(config.upstashUrl, 'https://redis.example');
+  assert.equal(config.fromEmail, 'Website <website@example.com>');
   assert.equal(config.toEmail, 'contact@juit.se');
   assert.deepEqual(config.allowedTurnstileHostnames, ['juitnetsec.se', 'www.juitnetsec.se']);
   assert.equal(config.rateLimitMax, 5);
@@ -44,11 +45,16 @@ test('rejects insecure or credential-bearing Upstash URLs', () => {
   }
 });
 
-test('rejects header injection and invalid recipient addresses', () => {
-  assert.throws(
-    () => loadContactConfig({ ...completeEnv, CONTACT_FROM_EMAIL: 'Website <website@example.com>\r\nBcc: attacker@example.com' }),
-    /CONTACT_FROM_EMAIL/u,
-  );
+test('rejects invalid or injected email configuration', () => {
+  for (const fromEmail of [
+    'Website <website@example.com>\r\nBcc: attacker@example.com',
+    'Website <not-an-address>',
+  ]) {
+    assert.throws(
+      () => loadContactConfig({ ...completeEnv, CONTACT_FROM_EMAIL: fromEmail }),
+      /CONTACT_FROM_EMAIL/u,
+    );
+  }
   assert.throws(
     () => loadContactConfig({ ...completeEnv, CONTACT_TO_EMAIL: 'not-an-address' }),
     /CONTACT_TO_EMAIL/u,
