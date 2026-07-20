@@ -26,7 +26,10 @@ for (const [name, path] of routes) {
     expect(clientErrors).toEqual([]);
 
     if (name === 'contact') {
-      await expect(page.getByRole('button', { name: /send request/i })).toBeVisible();
+      const openForm = page.getByRole('button', { name: /say hi/i });
+      await expect(openForm).toBeVisible();
+      await openForm.click();
+      await expect(page.getByRole('button', { name: /send message/i })).toBeVisible();
     }
   });
 }
