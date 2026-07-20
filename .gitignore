@@ -3,6 +3,12 @@ dist
 .DS_Store
 *.local
 
+# Local environment files and Vercel project metadata
+.env
+.env.*
+!.env.example
+.vercel/
+
 # Local visual-regression / screenshot artifacts (not part of the app)
 visual-checks/
 test-results/
