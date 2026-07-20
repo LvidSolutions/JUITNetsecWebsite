@@ -1,5 +1,7 @@
 import { ConfigurationError } from './errors.js';
 
+const EMAIL_PATTERN = /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/u;
+
 function splitCsv(value = '') {
   return value
     .split(',')
@@ -57,10 +59,20 @@ function readAllowedHostnames(value) {
 
 function readRecipientEmail(env) {
   const email = requireSingleLine(env, 'CONTACT_TO_EMAIL', 254).toLowerCase();
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/u.test(email)) {
+  if (!EMAIL_PATTERN.test(email)) {
     throw new ConfigurationError(['CONTACT_TO_EMAIL must be a valid email address']);
   }
   return email;
+}
+
+function readSenderEmail(env) {
+  const value = requireSingleLine(env, 'CONTACT_FROM_EMAIL', 320);
+  const angleMatch = value.match(/<([^<>]+)>$/u);
+  const address = (angleMatch?.[1] || value).trim().toLowerCase();
+  if (!EMAIL_PATTERN.test(address)) {
+    throw new ConfigurationError(['CONTACT_FROM_EMAIL must contain a valid email address']);
+  }
+  return value;
 }
 
 export function loadContactConfig(env = process.env) {
@@ -75,7 +87,7 @@ export function loadContactConfig(env = process.env) {
   }
 
   const resendApiKey = requireSingleLine(env, 'RESEND_API_KEY');
-  const fromEmail = requireSingleLine(env, 'CONTACT_FROM_EMAIL', 320);
+  const fromEmail = readSenderEmail(env);
   const toEmail = readRecipientEmail(env);
   const turnstileSecretKey = requireSingleLine(env, 'TURNSTILE_SECRET_KEY');
   const upstashUrl = readHttpsUrl(env, 'UPSTASH_REDIS_REST_URL');
