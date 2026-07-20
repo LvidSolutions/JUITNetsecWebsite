@@ -1,136 +1,85 @@
-# Codex Session Handover — JUIT NetSec Website
+# JUIT NetSec website — current implementation handover
 
-> **READ THIS FIRST. Do NOT bulk-load the codebase.**
-> When you start a new prompt, **do not** open or index every file, and **do not** pull
-> the whole project into context. Instead:
->
-> 1. Read **this file** (`CODEX_HANDOVER.md`) — it contains everything you need.
-> 2. Check the **GitHub repo** for current state:
->    `https://github.com/LvidSolutions/JUITNetsecWebsite` (live branch: **`merge`**).
-> 3. Only open the **2 files named in "Pending task"** when you are actually ready to edit.
-> 4. Ask before reading anything else. Stay scoped — this is a tiny, surgical footer fix.
+## Repository
 
----
+- Remote: `https://github.com/LvidSolutions/JUITNetsecWebsite`
+- Production branch: `merge`
+- Stack: React 19, Vite 7, Tailwind CSS, Framer Motion, OGL, Node.js 24
+- Hosting: Vercel
+- Public and contact-form receiving email: `contact@juit.se`
 
-## Repo facts
+Do not infer a final website domain, organization number, postal address, CMS project or provider credential from placeholders. Confirm business data before publishing it.
 
-| | |
-|---|---|
-| **Remote** | `https://github.com/LvidSolutions/JUITNetsecWebsite.git` |
-| **Live branch** | `merge` (NOT `main` — deploy/push here) |
-| **Local path** | `C:\Users\lucas\Downloads\Repos\LVID\JUITNetsecWebsite` |
-| **Stack** | React + Vite 7 + Tailwind + framer-motion, Node v24 |
-| **Dev server** | `npm run dev` → http://localhost:5173 |
-| **Footer is global** | Rendered once in `App.jsx`; shared by all pages |
+## Runtime architecture
 
-Verified contact data (do NOT invent): email `info@juitnetsec.se`,
-address `Fatburs kvarngata 26 / 118 64 Stockholm / Sweden`.
-Brand colors: green `#00C853`, black `#050505`, mist `#E5E7EB`. Font: Space Grotesk.
+- Static frontend: `src/`
+- Vercel Functions: `api/`
+- Contact entrypoint: `api/contact.js`
+- Health endpoint: `api/health.js`
+- Robots endpoint: `api/robots.js`, exposed as `/robots.txt`
+- Sitemap endpoint: `api/sitemap.js`, exposed as `/sitemap.xml`
+- Server modules: `api/_lib/`
+- API and security tests: `test/`
+- Browser smoke tests: `e2e/`
+- Deployment guide: `docs/BACKEND_DEPLOYMENT.md`
 
----
+The contact flow uses Resend, Cloudflare Turnstile and Upstash Redis. It is fail-closed when `CONTACT_FORM_ENABLED` is not exactly `true` or required server configuration is missing.
 
-## Current working-tree state (UNCOMMITTED)
+There is no application database, public authentication, payment system or file-upload API because the current website does not require those systems.
 
-```
- M src/components/layout/Footer.jsx     # footer reworked to use the 2 image assets
- M src/styles/index.css                 # .footer-glow retuned
-?? public/assets/footer-radar.png       # maze/radar graphic (used)
-?? public/assets/footer-stat.png        # threat-stats panel graphic (used)
-?? public/assets/footer-source.png      # UNUSED original composite (~1.6MB) — candidate to delete
-```
+## Commands
 
-**What's already done (working tree, not yet committed):** the footer was rebuilt into a
-shorter "cinematic strip" (~660px desktop, no `min-h-screen`) showing `footer-radar.png`
-upper-left and `footer-stat.png` upper-right (both via `mix-blend-screen`), brand wordmark
-lower-left, nav + contact lower-right. Validated on desktop/tablet/mobile.
-
----
-
-## Pending task (APPROVED, NOT yet implemented)
-
-**Problem:** both footer graphics show a visible **rectangular box** around them.
-**Root cause (confirmed by inspecting the pixels):** the PNGs do not have a *black*
-background — they have a baked **dark-green** background. `mix-blend-mode: screen` only
-hides a *pure-black* background, so the green background gets *added* over the footer as a
-rectangle (radar = square vignette corners; stats = dark green card edge).
-
-**Fix (CSS-only, do NOT edit the PNG files):** replace `mix-blend-mode: screen` with a
-**luminance-to-alpha SVG filter** so each pixel's alpha = its luminance. The dark-green
-background → alpha ≈ 0 (truly gone, no rectangle on any background); bright radar lines and
-white stat numbers → alpha ≈ 1 (stay crisp).
-
-### File 1 — `src/styles/index.css` (add these utilities; leave `.footer-glow`/`.footer-noise` alone)
-
-```css
-.footer-cutout {
-  filter: url(#footerCutout);
-}
-.footer-radar-graphic {
-  -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 74%, transparent 100%);
-  mask-image: radial-gradient(circle at 50% 50%, #000 74%, transparent 100%);
-}
+```bash
+npm ci
+npm run lint
+npm test
+npm run build
+npm run report:build
+npm run smoke:local
 ```
 
-### File 2 — `src/components/layout/Footer.jsx`
+Full non-browser check:
 
-- Add the filter def once, hidden, inside `<footer>`:
-
-```jsx
-<svg aria-hidden="true" focusable="false" width="0" height="0"
-     style={{ position: 'absolute', width: 0, height: 0 }}>
-  <filter id="footerCutout" colorInterpolationFilters="sRGB">
-    <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0.33 0.5 0.16 0 0" />
-    <feComponentTransfer>
-      <feFuncA type="table" tableValues="0 0.05 0.55 0.9 1 1" />
-    </feComponentTransfer>
-  </filter>
-</svg>
+```bash
+npm run check
 ```
 
-- Radar `<img>`: change `mix-blend-screen` → `footer-cutout footer-radar-graphic`.
-- Stats `<img>`: change `mix-blend-screen` → `footer-cutout`.
-- **Nothing else changes** — same layout, sizes, spacing, `lg:min-h-[660px]`, wordmark,
-  nav, contact, alt text.
+Browser smoke tests:
 
-### Tuning levers (decide from screenshots)
+```bash
+npx playwright install chromium
+npm run test:visual
+```
 
-- Content too dim → raise mids: `tableValues="0 0.1 0.7 1 1 1"`.
-- Faint rectangle still showing (esp. stats' bottom green glow) → flatten low end:
-  `tableValues="0 0 0.4 0.85 1 1"`.
-- Radar corner haze → the `footer-radar-graphic` radial mask is the backstop.
+## Environment safety
 
-### Fallback (only if the runtime filter looks bad)
+- Copy variable names from `.env.example`.
+- Never commit `.env`, `.env.local`, `.vercel` or real credentials.
+- Every `VITE_` value is public browser configuration.
+- Preview and Production must use separate Resend, Turnstile, Upstash and hashing credentials.
+- Keep `CONTACT_FORM_ENABLED=false` until a real Preview submission has been delivered and logs have been reviewed.
 
-Pre-bake the same luminance→alpha into transparent PNGs with a one-off `sharp` script
-(`footer-radar-cut.png` / `footer-stat-cut.png`) and repoint `src`. Not expected.
+## Verified design constraints
 
----
+Preserve the current premium dark JUIT NetSec design, animations, responsive behavior and page composition unless a task explicitly asks for a visual change. Backend and security work must not silently redesign the frontend.
 
-## Do NOT modify
+## Manual launch blockers
 
-Footer layout/height, logo/nav/contact placement, text content, navbar, hero, intro
-animation, cursor, contact form, FaultyTerminal, services/about, global typography.
-Only touch: image rendering classes + the two footer-graphic CSS rules above.
+Repository code cannot complete these external steps:
 
----
+1. Purchase and confirm the company-owned production domain.
+2. Add Vercel Preview and Production environment values.
+3. Verify the Resend sending domain and SPF/DKIM records.
+4. Create Preview and Production Turnstile widgets.
+5. Create or provision isolated Upstash credentials.
+6. Send one real Preview and one real Production email to `contact@juit.se`.
+7. Review privacy notice, retention and processor agreements.
+8. Decide whether a CMS is required. Sanity is the preferred future option, but it is not required for the current static launch.
 
-## Verify (Playwright)
+## Change discipline
 
-There is a ready script: `scratchpad/shot-footer.js` (run `node shot-footer.js after`).
-It uses cached Chromium and screenshots the footer at **1440 / 834 / 390** into
-`visual-checks/footer/`. (Install `playwright-core` with
-`PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm install --no-save playwright-core`, then
-`npm uninstall --no-save playwright-core` when done.)
-
-Acceptance: no square around the radar, no rectangle around the stats panel, radar lines +
-all stat figures readable, footer height still ~660px desktop, layout unchanged, zero
-console errors. Test desktop + tablet + mobile.
-
----
-
-## After it works
-
-Ask the user before committing. Suggested: also delete the unused
-`public/assets/footer-source.png` (~1.6MB). Commit + push to **`merge`** only when asked.
-Commit message footer: `Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>` if Claude
-authored; otherwise per Codex convention.
+- Read only the files relevant to the requested task.
+- Do not delete or rewrite major visual sections without an explicit reason.
+- Add tests for critical backend behavior.
+- Keep server errors generic and keep personal data out of logs.
+- Review the final diff and deployment status before enabling a production feature.
