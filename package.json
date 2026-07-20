@@ -3,17 +3,22 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
+  "engines": {
+    "node": "24.x"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "lint": "node scripts/lint-source.mjs",
     "test": "node --test \"test/*.test.js\"",
     "test:api": "node --test \"test/*.test.js\"",
     "smoke:local": "node scripts/smoke-local.mjs",
     "smoke:preview": "node scripts/smoke-vercel-preview.mjs",
     "report:build": "node scripts/report-build-size.mjs",
     "test:visual": "playwright test",
-    "test:visual:report": "playwright show-report"
+    "test:visual:report": "playwright show-report",
+    "check": "npm run lint && npm test && npm run build && npm run report:build && npm run smoke:local"
   },
   "dependencies": {
     "framer-motion": "^12.40.0",
