@@ -26,11 +26,13 @@ export function StatsSection() {
 
     const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
     let frame = 0;
+    let maxProgress = 0;
 
     function updateProgress() {
       frame = 0;
 
       if (motionQuery.matches) {
+        maxProgress = 1;
         section.style.setProperty('--risk-progress', '1');
         return;
       }
@@ -38,7 +40,9 @@ export function StatsSection() {
       const scrollRange = Math.max(section.offsetHeight - window.innerHeight, 1);
       const travelled = -section.getBoundingClientRect().top;
       const progress = Math.min(1, Math.max(0, travelled / scrollRange));
-      section.style.setProperty('--risk-progress', progress.toFixed(5));
+
+      maxProgress = Math.max(maxProgress, progress);
+      section.style.setProperty('--risk-progress', maxProgress.toFixed(5));
     }
 
     function requestUpdate() {
