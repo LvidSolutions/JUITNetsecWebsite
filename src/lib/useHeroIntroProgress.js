@@ -20,7 +20,8 @@ export function useHeroIntroProgress() {
     const rect = el.getBoundingClientRect();
     // Motsvarar offset ['start start', 'end start']: 0 när hero-toppen är i
     // viewporttoppen, 1 när hero-botten passerat viewporttoppen.
-    const progress = rect.height > 0 ? -rect.top / rect.height : 0;
+    const scrollDistance = Math.max(rect.height - window.innerHeight, 1);
+    const progress = -rect.top / scrollDistance;
     scrollYProgress.set(Math.min(Math.max(progress, 0), 1));
   }, [scrollYProgress]);
 

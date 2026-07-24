@@ -239,7 +239,7 @@ function setStraightOnCamera(api, callback) {
   });
 }
 
-export function ContactMonitorCTA() {
+export function ContactMonitorCTA({ transitionState = 'IDLE', monitorMedia = null }) {
   const containerRef = useRef(null);
   const frameRef = useRef(null);
   const animationRef = useRef(0);
@@ -254,6 +254,7 @@ export function ContactMonitorCTA() {
   const [textureStatus, setTextureStatus] = useState('pending');
   const [textureUid, setTextureUid] = useState('');
   const [snapshot, setSnapshot] = useState('');
+  const interactionEnabled = transitionState === 'IDLE';
 
   const updateTilt = useCallback((time) => {
     const target = tiltRef.current;
@@ -281,6 +282,29 @@ export function ContactMonitorCTA() {
       animationRef.current = window.requestAnimationFrame(updateTilt);
     }
   }, [updateTilt]);
+
+  useEffect(() => {
+    if (interactionEnabled) return;
+
+    const target = tiltRef.current;
+    target.currentX = 0;
+    target.currentY = 0;
+    target.targetX = 0;
+    target.targetY = 0;
+    target.hovering = false;
+
+    if (animationRef.current) {
+      window.cancelAnimationFrame(animationRef.current);
+      animationRef.current = 0;
+    }
+
+    const element = containerRef.current;
+    element?.style.setProperty('--monitor-rotate-x', '0deg');
+    element?.style.setProperty('--monitor-rotate-y', '0deg');
+    element?.style.setProperty('--monitor-pointer-x', '50%');
+    element?.style.setProperty('--monitor-pointer-y', '50%');
+    element?.setAttribute('data-active', 'false');
+  }, [interactionEnabled]);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -451,6 +475,7 @@ export function ContactMonitorCTA() {
   }, []);
 
   const handlePointerMove = (event) => {
+    if (!interactionEnabled) return;
     if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
     const rect = event.currentTarget.getBoundingClientRect();
     const percentX = ((event.clientX - rect.left) / rect.width) * 100;
@@ -466,6 +491,7 @@ export function ContactMonitorCTA() {
   };
 
   const handlePointerLeave = () => {
+    if (!interactionEnabled) return;
     const target = tiltRef.current;
     target.targetX = 0;
     target.targetY = 0;
@@ -487,17 +513,19 @@ export function ContactMonitorCTA() {
       data-texture-status={textureStatus}
       data-texture-uid={textureUid || undefined}
       data-has-snapshot={snapshot ? 'true' : 'false'}
+      data-transition-state={transitionState}
     >
-      <div
-        ref={containerRef}
-        className="contact-monitor-cta__tilt"
-        onPointerMove={handlePointerMove}
-        onPointerLeave={handlePointerLeave}
-        onMouseMove={handlePointerMove}
-        onMouseLeave={handlePointerLeave}
-      >
-        <div className="contact-monitor-cta__glow" aria-hidden="true" />
-        <div className="contact-monitor-cta__frame">
+      <div className="contact-monitor-cta__expansion-root">
+        <div
+          ref={containerRef}
+          className="contact-monitor-cta__tilt"
+          onPointerMove={interactionEnabled ? handlePointerMove : undefined}
+          onPointerLeave={interactionEnabled ? handlePointerLeave : undefined}
+          onMouseMove={interactionEnabled ? handlePointerMove : undefined}
+          onMouseLeave={interactionEnabled ? handlePointerLeave : undefined}
+        >
+          <div className="contact-monitor-cta__glow" aria-hidden="true" />
+          <div className="contact-monitor-cta__frame">
           {showLocalFallback && (
             <div className="contact-monitor-cta__local-fallback" aria-hidden="true">
               <span className="contact-monitor-cta__fallback-kicker">Secure connection</span>
@@ -539,17 +567,21 @@ export function ContactMonitorCTA() {
               <em>Start a technical discussion</em>
             </div>
           )}
+          <div className="contact-monitor-cta__transition-screen" aria-hidden="true">
+            {monitorMedia}
+          </div>
         </div>
-        <a
-          className="contact-monitor-cta__interaction"
-          href={CONTACT_ROUTE}
-          aria-label="Go to the contact page"
-          onKeyDown={(event) => {
-            if (event.key === 'Enter') event.currentTarget.click();
-          }}
-        >
-          <span className="sr-only">Contact us</span>
-        </a>
+          <a
+            className="contact-monitor-cta__interaction"
+            href={CONTACT_ROUTE}
+            aria-label="Go to the contact page"
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') event.currentTarget.click();
+            }}
+          >
+            <span className="sr-only">Contact us</span>
+          </a>
+        </div>
       </div>
       <p className="contact-monitor-cta__attribution">
         <a

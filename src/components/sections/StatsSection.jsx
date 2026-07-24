@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import './StatsSection.css';
 
 const story = [
-  'Cyber', 'risk', 'is', 'no', 'longer', 'a', 'future', 'problem.',
+  'yber', 'risk', 'is', 'no', 'longer', 'a', 'future', 'problem.',
   { text: '59%', emphasis: 'stat' }, 'of', 'SME', 'respondents', 'reported', 'a', 'cyberattack', 'in', 'the', 'past', 'year.',
   { text: '88%', emphasis: 'stat' }, 'of', 'ransomware-related', 'breaches', 'affected', 'small', 'and', 'medium-sized', 'businesses', 'in', 'the', 'Verizon', 'DBIR', '2025', 'SMB', 'snapshot.',
   { text: '43%', emphasis: 'stat' }, 'of', 'organisations', 'reported', 'a', 'breach', 'or', 'attack', 'during', 'the', 'last', 'twelve', 'months.',
@@ -17,10 +17,11 @@ const sources = [
   'Verizon 2025 DBIR Executive Summary',
 ];
 
-export function StatsSection() {
+export function StatsSection({ embedded = false, afterHero = false }) {
   const sectionRef = useRef(null);
 
   useEffect(() => {
+    if (embedded) return undefined;
     const section = sectionRef.current;
     if (!section) return undefined;
 
@@ -30,7 +31,7 @@ export function StatsSection() {
     let isCompacted = false;
 
     function compactCompletedSection() {
-      if (isCompacted || motionQuery.matches) return;
+      if (afterHero || isCompacted || motionQuery.matches) return;
 
       isCompacted = true;
       const bottomBefore = section.getBoundingClientRect().bottom;
@@ -40,12 +41,8 @@ export function StatsSection() {
 
       if (collapsedBy > 0) {
         const scrollRoot = document.scrollingElement;
-
-        if (scrollRoot) {
-          scrollRoot.scrollTop = Math.max(0, scrollRoot.scrollTop - collapsedBy);
-        } else {
-          window.scrollBy(0, -collapsedBy);
-        }
+        if (scrollRoot) scrollRoot.scrollTop = Math.max(0, scrollRoot.scrollTop - collapsedBy);
+        else window.scrollBy(0, -collapsedBy);
       }
     }
 
@@ -53,7 +50,6 @@ export function StatsSection() {
       frame = 0;
 
       if (motionQuery.matches) {
-        maxProgress = 1;
         section.style.setProperty('--risk-progress', '1');
         return;
       }
@@ -62,10 +58,14 @@ export function StatsSection() {
       const travelled = -section.getBoundingClientRect().top;
       const progress = Math.min(1, Math.max(0, travelled / scrollRange));
 
-      maxProgress = Math.max(maxProgress, progress);
-      section.style.setProperty('--risk-progress', maxProgress.toFixed(5));
-
-      if (maxProgress >= 1) compactCompletedSection();
+      if (afterHero) {
+        section.style.setProperty('--risk-progress', progress.toFixed(5));
+        section.dataset.overlayActive = travelled >= -1 ? 'true' : 'false';
+      } else {
+        maxProgress = Math.max(maxProgress, progress);
+        section.style.setProperty('--risk-progress', maxProgress.toFixed(5));
+        if (maxProgress >= 1) compactCompletedSection();
+      }
     }
 
     function requestUpdate() {
@@ -90,21 +90,24 @@ export function StatsSection() {
       window.removeEventListener('resize', requestUpdate);
       motionQuery.removeEventListener('change', handleMotionChange);
     };
-  }, []);
+  }, [afterHero, embedded]);
 
   return (
     <section
       ref={sectionRef}
-      id="risklandskapet"
-      aria-labelledby="risk-landscape-heading"
-      className="risk-progress"
-      style={{ '--risk-progress': 0 }}
+      id={embedded ? undefined : 'risklandskapet'}
+      aria-hidden={embedded || undefined}
+      aria-labelledby={embedded ? undefined : 'risk-landscape-heading'}
+      className={`risk-progress${embedded ? ' risk-progress--embedded' : ''}${afterHero ? ' risk-progress--after-hero' : ''}`}
+      data-overlay-active={afterHero ? 'false' : undefined}
+      style={embedded ? undefined : { '--risk-progress': 0 }}
     >
       <div className="risk-progress__sticky">
         <div className="risk-progress__content">
           <p className="risk-progress__eyebrow">01 / The risk landscape</p>
-          <h2 id="risk-landscape-heading" className="sr-only">The risk landscape</h2>
+          <h2 id={embedded ? undefined : 'risk-landscape-heading'} className="sr-only">The risk landscape</h2>
           <p className="risk-progress__text">
+            <span className="risk-progress__initial-c">C</span>
             {story.map((token, index) => {
               const { text, emphasis } = typeof token === 'string' ? { text: token } : token;
               const isLast = index === story.length - 1;
@@ -112,7 +115,7 @@ export function StatsSection() {
               return (
                 <span
                   key={`${text}-${index}`}
-                  className={`risk-progress__word${emphasis ? ` risk-progress__word--${emphasis}` : ''}`}
+                  className={`risk-progress__word${index === 0 ? ' risk-progress__word--after-c' : ''}${emphasis ? ` risk-progress__word--${emphasis}` : ''}`}
                   style={{ '--risk-word-index': index + 1, '--risk-word-total': story.length + 1 }}
                 >
                   {text}{!isLast && '\u00A0'}

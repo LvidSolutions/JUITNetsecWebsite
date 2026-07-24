@@ -7,7 +7,7 @@ import { DistortedText } from '../ui/DistortedText.jsx';
 
 const LOGO_LANDED_AT = 0.45;
 
-export function Hero({ heroRef, introProgress }) {
+export function Hero({ introProgress, transitionState, monitorMedia }) {
   const prefersReducedMotion = useReducedMotion();
   const [logoLanded, setLogoLanded] = useState(() => introProgress.get() >= LOGO_LANDED_AT);
 
@@ -18,11 +18,11 @@ export function Hero({ heroRef, introProgress }) {
   const copyVisible = prefersReducedMotion || logoLanded;
 
   return (
-    <section id="hem" ref={heroRef} className="relative -mt-20 h-[220vh] sm:h-[240vh]">
-      <div className="sticky top-0 h-screen w-full overflow-hidden bg-brand-black">
-        <HeroVideoBackground />
+    <section className="hero-transition__hero relative h-full w-full overflow-hidden bg-brand-black">
+      <HeroVideoBackground />
 
-        <Container className="relative z-20 flex h-full flex-col items-center justify-center pb-10 pt-24 text-center sm:pb-12 sm:pt-28 lg:pb-14 lg:pt-32">
+      <Container className="relative z-20 flex h-full flex-col items-center justify-center pb-10 pt-24 text-center sm:pb-12 sm:pt-28 lg:pb-14 lg:pt-32">
+        <div className="hero-transition__copy w-full">
           <motion.div
             className="mx-auto w-full max-w-[96rem]"
             initial={false}
@@ -50,11 +50,22 @@ export function Hero({ heroRef, introProgress }) {
               Infrastructure, secure communication and cybersecurity advisory for organizations that
               depend on control, uptime and trust.
             </p>
-
-            <ContactMonitorCTA />
           </motion.div>
-        </Container>
-      </div>
+        </div>
+        <motion.div
+          className="w-full"
+          aria-hidden={!copyVisible}
+          initial={false}
+          animate={{ opacity: copyVisible ? 1 : 0, y: copyVisible ? 0 : 28 }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          style={{ pointerEvents: copyVisible ? 'auto' : 'none' }}
+        >
+          <ContactMonitorCTA
+            transitionState={transitionState}
+            monitorMedia={monitorMedia}
+          />
+        </motion.div>
+      </Container>
     </section>
   );
 }

@@ -1,15 +1,10 @@
 .risk-progress {
-  --risk-progress: 0;
   --risk-section-height: 900svh;
   position: relative;
   min-height: var(--risk-section-height);
   overflow: clip;
   background: #000;
   color: #fff;
-}
-
-.risk-progress--complete {
-  --risk-section-height: 180svh;
 }
 
 .risk-progress__sticky {
@@ -23,8 +18,14 @@
 }
 
 .risk-progress__content {
+  position: relative;
+  z-index: 1;
   width: min(100%, 70rem);
   margin-inline: auto;
+}
+
+.risk-progress--complete {
+  --risk-section-height: 180svh;
 }
 
 .risk-progress__eyebrow {
@@ -49,13 +50,50 @@
 }
 
 .risk-progress__word {
-  --risk-word-turn: calc((var(--risk-word-index) - 3) / var(--risk-word-total));
+  --risk-word-turn: calc(var(--risk-word-index) / var(--risk-word-total));
   --risk-word-step: calc(1 / var(--risk-word-total));
   --risk-word-progress: clamp(0, calc((var(--risk-progress) - var(--risk-word-turn)) / var(--risk-word-step)), 1);
   display: inline-block;
   transform: translate3d(0, calc(100% - var(--risk-word-progress) * 100%), 0);
   clip-path: inset(-15% 0 calc(115% - var(--risk-word-progress) * 130%) 0);
   will-change: transform, clip-path;
+}
+
+.risk-progress--embedded {
+  position: absolute;
+  z-index: 35;
+  inset: 0;
+  min-height: 0;
+  opacity: var(--risk-layer-opacity, 0);
+  pointer-events: none;
+}
+
+.risk-progress--after-hero {
+  z-index: 2;
+  /* Hero hands the C to this sticky stage at 95% of its 900svh scroll range. */
+  margin-top: -140svh;
+  visibility: hidden;
+}
+
+.risk-progress--after-hero[data-overlay-active='true'] {
+  visibility: visible;
+}
+
+.risk-progress--embedded .risk-progress__sticky {
+  position: absolute;
+  inset: 0;
+}
+
+.risk-progress__initial-c {
+  display: inline-block;
+  color: var(--transition-c-color, #00c853);
+  font-family: var(--transition-c-font, inherit);
+  font-size: var(--transition-c-size, 1em);
+  font-weight: var(--transition-c-weight, inherit);
+  letter-spacing: var(--transition-c-tracking, inherit);
+  line-height: var(--transition-c-line-height, inherit);
+  pointer-events: none;
+  vertical-align: baseline;
 }
 
 .risk-progress__word--stat {

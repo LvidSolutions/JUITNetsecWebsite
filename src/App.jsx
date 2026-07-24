@@ -6,6 +6,7 @@ import { CinematicFooterScene } from './components/layout/CinematicFooterScene.j
 import { AboutSection } from './components/sections/AboutSection.jsx';
 import { ContactPage } from './components/contact/ContactPage.jsx';
 import { Hero } from './components/sections/Hero.jsx';
+import { HeroTransitionScene } from './components/sections/HeroTransitionScene.jsx';
 import { IntroLoader } from './components/sections/IntroLoader.jsx';
 import { IntroSequence } from './components/intro/IntroSequence.jsx';
 import { PartnersSection } from './components/sections/PartnersSection.jsx';
@@ -63,7 +64,7 @@ function App() {
   const isHome = currentPath === '/';
   const logoSlotRef = useRef(null);
   const title = titles[currentPath] || titles['/'];
-  const { scrollYProgress: introProgress, heroRef } = useHeroIntroProgress();
+  const { scrollYProgress: heroProgress, heroRef } = useHeroIntroProgress();
   // Intro i två steg: 'loader' (0–100%-uppstart) → 'reveal' (CRT-curtain) → 'done'.
   const [introPhase, setIntroPhase] = useState(() =>
     getCurrentPath() !== '/' || hasSeenIntro() ? 'done' : 'loader',
@@ -170,7 +171,7 @@ function App() {
         logoSlotRef={logoSlotRef}
         hideStaticLogo
       />
-      <AnimatedLogo compact={!isHome} targetRef={logoSlotRef} progress={introProgress} />
+      <AnimatedLogo compact={!isHome} targetRef={logoSlotRef} progress={heroProgress} />
       <main
         id="huvudinnehall"
         className="min-h-screen bg-brand-black text-brand-white"
@@ -179,8 +180,16 @@ function App() {
       >
         {isHome && (
           <>
-            <Hero heroRef={heroRef} introProgress={introProgress} />
-            <StatsSection />
+            <HeroTransitionScene
+              sceneRef={heroRef}
+              progress={heroProgress}
+              introReady={introDone}
+              renderHero={(transitionProps) => (
+                <Hero introProgress={heroProgress} {...transitionProps} />
+              )}
+              risk={<StatsSection embedded />}
+            />
+            <StatsSection afterHero />
             <PartnersSection />
             <TerminalSignalSection />
             <FaqFooterScene />
@@ -189,14 +198,14 @@ function App() {
         {currentPath === '/tjanster' && (
           <ServicesSection
             renderClosingScene={(operatingModel) => (
-            <CinematicFooterScene variant="services" source="/videos/services-footer.mp4">
-              {(sceneRef) => (
-                <>
-                  {operatingModel}
-                  <Footer homeEffects videoScene revealTargetRef={sceneRef} />
-                </>
-              )}
-            </CinematicFooterScene>
+              <CinematicFooterScene variant="services" source="/videos/services-footer.mp4">
+                {(sceneRef) => (
+                  <>
+                    {operatingModel}
+                    <Footer homeEffects videoScene revealTargetRef={sceneRef} />
+                  </>
+                )}
+              </CinematicFooterScene>
             )}
           />
         )}

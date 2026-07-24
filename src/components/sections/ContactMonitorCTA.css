@@ -16,6 +16,15 @@
   will-change: transform;
 }
 
+.contact-monitor-cta__expansion-root {
+  position: relative;
+  width: 100%;
+  transform: translate3d(var(--monitor-expansion-x, 0px), var(--monitor-expansion-y, 0px), 0)
+    scale(var(--monitor-expansion-scale-x, 1), var(--monitor-expansion-scale-y, 1));
+  transform-origin: top left;
+  will-change: transform;
+}
+
 .contact-monitor-cta__frame {
   position: relative;
   z-index: 1;
@@ -23,6 +32,36 @@
   overflow: hidden;
   background: transparent;
   backface-visibility: hidden;
+}
+
+/* The Sketchfab renderer is unavailable in some browsers (including
+   Playwright's headless WebGL fallback). Keep a composed monitor silhouette in
+   that state so the screen, bezel, casing and stand remain one object. */
+.contact-monitor-cta[data-mode='fallback'] .contact-monitor-cta__frame::before {
+  position: absolute;
+  z-index: 0;
+  inset: 8% 10% 18%;
+  border: clamp(0.35rem, 1.25vw, 0.8rem) solid #303b39;
+  border-bottom-width: clamp(0.65rem, 1.8vw, 1.15rem);
+  border-radius: 3% 3% 2% 2%;
+  background:
+    linear-gradient(135deg, rgba(132, 155, 150, 0.36), transparent 35%),
+    linear-gradient(180deg, #27302e 0%, #0d1110 78%);
+  box-shadow: 0 2rem 3rem rgba(0, 0, 0, 0.65), inset 0 1px rgba(255, 255, 255, 0.26);
+  content: '';
+}
+
+.contact-monitor-cta[data-mode='fallback'] .contact-monitor-cta__frame::after {
+  position: absolute;
+  z-index: 0;
+  top: 73%;
+  left: 41%;
+  width: 18%;
+  height: 20%;
+  background: linear-gradient(100deg, #121817 18%, #4a5855 52%, #111615 84%);
+  clip-path: polygon(28% 0, 72% 0, 100% 100%, 0 100%);
+  box-shadow: 0 1.2rem 1.6rem rgba(0, 0, 0, 0.55);
+  content: '';
 }
 
 .contact-monitor-cta__glow {
@@ -36,6 +75,12 @@
   opacity: 0.68;
   pointer-events: none;
   transition: filter 320ms ease, opacity 320ms ease, transform 320ms ease;
+  transform: scale(0.96);
+}
+
+.contact-monitor-cta:not([data-transition-state='IDLE']) .contact-monitor-cta__glow {
+  filter: blur(0);
+  opacity: 0;
   transform: scale(0.96);
 }
 
@@ -115,6 +160,36 @@
   text-transform: uppercase;
 }
 
+.contact-monitor-cta__transition-screen {
+  position: absolute;
+  z-index: 5;
+  top: 21.5%;
+  left: 21.5%;
+  width: 58.5%;
+  height: 42.5%;
+  overflow: hidden;
+  border-radius: 1px;
+  pointer-events: none;
+}
+
+.contact-monitor-cta__transition-screen::before {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  background: #000;
+  content: '';
+  opacity: var(--screen-takeover-opacity, 0);
+  transition: opacity 70ms linear;
+}
+
+.contact-monitor-cta__transition-screen .hero-transition-scene__media {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
 .contact-monitor-cta__screen strong {
   position: relative;
   z-index: 1;
@@ -136,15 +211,15 @@
   letter-spacing: 0.08em;
 }
 
-.contact-monitor-cta__tilt[data-active='true'] .contact-monitor-cta__glow,
-.contact-monitor-cta__tilt:is(:hover, :focus-within) .contact-monitor-cta__glow {
+.contact-monitor-cta[data-transition-state='IDLE'] .contact-monitor-cta__tilt[data-active='true'] .contact-monitor-cta__glow,
+.contact-monitor-cta[data-transition-state='IDLE'] .contact-monitor-cta__tilt:is(:hover, :focus-within) .contact-monitor-cta__glow {
   filter: blur(31px);
   opacity: 1;
   transform: scale(1.08);
 }
 
-.contact-monitor-cta__tilt[data-active='true'] .contact-monitor-cta__screen,
-.contact-monitor-cta__tilt:is(:hover, :focus-within) .contact-monitor-cta__screen {
+.contact-monitor-cta[data-transition-state='IDLE'] .contact-monitor-cta__tilt[data-active='true'] .contact-monitor-cta__screen,
+.contact-monitor-cta[data-transition-state='IDLE'] .contact-monitor-cta__tilt:is(:hover, :focus-within) .contact-monitor-cta__screen {
   border-color: rgba(128, 255, 151, 0.92);
   background-color: #00c853;
   box-shadow:
@@ -154,8 +229,8 @@
   color: #fff;
 }
 
-.contact-monitor-cta__tilt[data-active='true'] .contact-monitor-cta__screen em,
-.contact-monitor-cta__tilt:is(:hover, :focus-within) .contact-monitor-cta__screen em {
+.contact-monitor-cta[data-transition-state='IDLE'] .contact-monitor-cta__tilt[data-active='true'] .contact-monitor-cta__screen em,
+.contact-monitor-cta[data-transition-state='IDLE'] .contact-monitor-cta__tilt:is(:hover, :focus-within) .contact-monitor-cta__screen em {
   color: rgba(255, 255, 255, 0.82);
 }
 
@@ -163,11 +238,7 @@
   z-index: 2;
   display: grid;
   place-items: center;
-  background:
-    linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px),
-    #070908;
-  background-size: 30px 30px;
+  background: transparent;
   transition: opacity 240ms ease;
 }
 
@@ -189,17 +260,15 @@
 
 .contact-monitor-cta__local-fallback {
   z-index: 3;
+  inset: 21.5% 20% 36% 21.5%;
+  width: auto;
+  height: auto;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: clamp(1rem, 4vw, 2rem);
-  border: 1px solid rgba(0, 200, 83, 0.38);
-  background:
-    linear-gradient(rgba(0, 200, 83, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 200, 83, 0.08) 1px, transparent 1px),
-    #070908;
-  background-size: 28px 28px;
-  color: #fff;
+  padding: 4.8% 5.5% 4.2%;
+  background: #f4f7f5;
+  color: #050706;
   text-align: left;
 }
 
@@ -211,19 +280,22 @@
 }
 
 .contact-monitor-cta__fallback-kicker {
-  color: #a9e8b4;
+  color: rgba(5, 7, 6, 0.68);
 }
 
 .contact-monitor-cta__local-fallback strong {
-  margin-top: 0.65rem;
-  font-size: clamp(1.3rem, 6vw, 2.35rem);
+  margin-top: 0.18rem;
+  font-family: 'Elounda', 'Space Grotesk', sans-serif;
+  font-size: clamp(1.15rem, 2.75vw, 2rem);
+  font-weight: 400;
   letter-spacing: 0.04em;
+  line-height: 0.94;
 }
 
 .contact-monitor-cta__fallback-arrow {
-  margin-top: 0.35rem;
+  margin-top: 0.18rem;
   color: #00c853;
-  font-size: 1.55rem;
+  font-size: 1.1rem;
 }
 
 .contact-monitor-cta__fallback-label {
@@ -290,6 +362,11 @@
   font-size: 0.48rem;
   letter-spacing: 0.08em;
   text-align: center;
+  transition: opacity 120ms linear;
+}
+
+.contact-monitor-cta:not([data-transition-state='IDLE']) .contact-monitor-cta__attribution {
+  opacity: 0;
 }
 
 .contact-monitor-cta__attribution a {
