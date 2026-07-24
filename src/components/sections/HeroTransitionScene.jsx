@@ -9,10 +9,11 @@ const LOGO_DOCK_PROGRESS = 0.45;
 const PLAYBACK_DELAY_DISTANCE = 900; // Five standard 180 px mouse-wheel ticks after logo docking.
 const PLAYBACK_VISUAL_PROGRESS = 0.5;
 const PLAYBACK_HOLD_END = 0.68;
-const PLAYBACK_FALLBACK_MS = 4500;
-const EXPANSION_START = 0.7;
-const EXPANSION_END = 0.9;
-const HANDOFF_END = 0.95;
+const PLAYBACK_START_TIMEOUT_MS = 6000;
+const BLACKOUT_SETTLE_MS = 1250;
+const EXPANSION_START = 0.69;
+const EXPANSION_END = 0.96;
+const HANDOFF_END = 0.99;
 
 export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero, risk }) {
   const rootRef = useRef(null);
@@ -23,6 +24,7 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
   const playbackRequestedRef = useRef(false);
   const logoDockScrollYRef = useRef(null);
   const playbackFallbackRef = useRef(null);
+  const mediaStartedRef = useRef(false);
   const [phase, setPhase] = useState('IDLE');
   const reducedMotion = useReducedMotion();
 
@@ -34,8 +36,9 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
       playbackFallbackRef.current = null;
     }
     if (phaseRef.current !== 'PLAYING') return;
+    mediaStartedRef.current = false;
     setPhaseSafe('BLACKOUT');
-    window.setTimeout(() => setPhaseSafe('READY'), reducedMotion ? 0 : 900);
+    window.setTimeout(() => setPhaseSafe('READY'), reducedMotion ? 0 : BLACKOUT_SETTLE_MS);
   }, [reducedMotion, setPhaseSafe]);
 
   const measure = useCallback(() => {
@@ -80,6 +83,7 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
     const g = geometryRef.current;
     if (!root || !g) return;
     const isPlaying = phaseRef.current === 'PLAYING';
+    const mediaIsVisible = isPlaying && mediaStartedRef.current;
     const ready = phaseRef.current === 'READY' || phaseRef.current === 'EXPANDING' || phaseRef.current === 'HANDED_OFF';
     const blackout = phaseRef.current === 'BLACKOUT' || ready;
     const visual = isPlaying ? PLAYBACK_VISUAL_PROGRESS : physical;
@@ -113,8 +117,11 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
     root.style.setProperty('--transition-c-tracking', g.fontTracking);
     root.style.setProperty('--transition-c-line-height', g.fontLineHeight);
     root.style.setProperty('--transition-c-color', g.fontColor);
-    root.style.setProperty('--screen-takeover-opacity', phaseRef.current === 'PLAYING' || blackout ? '1' : '0');
-    root.style.setProperty('--monitor-video-opacity', phaseRef.current === 'PLAYING' ? '1' : '0');
+    // The monitor keeps its Contact Us panel until the browser confirms that
+    // the media is actually playing. This prevents a full-screen black flash
+    // on slower connections or first-time decodes.
+    root.style.setProperty('--screen-takeover-opacity', mediaIsVisible || blackout ? '1' : '0');
+    root.style.setProperty('--monitor-video-opacity', mediaIsVisible ? '1' : '0');
     root.style.setProperty('--hero-copy-opacity', (1 - expansion).toFixed(5));
     root.style.setProperty('--first-character-current-x', `${cX + (g.targetX - cX) * expansion}px`);
     root.style.setProperty('--first-character-current-y', `${cY + (g.targetY - cY) * expansion}px`);
@@ -131,11 +138,24 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
     const video = videoRef.current;
     if (!video || video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) return;
     setPhaseSafe('PLAYING');
+    mediaStartedRef.current = false;
     video.currentTime = 0;
     if (playbackFallbackRef.current) window.clearTimeout(playbackFallbackRef.current);
-    playbackFallbackRef.current = window.setTimeout(finishPlayback, PLAYBACK_FALLBACK_MS);
+    // This only protects against a video which never starts. Once onPlaying
+    // fires, the full clip runs to its natural ended event.
+    playbackFallbackRef.current = window.setTimeout(finishPlayback, PLAYBACK_START_TIMEOUT_MS);
     video.play().catch(() => finishPlayback());
   }, [finishPlayback, introReady, setPhaseSafe]);
+
+  const confirmPlayback = useCallback(() => {
+    if (phaseRef.current !== 'PLAYING') return;
+    if (playbackFallbackRef.current) {
+      window.clearTimeout(playbackFallbackRef.current);
+      playbackFallbackRef.current = null;
+    }
+    mediaStartedRef.current = true;
+    write(progress.get());
+  }, [progress, write]);
 
   useMotionValueEvent(progress, 'change', (latest) => {
     if (latest >= LOGO_DOCK_PROGRESS && logoDockScrollYRef.current === null) {
@@ -144,6 +164,7 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
     if (latest < 0.42) {
       playbackRequestedRef.current = false;
       logoDockScrollYRef.current = null;
+      mediaStartedRef.current = false;
       if (playbackFallbackRef.current) {
         window.clearTimeout(playbackFallbackRef.current);
         playbackFallbackRef.current = null;
@@ -199,13 +220,13 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
     const video = videoRef.current;
     if (!video) return undefined;
     const resume = () => {
-      if (phaseRef.current === 'PLAYING') video.play().catch(() => setPhaseSafe('READY'));
+      if (phaseRef.current === 'PLAYING') video.play().catch(() => finishPlayback());
       else if (playbackRequestedRef.current && ['IDLE', 'PREPARING'].includes(phaseRef.current)) startPlayback();
     };
     video.addEventListener('canplay', resume);
     video.load();
     return () => video.removeEventListener('canplay', resume);
-  }, [progress, setPhaseSafe, startPlayback]);
+  }, [finishPlayback, progress, startPlayback]);
 
   useEffect(() => () => {
     if (playbackFallbackRef.current) window.clearTimeout(playbackFallbackRef.current);
@@ -219,7 +240,7 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
       {renderHero({
         transitionState: phase,
         monitorMedia: (
-          <video ref={videoRef} muted playsInline preload="auto" className="hero-transition-scene__media" onEnded={finishPlayback} onError={finishPlayback}>
+          <video ref={videoRef} muted playsInline preload="auto" className="hero-transition-scene__media" onPlaying={confirmPlayback} onEnded={finishPlayback} onError={finishPlayback}>
             <source src="/videos/monitor-media-sequence.webm" type="video/webm" />
             <source src="/videos/monitor-media-sequence.mp4" type="video/mp4" />
           </video>

@@ -1,7 +1,6 @@
 .risk-progress {
-  --risk-section-height: 900svh;
   position: relative;
-  min-height: var(--risk-section-height);
+  min-height: 900svh;
   overflow: clip;
   background: #000;
   color: #fff;
@@ -24,10 +23,6 @@
   margin-inline: auto;
 }
 
-.risk-progress--complete {
-  --risk-section-height: 180svh;
-}
-
 .risk-progress__eyebrow {
   margin: 0 0 clamp(1.5rem, 3vw, 3rem);
   color: rgba(255, 255, 255, 0.58);
@@ -42,7 +37,7 @@
 .risk-progress__text {
   margin: 0;
   /* Keep the complete story above the fixed source line on wide, short screens. */
-  font-size: clamp(2.25rem, 3.2vw, 3.75rem);
+  font-size: clamp(2.75rem, 4.5vw, 5.75rem);
   font-weight: 500;
   letter-spacing: -0.05em;
   line-height: 0.98;
@@ -119,11 +114,7 @@
 
 @media (max-width: 1023px) {
   .risk-progress {
-    --risk-section-height: 650svh;
-  }
-
-  .risk-progress--complete {
-    --risk-section-height: 160svh;
+    min-height: 650svh;
   }
 
   .risk-progress__sticky {
@@ -131,18 +122,14 @@
   }
 
   .risk-progress__text {
-    font-size: clamp(2rem, 5.5vw, 3.6rem);
+    font-size: clamp(2.4rem, 6.8vw, 4.75rem);
     line-height: 1;
   }
 }
 
 @media (max-width: 639px) {
   .risk-progress {
-    --risk-section-height: 520svh;
-  }
-
-  .risk-progress--complete {
-    --risk-section-height: 140svh;
+    min-height: 520svh;
   }
 
   .risk-progress__sticky {
@@ -158,7 +145,7 @@
   }
 
   .risk-progress__text {
-    font-size: clamp(1.55rem, 6.8vw, 2rem);
+    font-size: clamp(1.9rem, 8.3vw, 2.7rem);
     letter-spacing: -0.045em;
     text-wrap: pretty;
   }
@@ -169,9 +156,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .risk-progress,
-  .risk-progress--complete {
-    --risk-section-height: 0;
+  .risk-progress {
     min-height: 0;
     overflow: visible;
   }

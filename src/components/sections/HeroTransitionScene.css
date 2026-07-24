@@ -70,7 +70,7 @@
 }
 
 .hero-transition-scene[data-c-mode='blinking'] .hero-transition-scene__character {
-  animation: hero-transition-character-blink 1.1s linear infinite;
+  animation: hero-transition-character-blink 1.45s linear infinite;
 }
 
 .hero-transition-scene[data-c-mode='static'] .hero-transition-scene__character {
