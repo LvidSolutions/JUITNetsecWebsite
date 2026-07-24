@@ -2,12 +2,10 @@ import { useEffect, useRef } from 'react';
 import './StatsSection.css';
 
 const story = [
-  'yber', 'risk', 'is', 'no', 'longer', 'a', 'future', 'problem.',
-  { text: '59%', emphasis: 'stat' }, 'of', 'SME', 'respondents', 'reported', 'a', 'cyberattack', 'in', 'the', 'past', 'year.',
-  { text: '88%', emphasis: 'stat' }, 'of', 'ransomware-related', 'breaches', 'affected', 'small', 'and', 'medium-sized', 'businesses', 'in', 'the', 'Verizon', 'DBIR', '2025', 'SMB', 'snapshot.',
-  { text: '43%', emphasis: 'stat' }, 'of', 'organisations', 'reported', 'a', 'breach', 'or', 'attack', 'during', 'the', 'last', 'twelve', 'months.',
-  'The', 'median', 'amount', 'paid', 'to', 'ransomware', 'groups', 'was', { text: '$115,000', emphasis: 'stat' },
-  'For', 'many', 'organisations,', 'security', 'is', 'no', 'longer', 'about', 'a', 'single', 'product.', 'It', 'is', 'about', 'visibility,', 'control', 'and', 'the', 'ability', 'to', 'act', 'before', 'disruption', 'becomes', 'an', 'outage.',
+  'yber', 'risk', 'is', 'already', 'a', 'business', 'problem.',
+  { text: '59%', emphasis: 'stat' }, 'of', 'SMEs', 'reported', 'a', 'cyberattack', 'in', 'the', 'past', 'year,', 'while',
+  { text: '88%', emphasis: 'stat' }, 'of', 'ransomware-related', 'breaches', 'affected', 'small', 'and', 'medium-sized', 'businesses.',
+  'Security', 'now', 'depends', 'on', 'visibility,', 'control', 'and', 'acting', 'before', 'disruption', 'becomes', 'an', 'outage.',
 ];
 
 const sources = [
@@ -27,24 +25,6 @@ export function StatsSection({ embedded = false, afterHero = false }) {
 
     const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
     let frame = 0;
-    let maxProgress = 0;
-    let isCompacted = false;
-
-    function compactCompletedSection() {
-      if (afterHero || isCompacted || motionQuery.matches) return;
-
-      isCompacted = true;
-      const bottomBefore = section.getBoundingClientRect().bottom;
-      section.classList.add('risk-progress--complete');
-      const bottomAfter = section.getBoundingClientRect().bottom;
-      const collapsedBy = bottomBefore - bottomAfter;
-
-      if (collapsedBy > 0) {
-        const scrollRoot = document.scrollingElement;
-        if (scrollRoot) scrollRoot.scrollTop = Math.max(0, scrollRoot.scrollTop - collapsedBy);
-        else window.scrollBy(0, -collapsedBy);
-      }
-    }
 
     function updateProgress() {
       frame = 0;
@@ -57,15 +37,8 @@ export function StatsSection({ embedded = false, afterHero = false }) {
       const scrollRange = Math.max(section.offsetHeight - window.innerHeight, 1);
       const travelled = -section.getBoundingClientRect().top;
       const progress = Math.min(1, Math.max(0, travelled / scrollRange));
-
-      if (afterHero) {
-        section.style.setProperty('--risk-progress', progress.toFixed(5));
-        section.dataset.overlayActive = travelled >= -1 ? 'true' : 'false';
-      } else {
-        maxProgress = Math.max(maxProgress, progress);
-        section.style.setProperty('--risk-progress', maxProgress.toFixed(5));
-        if (maxProgress >= 1) compactCompletedSection();
-      }
+      section.style.setProperty('--risk-progress', progress.toFixed(5));
+      if (afterHero) section.dataset.overlayActive = travelled >= -1 ? 'true' : 'false';
     }
 
     function requestUpdate() {

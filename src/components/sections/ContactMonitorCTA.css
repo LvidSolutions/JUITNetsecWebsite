@@ -245,7 +245,9 @@
 
 .contact-monitor-cta__placeholder {
   z-index: 2;
-  background: #050505;
+  /* Keep the normal Contact Us panel visible while the hidden 3D render is
+     prepared; a blank black screen here reads as a broken monitor. */
+  background: transparent;
   transition: opacity 160ms ease;
 }
 
