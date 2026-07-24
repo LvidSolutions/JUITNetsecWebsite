@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 // Bakgrundsvideon är tung. För att hålla startsidan lätt och stabil:
-//  - laddas den bara på desktop (pekare av fine-typ + bredd >= 768px),
+//  - laddas på alla större skärmar (även touch-laptops med grov primärpekare),
 //  - aldrig vid prefers-reduced-motion,
 //  - ett enda <video> med native loop,
 //  - preload="metadata" så hela filen inte hämtas innan den behövs,
@@ -21,7 +21,7 @@ export function HeroVideoBackground() {
   const [useVideo, setUseVideo] = useState(false);
 
   useEffect(() => {
-    const mq = window.matchMedia('(min-width: 768px) and (pointer: fine)');
+    const mq = window.matchMedia('(min-width: 768px)');
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
     const sync = () => setUseVideo(mq.matches && !reduced.matches);
 

@@ -9,6 +9,7 @@ const LOGO_DOCK_PROGRESS = 0.45;
 const PLAYBACK_DELAY_DISTANCE = 900; // Five standard 180 px mouse-wheel ticks after logo docking.
 const PLAYBACK_VISUAL_PROGRESS = 0.5;
 const PLAYBACK_HOLD_END = 0.68;
+const PLAYBACK_FALLBACK_MS = 4500;
 const EXPANSION_START = 0.7;
 const EXPANSION_END = 0.9;
 const HANDOFF_END = 0.95;
@@ -21,10 +22,21 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
   const phaseRef = useRef('IDLE');
   const playbackRequestedRef = useRef(false);
   const logoDockScrollYRef = useRef(null);
+  const playbackFallbackRef = useRef(null);
   const [phase, setPhase] = useState('IDLE');
   const reducedMotion = useReducedMotion();
 
   const setPhaseSafe = useCallback((next) => { phaseRef.current = next; setPhase(next); }, []);
+
+  const finishPlayback = useCallback(() => {
+    if (playbackFallbackRef.current) {
+      window.clearTimeout(playbackFallbackRef.current);
+      playbackFallbackRef.current = null;
+    }
+    if (phaseRef.current !== 'PLAYING') return;
+    setPhaseSafe('BLACKOUT');
+    window.setTimeout(() => setPhaseSafe('READY'), reducedMotion ? 0 : 900);
+  }, [reducedMotion, setPhaseSafe]);
 
   const measure = useCallback(() => {
     const root = rootRef.current;
@@ -120,14 +132,10 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
     if (!video || video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) return;
     setPhaseSafe('PLAYING');
     video.currentTime = 0;
-    video.play().catch(() => setPhaseSafe('READY'));
-  }, [introReady, setPhaseSafe]);
-
-  const finishPlayback = useCallback(() => {
-    if (phaseRef.current !== 'PLAYING') return;
-    setPhaseSafe('BLACKOUT');
-    window.setTimeout(() => setPhaseSafe('READY'), reducedMotion ? 0 : 900);
-  }, [reducedMotion, setPhaseSafe]);
+    if (playbackFallbackRef.current) window.clearTimeout(playbackFallbackRef.current);
+    playbackFallbackRef.current = window.setTimeout(finishPlayback, PLAYBACK_FALLBACK_MS);
+    video.play().catch(() => finishPlayback());
+  }, [finishPlayback, introReady, setPhaseSafe]);
 
   useMotionValueEvent(progress, 'change', (latest) => {
     if (latest >= LOGO_DOCK_PROGRESS && logoDockScrollYRef.current === null) {
@@ -136,6 +144,10 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
     if (latest < 0.42) {
       playbackRequestedRef.current = false;
       logoDockScrollYRef.current = null;
+      if (playbackFallbackRef.current) {
+        window.clearTimeout(playbackFallbackRef.current);
+        playbackFallbackRef.current = null;
+      }
       if (phaseRef.current !== 'IDLE') {
         videoRef.current?.pause();
         if (videoRef.current) videoRef.current.currentTime = 0;
@@ -195,12 +207,19 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
     return () => video.removeEventListener('canplay', resume);
   }, [progress, setPhaseSafe, startPlayback]);
 
-  return <section id="hem" ref={setRoot} className="hero-transition-scene relative -mt-20 h-[900svh]" data-phase={phase}>
+  useEffect(() => () => {
+    if (playbackFallbackRef.current) window.clearTimeout(playbackFallbackRef.current);
+  }, []);
+
+  // Keep the new sequence scroll-led, without leaving the rest of the home page
+  // nine viewports away. This gives the five-tick playback delay room to happen
+  // while returning the normal sections to their original reachable flow.
+  return <section id="hem" ref={setRoot} className="hero-transition-scene relative -mt-20 h-[500svh] sm:h-[420svh] lg:h-[340svh]" data-phase={phase}>
     <div className="hero-transition-scene__sticky">
       {renderHero({
         transitionState: phase,
         monitorMedia: (
-          <video ref={videoRef} muted playsInline preload="auto" className="hero-transition-scene__media" onEnded={finishPlayback}>
+          <video ref={videoRef} muted playsInline preload="auto" className="hero-transition-scene__media" onEnded={finishPlayback} onError={finishPlayback}>
             <source src="/videos/monitor-media-sequence.webm" type="video/webm" />
             <source src="/videos/monitor-media-sequence.mp4" type="video/mp4" />
           </video>
