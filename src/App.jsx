@@ -14,7 +14,6 @@ import { StatsSection } from './components/sections/StatsSection.jsx';
 import { TerminalSignalSection } from './components/sections/TerminalSignalSection.jsx';
 import { FaqFooterScene } from './components/sections/FaqFooterScene.jsx';
 import { ServicesSection } from './components/sections/ServicesSection.jsx';
-import { HomeCursor } from './components/ui/HomeCursor.jsx';
 import { useHeroIntroProgress } from './lib/useHeroIntroProgress.js';
 
 const titles = {
@@ -175,7 +174,6 @@ function App() {
       <main
         id="huvudinnehall"
         className="min-h-screen bg-brand-black text-brand-white"
-        data-home-cursor-scope={isHome ? 'true' : undefined}
         tabIndex="-1"
       >
         {isHome && (
@@ -226,7 +224,6 @@ function App() {
         )}
       </main>
       {!isHome && currentPath !== '/tjanster' && currentPath !== '/kontakt' && currentPath !== '/contact' && <Footer />}
-      {isHome && <HomeCursor />}
     </>
   );
 }

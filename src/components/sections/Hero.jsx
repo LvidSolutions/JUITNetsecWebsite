@@ -29,10 +29,7 @@ export function Hero({ introProgress, transitionState, monitorMedia }) {
             animate={{ opacity: copyVisible ? 1 : 0, y: copyVisible ? 20 : 44 }}
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
           >
-            <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-brand-mist/60">
-              Secure IT environments
-            </p>
-            <h1 className="mx-auto mt-12 flex w-full flex-col items-center font-['Elounda'] uppercase leading-[0.95] [font-weight:400] [text-rendering:geometricPrecision]">
+            <h1 className="mx-auto mt-24 flex w-full flex-col items-center font-['Elounda'] uppercase leading-[0.95] [font-weight:400] [text-rendering:geometricPrecision] sm:mt-28">
               <DistortedText
                 selective
                 className="block text-[clamp(1.45rem,4.05vw,4.4rem)] tracking-[0.12em] text-brand-green sm:whitespace-nowrap sm:tracking-[0.34em] lg:tracking-[0.44em]"
@@ -46,10 +43,6 @@ export function Hero({ introProgress, transitionState, monitorMedia }) {
                 your IT environment?
               </DistortedText>
             </h1>
-            <p className="mx-auto mt-9 max-w-3xl text-base leading-8 tracking-[0.12em] text-brand-mist sm:text-lg sm:leading-9">
-              Infrastructure, secure communication and cybersecurity advisory for organizations that
-              depend on control, uptime and trust.
-            </p>
           </motion.div>
         </div>
         <motion.div
