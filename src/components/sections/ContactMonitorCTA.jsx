@@ -380,7 +380,6 @@ export function ContactMonitorCTA({ transitionState = 'IDLE', monitorMedia = nul
                 api.setBackground({ color: [0, 0, 0] });
                 const initializeMonitor = () => {
                   if (!mountedRef.current) return;
-                  setMode('viewer');
 
                   const captureCleanRender = () => {
                   if (snapshotRequestedRef.current) return;
@@ -390,7 +389,12 @@ export function ContactMonitorCTA({ transitionState = 'IDLE', monitorMedia = nul
                     api.getScreenShot(1024, 576, 'image/png', (screenshotError, image) => {
                       if (!screenshotError && image && mountedRef.current) {
                         setSnapshot(image);
+                        setMode('snapshot');
                         api.stop();
+                      } else if (mountedRef.current) {
+                        // Keep a usable monitor if the image capture is unavailable,
+                        // but never show Sketchfab's transient loading UI by default.
+                        setMode('viewer-fallback');
                       }
                     });
                   }, 900);
@@ -550,9 +554,7 @@ export function ContactMonitorCTA({ transitionState = 'IDLE', monitorMedia = nul
             />
           )}
           {(mode === 'placeholder' || mode === 'loading') && (
-            <div className="contact-monitor-cta__placeholder" aria-hidden="true">
-              <span />
-            </div>
+            <div className="contact-monitor-cta__placeholder" aria-hidden="true" />
           )}
           {showFallbackLabel && (
             <div className="contact-monitor-cta__fallback-label" aria-hidden="true">

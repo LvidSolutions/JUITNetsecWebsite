@@ -25,6 +25,15 @@
   will-change: transform;
 }
 
+/* The Contact Us panel remains a fixed part of the physical monitor until the
+   actual post-video takeover starts. This prevents a pre-playback zoom/jump. */
+.contact-monitor-cta[data-transition-state='IDLE'] .contact-monitor-cta__expansion-root,
+.contact-monitor-cta[data-transition-state='PREPARING'] .contact-monitor-cta__expansion-root,
+.contact-monitor-cta[data-transition-state='PLAYING'] .contact-monitor-cta__expansion-root,
+.contact-monitor-cta[data-transition-state='BLACKOUT'] .contact-monitor-cta__expansion-root {
+  transform: none;
+}
+
 .contact-monitor-cta__frame {
   position: relative;
   z-index: 1;
@@ -236,10 +245,8 @@
 
 .contact-monitor-cta__placeholder {
   z-index: 2;
-  display: grid;
-  place-items: center;
-  background: transparent;
-  transition: opacity 240ms ease;
+  background: #050505;
+  transition: opacity 160ms ease;
 }
 
 .contact-monitor-cta[data-mode='viewer'] .contact-monitor-cta__placeholder,
@@ -249,14 +256,6 @@
   pointer-events: none;
 }
 
-.contact-monitor-cta__placeholder span {
-  width: 2.2rem;
-  height: 2.2rem;
-  border: 2px solid rgba(169, 232, 180, 0.24);
-  border-top-color: #00c853;
-  border-radius: 50%;
-  animation: contact-monitor-spin 1s linear infinite;
-}
 
 .contact-monitor-cta__local-fallback {
   z-index: 3;
@@ -378,12 +377,6 @@
   color: #a9e8b4;
 }
 
-@keyframes contact-monitor-spin {
-  to {
-    transform: rotate(1turn);
-  }
-}
-
 @media (max-width: 639px) {
   .contact-monitor-cta {
     width: min(100%, 21rem);
@@ -394,10 +387,6 @@
 @media (prefers-reduced-motion: reduce) {
   .contact-monitor-cta__tilt {
     transform: none !important;
-  }
-
-  .contact-monitor-cta__placeholder span {
-    animation: none;
   }
 
   .contact-monitor-cta__glow,
