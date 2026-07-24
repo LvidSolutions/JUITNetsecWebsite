@@ -42,7 +42,7 @@ export function HeroVideoBackground() {
   }, [useVideo]);
 
   return (
-    <div className="absolute inset-0 -z-20 overflow-hidden bg-brand-black">
+    <div className="absolute inset-0 z-0 overflow-hidden bg-brand-black">
       {useVideo && (
         <video
           ref={videoRef}
