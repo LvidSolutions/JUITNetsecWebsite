@@ -9,7 +9,7 @@ const LOGO_DOCK_PROGRESS = 0.45;
 const PLAYBACK_DELAY_DISTANCE = 900; // Five standard 180 px mouse-wheel ticks after logo docking.
 const PLAYBACK_VISUAL_PROGRESS = 0.5;
 const PLAYBACK_HOLD_END = 0.68;
-const PLAYBACK_START_TIMEOUT_MS = 6000;
+const PLAYBACK_START_TIMEOUT_MS = 15000;
 const BLACKOUT_SETTLE_MS = 1250;
 const EXPANSION_START = 0.69;
 const EXPANSION_END = 0.985;
@@ -40,7 +40,7 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
       window.clearTimeout(mediaRevealRef.current);
       mediaRevealRef.current = null;
     }
-    if (phaseRef.current !== 'PLAYING') return;
+    if (!['PREPARING', 'PLAYING'].includes(phaseRef.current)) return;
     setPhaseSafe('BLACKOUT');
     window.setTimeout(() => {
       mediaStartedRef.current = false;
@@ -145,7 +145,7 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
     if (phaseRef.current === 'IDLE') setPhaseSafe('PREPARING');
     const video = videoRef.current;
     if (!video || video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) return;
-    setPhaseSafe('PLAYING');
+    setPhaseSafe('PREPARING');
     mediaStartedRef.current = false;
     video.currentTime = 0;
     if (playbackFallbackRef.current) window.clearTimeout(playbackFallbackRef.current);
@@ -156,11 +156,12 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
   }, [finishPlayback, introReady, setPhaseSafe]);
 
   const confirmPlayback = useCallback(() => {
-    if (phaseRef.current !== 'PLAYING') return;
+    if (!['PREPARING', 'PLAYING'].includes(phaseRef.current)) return;
     if (playbackFallbackRef.current) {
       window.clearTimeout(playbackFallbackRef.current);
       playbackFallbackRef.current = null;
     }
+    setPhaseSafe('PLAYING');
     // `playing` can precede the first painted video frame. Keep the Contact Us
     // panel in place for one short paint window so a black decoder frame cannot
     // flash across the transition.
@@ -204,7 +205,7 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
       playbackRequestedRef.current = true;
       startPlayback();
     }
-    if (phaseRef.current === 'PLAYING' && latest > PLAYBACK_HOLD_END) {
+    if (['PREPARING', 'PLAYING'].includes(phaseRef.current) && latest > PLAYBACK_HOLD_END) {
       const root = rootRef.current;
       const start = window.scrollY + root.getBoundingClientRect().top;
       const distance = root.offsetHeight - window.innerHeight;
