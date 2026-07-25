@@ -12,8 +12,8 @@ const PLAYBACK_HOLD_END = 0.68;
 const PLAYBACK_START_TIMEOUT_MS = 6000;
 const BLACKOUT_SETTLE_MS = 1250;
 const EXPANSION_START = 0.69;
-const EXPANSION_END = 0.96;
-const HANDOFF_END = 0.99;
+const EXPANSION_END = 0.985;
+const HANDOFF_END = 0.998;
 
 export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero, risk }) {
   const rootRef = useRef(null);
@@ -24,6 +24,7 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
   const playbackRequestedRef = useRef(false);
   const logoDockScrollYRef = useRef(null);
   const playbackFallbackRef = useRef(null);
+  const mediaRevealRef = useRef(null);
   const mediaStartedRef = useRef(false);
   const [phase, setPhase] = useState('IDLE');
   const reducedMotion = useReducedMotion();
@@ -35,10 +36,16 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
       window.clearTimeout(playbackFallbackRef.current);
       playbackFallbackRef.current = null;
     }
+    if (mediaRevealRef.current) {
+      window.clearTimeout(mediaRevealRef.current);
+      mediaRevealRef.current = null;
+    }
     if (phaseRef.current !== 'PLAYING') return;
-    mediaStartedRef.current = false;
     setPhaseSafe('BLACKOUT');
-    window.setTimeout(() => setPhaseSafe('READY'), reducedMotion ? 0 : BLACKOUT_SETTLE_MS);
+    window.setTimeout(() => {
+      mediaStartedRef.current = false;
+      setPhaseSafe('READY');
+    }, reducedMotion ? 0 : BLACKOUT_SETTLE_MS);
   }, [reducedMotion, setPhaseSafe]);
 
   const measure = useCallback(() => {
@@ -83,9 +90,10 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
     const g = geometryRef.current;
     if (!root || !g) return;
     const isPlaying = phaseRef.current === 'PLAYING';
-    const mediaIsVisible = isPlaying && mediaStartedRef.current;
+    const holdLastVideoFrame = phaseRef.current === 'BLACKOUT' && mediaStartedRef.current;
+    const mediaIsVisible = (isPlaying || holdLastVideoFrame) && mediaStartedRef.current;
     const ready = phaseRef.current === 'READY' || phaseRef.current === 'EXPANDING' || phaseRef.current === 'HANDED_OFF';
-    const blackout = phaseRef.current === 'BLACKOUT' || ready;
+    const blackout = ready;
     const visual = isPlaying ? PLAYBACK_VISUAL_PROGRESS : physical;
     const raw = reducedMotion ? (ready ? 1 : 0) : fontReadyRef.current ? range(visual, EXPANSION_START, EXPANSION_END) : 0;
     const expansion = ease(raw);
@@ -153,8 +161,16 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
       window.clearTimeout(playbackFallbackRef.current);
       playbackFallbackRef.current = null;
     }
-    mediaStartedRef.current = true;
-    write(progress.get());
+    // `playing` can precede the first painted video frame. Keep the Contact Us
+    // panel in place for one short paint window so a black decoder frame cannot
+    // flash across the transition.
+    if (mediaRevealRef.current) window.clearTimeout(mediaRevealRef.current);
+    mediaRevealRef.current = window.setTimeout(() => {
+      mediaRevealRef.current = null;
+      if (phaseRef.current !== 'PLAYING') return;
+      mediaStartedRef.current = true;
+      write(progress.get());
+    }, 180);
   }, [progress, write]);
 
   useMotionValueEvent(progress, 'change', (latest) => {
@@ -165,6 +181,10 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
       playbackRequestedRef.current = false;
       logoDockScrollYRef.current = null;
       mediaStartedRef.current = false;
+      if (mediaRevealRef.current) {
+        window.clearTimeout(mediaRevealRef.current);
+        mediaRevealRef.current = null;
+      }
       if (playbackFallbackRef.current) {
         window.clearTimeout(playbackFallbackRef.current);
         playbackFallbackRef.current = null;
@@ -230,6 +250,7 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
 
   useEffect(() => () => {
     if (playbackFallbackRef.current) window.clearTimeout(playbackFallbackRef.current);
+    if (mediaRevealRef.current) window.clearTimeout(mediaRevealRef.current);
   }, []);
 
   // Keep the new sequence scroll-led, without leaving the rest of the home page
