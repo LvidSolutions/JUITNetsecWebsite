@@ -8,11 +8,10 @@ const ease = (value) => value * value * (3 - 2 * value);
 const LOGO_DOCK_PROGRESS = 0.45;
 const PLAYBACK_DELAY_DISTANCE = 900; // Five standard 180 px mouse-wheel ticks after logo docking.
 const PLAYBACK_START_TIMEOUT_MS = 15000;
-const BLACKOUT_SETTLE_MS = 1250;
 // This is deliberately a physical distance, not a small slice of the hero's
-// overall progress. It gives the monitor takeover roughly nine wheel ticks on
-// a standard mouse and keeps every expansion frame in the same sticky viewport.
-const EXPANSION_SCROLL_DISTANCE = 1600;
+// overall progress. It gives the monitor takeover roughly sixteen wheel ticks
+// on a standard mouse and keeps every expansion frame in the same sticky viewport.
+const EXPANSION_SCROLL_DISTANCE = 2800;
 const HANDOFF_START = 0.94;
 const VIDEO_REVEAL_DELAY_MS = 650;
 
@@ -51,14 +50,11 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
       setPhaseSafe('IDLE');
       return;
     }
-    setPhaseSafe('BLACKOUT');
-    window.setTimeout(() => {
-      mediaStartedRef.current = false;
-      // Start the black takeover from the exact scroll position where the
-      // video ended. There is no programmatic scroll correction or jump.
-      expansionStartScrollYRef.current = window.scrollY;
-      setPhaseSafe('READY');
-    }, reducedMotion ? 0 : BLACKOUT_SETTLE_MS);
+    mediaStartedRef.current = false;
+    // The blinking C and the scroll-led expansion begin in the same frame.
+    // There is deliberately no timed black holding state between them.
+    expansionStartScrollYRef.current = window.scrollY;
+    setPhaseSafe('READY');
   }, [reducedMotion, setPhaseSafe]);
 
   const measure = useCallback(() => {
@@ -287,10 +283,9 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
     if (mediaRevealRef.current) window.clearTimeout(mediaRevealRef.current);
   }, []);
 
-  // Keep the new sequence scroll-led, without leaving the rest of the home page
-  // nine viewports away. This gives the five-tick playback delay room to happen
-  // while returning the normal sections to their original reachable flow.
-  return <section id="hem" ref={setRoot} className="hero-transition-scene relative -mt-20 h-[700svh] sm:h-[680svh] lg:h-[650svh]" data-phase={phase}>
+  // The root includes room for the five-tick video delay plus the deliberately
+  // long, continuous monitor takeover; the viewport itself remains sticky.
+  return <section id="hem" ref={setRoot} className="hero-transition-scene relative -mt-20 h-[900svh]" data-phase={phase}>
     <div className="hero-transition-scene__sticky">
       {renderHero({
         transitionState: phase,
