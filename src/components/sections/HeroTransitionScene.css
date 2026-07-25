@@ -70,7 +70,7 @@
 }
 
 .hero-transition-scene[data-phase='READY'] .hero-transition-scene__character {
-  transition: top 1.2s cubic-bezier(0.22, 1, 0.36, 1), left 1.2s cubic-bezier(0.22, 1, 0.36, 1), transform 1.2s cubic-bezier(0.22, 1, 0.36, 1), opacity 420ms linear;
+  transition: top 90ms linear, left 90ms linear, transform 90ms linear, opacity 120ms linear;
 }
 
 .hero-transition-scene[data-c-mode='blinking'] .hero-transition-scene__character {
