@@ -6,12 +6,10 @@ const clamp = (value) => Math.min(Math.max(value, 0), 1);
 const range = (value, start, end) => clamp((value - start) / (end - start));
 const ease = (value) => value * value * (3 - 2 * value);
 const LOGO_DOCK_PROGRESS = 0.45;
-const PLAYBACK_DELAY_DISTANCE = 900; // Five standard 180 px mouse-wheel ticks after logo docking.
+const PLAYBACK_DELAY_DISTANCE = 360; // Two standard mouse-wheel ticks after logo docking.
 const PLAYBACK_START_TIMEOUT_MS = 15000;
-// This is deliberately a physical distance, not a small slice of the hero's
-// overall progress. It gives the monitor takeover roughly sixteen wheel ticks
-// on a standard mouse and keeps every expansion frame in the same sticky viewport.
-const EXPANSION_SCROLL_DISTANCE = 2800;
+// Keep the monitor takeover compact so every wheel movement produces a visible change.
+const EXPANSION_SCROLL_DISTANCE = 1100;
 const HANDOFF_START = 0.94;
 const VIDEO_REVEAL_DELAY_MS = 650;
 
@@ -313,9 +311,8 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
     if (mediaRevealRef.current) window.clearTimeout(mediaRevealRef.current);
   }, []);
 
-  // The root includes room for the five-tick video delay plus the deliberately
-  // long, continuous monitor takeover; the viewport itself remains sticky.
-  return <section id="hem" ref={setRoot} className="hero-transition-scene relative -mt-20 h-[900svh]" data-phase={phase}>
+  // The compact root covers logo docking, the short video delay and the monitor takeover.
+  return <section id="hem" ref={setRoot} className="hero-transition-scene relative -mt-20 h-[500svh]" data-phase={phase}>
     <div className="hero-transition-scene__sticky">
       {renderHero({
         transitionState: phase,
