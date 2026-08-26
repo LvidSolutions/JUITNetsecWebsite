@@ -335,8 +335,8 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
         transitionState: phase,
         monitorMedia: (
           <video ref={videoRef} muted playsInline preload="auto" className="hero-transition-scene__media" onPlaying={confirmPlayback} onEnded={finishPlayback} onError={finishPlayback}>
-            <source src="/videos/monitor-media-sequence.webm" type="video/webm" />
-            <source src="/videos/monitor-media-sequence.mp4" type="video/mp4" />
+            <source src="/videos/monitor-virus-shutdown-v2.webm" type="video/webm" />
+            <source src="/videos/monitor-virus-shutdown-v2.mp4" type="video/mp4" />
           </video>
         ),
       })}
