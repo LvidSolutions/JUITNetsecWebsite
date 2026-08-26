@@ -63,7 +63,8 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
     const monitor = root?.querySelector('.contact-monitor-cta__expansion-root');
     const sticky = root?.querySelector('.hero-transition-scene__sticky');
     const target = root?.querySelector('.risk-progress__initial-c');
-    if (!source || !monitor || !sticky || !target) return;
+    const riskContent = root?.querySelector('.risk-progress--embedded .risk-progress__content');
+    if (!source || !monitor || !sticky || !target || !riskContent) return;
     const sourceRect = source.getBoundingClientRect();
     const monitorRect = monitor.getBoundingClientRect();
     const stickyRect = sticky.getBoundingClientRect();
@@ -72,6 +73,16 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
     const targetRect = targetRange.getBoundingClientRect();
     const targetStyle = getComputedStyle(target);
     const targetFontSize = Number.parseFloat(targetStyle.fontSize) || 16;
+    const riskContentWidth = Math.max(riskContent.offsetWidth, 1);
+    const riskContentHeight = Math.max(riskContent.offsetHeight, 1);
+    const riskScreenScale = Math.min(
+      (sourceRect.width * 0.86) / riskContentWidth,
+      (sourceRect.height * 0.78) / riskContentHeight,
+    );
+    const riskScreenLeft = sourceRect.left - stickyRect.left
+      + (sourceRect.width - riskContentWidth * riskScreenScale) / 2;
+    const riskScreenTop = sourceRect.top - stickyRect.top
+      + (sourceRect.height - riskContentHeight * riskScreenScale) / 2;
     geometryRef.current = {
       left: sourceRect.left - stickyRect.left, top: sourceRect.top - stickyRect.top,
       width: sourceRect.width, height: sourceRect.height,
@@ -91,6 +102,9 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
       fontLineHeight: targetStyle.lineHeight,
       fontColor: targetStyle.color,
       sourceScale: Math.min(0.56, Math.max(sourceRect.width / stickyRect.width, 12 / targetFontSize)),
+      riskScreenScale,
+      riskStartTranslateX: riskScreenLeft - riskContent.offsetLeft,
+      riskStartTranslateY: riskScreenTop - riskContent.offsetTop,
     };
   }, []);
 
@@ -111,6 +125,7 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
         : 0;
     const expansion = ease(raw);
     const handoff = ease(range(raw, HANDOFF_START, 1));
+    const riskContentScale = g.riskScreenScale + (1 - g.riskScreenScale) * expansion;
     const sourceCRelX = (g.targetX / g.destinationWidth);
     const sourceCRelY = (g.targetY / g.destinationHeight);
     const cX = g.left + g.width * sourceCRelX;
@@ -149,10 +164,13 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
     root.style.setProperty('--first-character-current-x', `${cX + (g.targetX - cX) * expansion}px`);
     root.style.setProperty('--first-character-current-y', `${cY + (g.targetY - cY) * expansion}px`);
     root.style.setProperty('--first-character-scale', (g.sourceScale + (1 - g.sourceScale) * expansion).toFixed(5));
-    root.style.setProperty('--first-character-opacity', blackout ? (1 - handoff).toFixed(5) : '0');
-    root.style.setProperty('--risk-layer-opacity', handoff.toFixed(5));
-    root.style.setProperty('--risk-progress', '0');
-    root.dataset.cMode = blackout && raw < HANDOFF_START ? 'blinking' : 'static';
+    root.style.setProperty('--first-character-opacity', ready ? '0' : blackout ? (1 - handoff).toFixed(5) : '0');
+    root.style.setProperty('--risk-content-translate-x', `${g.riskStartTranslateX * (1 - expansion)}px`);
+    root.style.setProperty('--risk-content-translate-y', `${g.riskStartTranslateY * (1 - expansion)}px`);
+    root.style.setProperty('--risk-content-scale', riskContentScale.toFixed(5));
+    root.style.setProperty('--risk-layer-opacity', ready ? '1' : handoff.toFixed(5));
+    root.style.setProperty('--risk-progress', ready ? '1' : '0');
+    root.dataset.cMode = blackout && !ready && raw < HANDOFF_START ? 'blinking' : 'static';
   }, [reducedMotion]);
 
   const startPlayback = useCallback(() => {
