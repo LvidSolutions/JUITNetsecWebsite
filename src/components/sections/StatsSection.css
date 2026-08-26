@@ -1,6 +1,6 @@
 .risk-progress {
   position: relative;
-  min-height: 360svh;
+  min-height: 800svh;
   overflow: clip;
   background: #000;
   color: #fff;
@@ -66,13 +66,19 @@
 
 .risk-progress--after-hero {
   z-index: 2;
-  /* Start as the compact hero reaches its handoff so there is no empty scroll gap. */
-  margin-top: -100svh;
+  /* Preserve the original monitor timing and only soften the handoff to the text. */
+  margin-top: -140svh;
+  opacity: 0;
   visibility: hidden;
+  transition:
+    opacity 240ms ease,
+    visibility 0s linear 240ms;
 }
 
 .risk-progress--after-hero[data-overlay-active='true'] {
+  opacity: 1;
   visibility: visible;
+  transition-delay: 0s;
 }
 
 .risk-progress--embedded .risk-progress__sticky {
@@ -128,7 +134,7 @@
 
 @media (max-width: 1023px) {
   .risk-progress {
-    min-height: 340svh;
+    min-height: 580svh;
   }
 
   .risk-progress__sticky {
@@ -143,7 +149,7 @@
 
 @media (max-width: 639px) {
   .risk-progress {
-    min-height: 300svh;
+    min-height: 460svh;
   }
 
   .risk-progress__sticky {
@@ -170,6 +176,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .risk-progress--after-hero {
+    transition: none;
+  }
+
   .risk-progress {
     min-height: 0;
     overflow: visible;
