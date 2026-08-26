@@ -262,6 +262,15 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
   }, [measure, progress, write]);
 
   useEffect(() => {
+    if (!introReady) return undefined;
+    const settleTimer = window.setTimeout(() => {
+      measure();
+      write(progress.get());
+    }, 800);
+    return () => window.clearTimeout(settleTimer);
+  }, [introReady, measure, progress, write]);
+
+  useEffect(() => {
     write(progress.get());
   }, [phase, progress, write]);
 
