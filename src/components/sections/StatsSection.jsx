@@ -2,10 +2,9 @@ import { useEffect, useRef } from 'react';
 import './StatsSection.css';
 
 const story = [
-  'yber', 'risk', 'is', 'a', 'business', 'problem.',
-  { text: '59%', emphasis: 'stat' }, 'of', 'SMEs', 'reported', 'a', 'cyberattack', 'last', 'year,', 'while',
-  { text: '88%', emphasis: 'stat' }, 'of', 'ransomware', 'breaches', 'affected', 'SMBs.',
-  'Visibility', 'and', 'control', 'help', 'prevent', 'disruption.',
+  'yber', 'risk', 'is', 'business', 'risk.',
+  { text: '59%', emphasis: 'stat' }, 'of', 'SMEs', 'reported', 'an', 'attack', 'last', 'year,', 'while',
+  { text: '88%', emphasis: 'stat' }, 'of', 'ransomware', 'breaches', 'hit', 'SMBs.',
 ];
 
 const sources = [
