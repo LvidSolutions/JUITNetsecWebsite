@@ -203,9 +203,10 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
       mediaRevealRef.current = null;
       if (phaseRef.current !== 'PLAYING') return;
       mediaStartedRef.current = true;
+      measure();
       write(progress.get());
     }, VIDEO_REVEAL_DELAY_MS);
-  }, [progress, write]);
+  }, [measure, progress, write]);
 
   useMotionValueEvent(progress, 'change', (latest) => {
     if (latest >= LOGO_DOCK_PROGRESS && logoDockScrollYRef.current === null) {
@@ -260,15 +261,6 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
     else markFontsReady();
     return () => { observer.disconnect(); window.removeEventListener('resize', update); };
   }, [measure, progress, write]);
-
-  useEffect(() => {
-    if (!introReady) return undefined;
-    const settleTimer = window.setTimeout(() => {
-      measure();
-      write(progress.get());
-    }, 800);
-    return () => window.clearTimeout(settleTimer);
-  }, [introReady, measure, progress, write]);
 
   useEffect(() => {
     write(progress.get());
