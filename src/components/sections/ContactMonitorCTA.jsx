@@ -249,17 +249,46 @@ export function ContactMonitorCTA({ transitionState = 'IDLE', monitorMedia = nul
   const apiRef = useRef(null);
   const snapshotRequestedRef = useRef(false);
   const tiltRef = useRef({ currentX: 0, currentY: 0, targetX: 0, targetY: 0, lastTime: 0, hovering: false });
-  const [mode, setMode] = useState('placeholder');
+  // The local composition is immediate and deterministic; the remote 3D render
+  // can enhance it later without leaving a blank or half-loaded monitor.
+  const [mode, setMode] = useState('fallback');
   const [screenMaterial, setScreenMaterial] = useState('');
   const [textureStatus, setTextureStatus] = useState('pending');
   const [textureUid, setTextureUid] = useState('');
   const [snapshot, setSnapshot] = useState('');
   const interactionEnabled = transitionState === 'IDLE';
 
+  const resetTilt = useCallback(() => {
+    const target = tiltRef.current;
+    target.currentX = 0;
+    target.currentY = 0;
+    target.targetX = 0;
+    target.targetY = 0;
+    target.lastTime = 0;
+    target.hovering = false;
+
+    if (animationRef.current) {
+      window.cancelAnimationFrame(animationRef.current);
+      animationRef.current = 0;
+    }
+
+    const element = containerRef.current;
+    element?.style.setProperty('--monitor-rotate-x', '0deg');
+    element?.style.setProperty('--monitor-rotate-y', '0deg');
+    element?.style.setProperty('--monitor-pointer-x', '50%');
+    element?.style.setProperty('--monitor-pointer-y', '50%');
+    element?.setAttribute('data-active', 'false');
+  }, []);
+
   const updateTilt = useCallback((time) => {
     const target = tiltRef.current;
     const element = containerRef.current;
-    if (!element || !visibleRef.current) return;
+    // A pending RAF previously returned here while keeping its non-zero id.
+    // On re-entry that blocked all future centering, leaving the monitor tilted.
+    if (!element || !visibleRef.current) {
+      animationRef.current = 0;
+      return;
+    }
 
     const elapsed = Math.min((time - target.lastTime) / 1000 || 0.016, 0.05);
     target.lastTime = time;
@@ -285,26 +314,21 @@ export function ContactMonitorCTA({ transitionState = 'IDLE', monitorMedia = nul
 
   useEffect(() => {
     if (interactionEnabled) return;
+    resetTilt();
+  }, [interactionEnabled, resetTilt]);
 
-    const target = tiltRef.current;
-    target.currentX = 0;
-    target.currentY = 0;
-    target.targetX = 0;
-    target.targetY = 0;
-    target.hovering = false;
-
-    if (animationRef.current) {
-      window.cancelAnimationFrame(animationRef.current);
-      animationRef.current = 0;
-    }
-
-    const element = containerRef.current;
-    element?.style.setProperty('--monitor-rotate-x', '0deg');
-    element?.style.setProperty('--monitor-rotate-y', '0deg');
-    element?.style.setProperty('--monitor-pointer-x', '50%');
-    element?.style.setProperty('--monitor-pointer-y', '50%');
-    element?.setAttribute('data-active', 'false');
-  }, [interactionEnabled]);
+  useEffect(() => {
+    const resetForLostFocus = () => resetTilt();
+    const resetWhenHidden = () => {
+      if (document.hidden) resetTilt();
+    };
+    window.addEventListener('blur', resetForLostFocus);
+    document.addEventListener('visibilitychange', resetWhenHidden);
+    return () => {
+      window.removeEventListener('blur', resetForLostFocus);
+      document.removeEventListener('visibilitychange', resetWhenHidden);
+    };
+  }, [resetTilt]);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -316,9 +340,8 @@ export function ContactMonitorCTA({ transitionState = 'IDLE', monitorMedia = nul
         visibleRef.current = entry.isIntersecting;
         if (entry.isIntersecting) {
           startTilt();
-        } else if (animationRef.current) {
-          window.cancelAnimationFrame(animationRef.current);
-          animationRef.current = 0;
+        } else {
+          resetTilt();
         }
       },
       { threshold: 0.01 },
@@ -331,7 +354,7 @@ export function ContactMonitorCTA({ transitionState = 'IDLE', monitorMedia = nul
       if (animationRef.current) window.cancelAnimationFrame(animationRef.current);
       apiRef.current?.stop?.();
     };
-  }, [startTilt]);
+  }, [resetTilt, startTilt]);
 
   useEffect(() => {
     const element = containerRef.current;
@@ -341,8 +364,6 @@ export function ContactMonitorCTA({ transitionState = 'IDLE', monitorMedia = nul
     const beginLoad = () => {
       if (loadedRef.current) return;
       loadedRef.current = true;
-      setMode('loading');
-
       loadViewerScript()
         .then(() => {
           if (!mountedRef.current || !frameRef.current || !window.Sketchfab) return;
@@ -451,7 +472,17 @@ export function ContactMonitorCTA({ transitionState = 'IDLE', monitorMedia = nul
                   });
                 };
 
-                setStraightOnCamera(api, initializeMonitor);
+                // Sketchfab can occasionally omit the end-animation callback.
+                // Do not let that hold up the monitor's usable rendering state.
+                let initialized = false;
+                const initializeOnce = () => {
+                  if (initialized) return;
+                  initialized = true;
+                  window.clearTimeout(cameraTimeout);
+                  initializeMonitor();
+                };
+                const cameraTimeout = window.setTimeout(initializeOnce, 1500);
+                setStraightOnCamera(api, initializeOnce);
               });
             },
             error() {
@@ -525,8 +556,8 @@ export function ContactMonitorCTA({ transitionState = 'IDLE', monitorMedia = nul
           className="contact-monitor-cta__tilt"
           onPointerMove={interactionEnabled ? handlePointerMove : undefined}
           onPointerLeave={interactionEnabled ? handlePointerLeave : undefined}
-          onMouseMove={interactionEnabled ? handlePointerMove : undefined}
-          onMouseLeave={interactionEnabled ? handlePointerLeave : undefined}
+          onPointerCancel={interactionEnabled ? handlePointerLeave : undefined}
+          onLostPointerCapture={interactionEnabled ? handlePointerLeave : undefined}
         >
           <div className="contact-monitor-cta__glow" aria-hidden="true" />
           <div className="contact-monitor-cta__frame">
@@ -573,16 +604,15 @@ export function ContactMonitorCTA({ transitionState = 'IDLE', monitorMedia = nul
             {monitorMedia}
           </div>
         </div>
-          <a
-            className="contact-monitor-cta__interaction"
-            href={CONTACT_ROUTE}
-            aria-label="Go to the contact page"
-            onKeyDown={(event) => {
-              if (event.key === 'Enter') event.currentTarget.click();
-            }}
-          >
-            <span className="sr-only">Contact us</span>
-          </a>
+          {interactionEnabled && (
+            <a
+              className="contact-monitor-cta__interaction"
+              href={CONTACT_ROUTE}
+              aria-label="Go to the contact page"
+            >
+              <span className="sr-only">Contact us</span>
+            </a>
+          )}
         </div>
       </div>
       <p className="contact-monitor-cta__attribution">
