@@ -16,6 +16,7 @@ const sources = [
 
 export function StatsSection({ embedded = false, afterHero = false }) {
   const sectionRef = useRef(null);
+  const revealCompleteRef = useRef(false);
 
   useEffect(() => {
     if (embedded) return undefined;
@@ -29,15 +30,21 @@ export function StatsSection({ embedded = false, afterHero = false }) {
       frame = 0;
 
       if (motionQuery.matches) {
+        revealCompleteRef.current = true;
         section.style.setProperty('--risk-progress', '1');
         return;
       }
 
       const scrollRange = Math.max(section.offsetHeight - window.innerHeight, 1);
+      const revealRange = afterHero ? scrollRange * 0.5 : scrollRange;
       const travelled = -section.getBoundingClientRect().top;
-      const progress = afterHero
-        ? 1
-        : Math.min(1, Math.max(0, travelled / scrollRange));
+      const scrollProgress = Math.min(1, Math.max(0, travelled / revealRange));
+
+      if (afterHero && scrollProgress >= 1) {
+        revealCompleteRef.current = true;
+      }
+
+      const progress = afterHero && revealCompleteRef.current ? 1 : scrollProgress;
       section.style.setProperty('--risk-progress', progress.toFixed(5));
       if (afterHero) section.dataset.overlayActive = travelled >= -1 ? 'true' : 'false';
     }
@@ -74,7 +81,7 @@ export function StatsSection({ embedded = false, afterHero = false }) {
       aria-labelledby={embedded ? undefined : 'risk-landscape-heading'}
       className={`risk-progress${embedded ? ' risk-progress--embedded' : ''}${afterHero ? ' risk-progress--after-hero' : ''}`}
       data-overlay-active={afterHero ? 'false' : undefined}
-      style={embedded ? undefined : { '--risk-progress': afterHero ? 1 : 0 }}
+      style={embedded ? undefined : { '--risk-progress': 0 }}
     >
       <div className="risk-progress__sticky">
         <div className="risk-progress__content">
