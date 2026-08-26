@@ -65,6 +65,7 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
     const sticky = root?.querySelector('.hero-transition-scene__sticky');
     const target = root?.querySelector('.risk-progress__initial-c');
     const riskContent = root?.querySelector('.risk-progress--embedded .risk-progress__content');
+    const riskHandoff = document.querySelector('.risk-progress--after-hero');
     if (!source || !monitor || !sticky || !target || !riskContent) return;
     const sourceRect = source.getBoundingClientRect();
     const monitorRect = monitor.getBoundingClientRect();
@@ -84,6 +85,9 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
       + (sourceRect.width - riskContentWidth * riskScreenScale) / 2;
     const riskScreenTop = sourceRect.top - stickyRect.top
       + (sourceRect.height - riskContentHeight * riskScreenScale) / 2;
+    const riskHandoffScrollY = riskHandoff
+      ? riskHandoff.getBoundingClientRect().top + window.scrollY
+      : null;
     geometryRef.current = {
       left: sourceRect.left - stickyRect.left, top: sourceRect.top - stickyRect.top,
       width: sourceRect.width, height: sourceRect.height,
@@ -106,6 +110,7 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
       riskScreenScale,
       riskStartTranslateX: riskScreenLeft - riskContent.offsetLeft,
       riskStartTranslateY: riskScreenTop - riskContent.offsetTop,
+      riskHandoffScrollY,
     };
   }, []);
 
@@ -127,7 +132,16 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
     const expansion = ease(raw);
     const handoff = ease(range(raw, HANDOFF_START, 1));
     const riskCopyVisible = ready && riskRevealCompleteRef.current;
-    const riskContentScale = g.riskScreenScale + (1 - g.riskScreenScale) * expansion;
+    const riskScrollDistance = g.riskHandoffScrollY === null
+      ? EXPANSION_SCROLL_DISTANCE
+      : Math.max(g.riskHandoffScrollY - expansionStart, 1);
+    const riskRaw = reducedMotion
+      ? (ready ? 1 : 0)
+      : ready && fontReadyRef.current
+        ? clamp((window.scrollY - expansionStart) / riskScrollDistance)
+        : 0;
+    const riskExpansion = ease(riskRaw);
+    const riskContentScale = g.riskScreenScale + (1 - g.riskScreenScale) * riskExpansion;
     const sourceCRelX = (g.targetX / g.destinationWidth);
     const sourceCRelY = (g.targetY / g.destinationHeight);
     const cX = g.left + g.width * sourceCRelX;
@@ -167,8 +181,8 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
     root.style.setProperty('--first-character-current-y', `${cY + (g.targetY - cY) * expansion}px`);
     root.style.setProperty('--first-character-scale', (g.sourceScale + (1 - g.sourceScale) * expansion).toFixed(5));
     root.style.setProperty('--first-character-opacity', ready ? '0' : blackout ? (1 - handoff).toFixed(5) : '0');
-    root.style.setProperty('--risk-content-translate-x', `${g.riskStartTranslateX * (1 - expansion)}px`);
-    root.style.setProperty('--risk-content-translate-y', `${g.riskStartTranslateY * (1 - expansion)}px`);
+    root.style.setProperty('--risk-content-translate-x', `${g.riskStartTranslateX * (1 - riskExpansion)}px`);
+    root.style.setProperty('--risk-content-translate-y', `${g.riskStartTranslateY * (1 - riskExpansion)}px`);
     root.style.setProperty('--risk-content-scale', riskContentScale.toFixed(5));
     root.style.setProperty('--risk-layer-opacity', riskCopyVisible ? '1' : '0');
     root.style.setProperty('--risk-progress', riskCopyVisible ? '1' : '0');
@@ -331,3 +345,4 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
     </div>
   </section>;
 }
+
