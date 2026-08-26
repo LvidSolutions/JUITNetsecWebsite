@@ -111,6 +111,14 @@
   vertical-align: baseline;
 }
 
+.risk-progress--embedded .risk-progress__initial-c {
+  font-family: inherit;
+  font-size: 1em;
+  font-weight: inherit;
+  letter-spacing: inherit;
+  line-height: inherit;
+}
+
 .risk-progress__word--stat {
   color: #00C853;
 }
@@ -202,3 +210,4 @@
     padding: 0 clamp(1rem, 3.1vw, 4.5rem) 2rem;
   }
 }
+
