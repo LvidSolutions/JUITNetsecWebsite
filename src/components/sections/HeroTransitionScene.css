@@ -12,6 +12,9 @@
   --screen-radius: 0px;
   --risk-progress: 0;
   --risk-layer-opacity: 0;
+  --risk-content-translate-x: 0px;
+  --risk-content-translate-y: 0px;
+  --risk-content-scale: 1;
   --hero-copy-opacity: 1;
   --first-character-current-x: 50%;
   --first-character-current-y: 50%;
