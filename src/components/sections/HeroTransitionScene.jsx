@@ -142,6 +142,10 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
         : 0;
     const riskExpansion = ease(riskRaw);
     const riskContentScale = g.riskScreenScale + (1 - g.riskScreenScale) * riskExpansion;
+    // Once the full risk copy has been revealed, keep the returning monitor and
+    // its copy on one scroll curve so they contract as a single visual object.
+    // The first downward takeover continues to use the original monitor timing.
+    const screenExpansion = riskCopyVisible ? riskExpansion : expansion;
     const sourceCRelX = (g.targetX / g.destinationWidth);
     const sourceCRelY = (g.targetY / g.destinationHeight);
     const cX = g.left + g.width * sourceCRelX;
@@ -150,17 +154,17 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
     root.style.setProperty('--screen-source-top', `${g.top}px`);
     root.style.setProperty('--screen-source-width', `${g.width}px`);
     root.style.setProperty('--screen-source-height', `${g.height}px`);
-    root.style.setProperty('--screen-translate-x', `${-g.left * expansion}px`);
-    root.style.setProperty('--screen-translate-y', `${-g.top * expansion}px`);
-    root.style.setProperty('--screen-scale-x', (1 + (g.destinationWidth / g.width - 1) * expansion).toFixed(5));
-    root.style.setProperty('--screen-scale-y', (1 + (g.destinationHeight / g.height - 1) * expansion).toFixed(5));
-    root.style.setProperty('--screen-radius', `${g.radius * (1 - expansion)}px`);
-    const monitorScaleX = 1 + (g.destinationWidth / g.width - 1) * expansion;
-    const monitorScaleY = 1 + (g.destinationHeight / g.height - 1) * expansion;
+    root.style.setProperty('--screen-translate-x', `${-g.left * screenExpansion}px`);
+    root.style.setProperty('--screen-translate-y', `${-g.top * screenExpansion}px`);
+    root.style.setProperty('--screen-scale-x', (1 + (g.destinationWidth / g.width - 1) * screenExpansion).toFixed(5));
+    root.style.setProperty('--screen-scale-y', (1 + (g.destinationHeight / g.height - 1) * screenExpansion).toFixed(5));
+    root.style.setProperty('--screen-radius', `${g.radius * (1 - screenExpansion)}px`);
+    const monitorScaleX = 1 + (g.destinationWidth / g.width - 1) * screenExpansion;
+    const monitorScaleY = 1 + (g.destinationHeight / g.height - 1) * screenExpansion;
     const monitorEndX = -g.monitorLeft - g.screenLeftWithinMonitor * (g.destinationWidth / g.width);
     const monitorEndY = -g.monitorTop - g.screenTopWithinMonitor * (g.destinationHeight / g.height);
-    root.style.setProperty('--monitor-expansion-x', `${monitorEndX * expansion}px`);
-    root.style.setProperty('--monitor-expansion-y', `${monitorEndY * expansion}px`);
+    root.style.setProperty('--monitor-expansion-x', `${monitorEndX * screenExpansion}px`);
+    root.style.setProperty('--monitor-expansion-y', `${monitorEndY * screenExpansion}px`);
     root.style.setProperty('--monitor-expansion-scale-x', monitorScaleX.toFixed(5));
     root.style.setProperty('--monitor-expansion-scale-y', monitorScaleY.toFixed(5));
     root.style.setProperty('--transition-c-font', g.fontFamily);
@@ -176,10 +180,10 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
     // The Contact Us panel remains beneath the transparent video until then.
     root.style.setProperty('--screen-takeover-opacity', blackout ? '1' : '0');
     root.style.setProperty('--monitor-video-opacity', mediaIsVisible ? '1' : '0');
-    root.style.setProperty('--hero-copy-opacity', (1 - expansion).toFixed(5));
-    root.style.setProperty('--first-character-current-x', `${cX + (g.targetX - cX) * expansion}px`);
-    root.style.setProperty('--first-character-current-y', `${cY + (g.targetY - cY) * expansion}px`);
-    root.style.setProperty('--first-character-scale', (g.sourceScale + (1 - g.sourceScale) * expansion).toFixed(5));
+    root.style.setProperty('--hero-copy-opacity', (1 - screenExpansion).toFixed(5));
+    root.style.setProperty('--first-character-current-x', `${cX + (g.targetX - cX) * screenExpansion}px`);
+    root.style.setProperty('--first-character-current-y', `${cY + (g.targetY - cY) * screenExpansion}px`);
+    root.style.setProperty('--first-character-scale', (g.sourceScale + (1 - g.sourceScale) * screenExpansion).toFixed(5));
     root.style.setProperty('--first-character-opacity', ready ? '0' : blackout ? (1 - handoff).toFixed(5) : '0');
     root.style.setProperty('--risk-content-translate-x', `${g.riskStartTranslateX * (1 - riskExpansion)}px`);
     root.style.setProperty('--risk-content-translate-y', `${g.riskStartTranslateY * (1 - riskExpansion)}px`);
