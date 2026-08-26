@@ -35,7 +35,9 @@ export function StatsSection({ embedded = false, afterHero = false }) {
 
       const scrollRange = Math.max(section.offsetHeight - window.innerHeight, 1);
       const travelled = -section.getBoundingClientRect().top;
-      const progress = Math.min(1, Math.max(0, travelled / scrollRange));
+      const progress = afterHero
+        ? 1
+        : Math.min(1, Math.max(0, travelled / scrollRange));
       section.style.setProperty('--risk-progress', progress.toFixed(5));
       if (afterHero) section.dataset.overlayActive = travelled >= -1 ? 'true' : 'false';
     }
@@ -72,7 +74,7 @@ export function StatsSection({ embedded = false, afterHero = false }) {
       aria-labelledby={embedded ? undefined : 'risk-landscape-heading'}
       className={`risk-progress${embedded ? ' risk-progress--embedded' : ''}${afterHero ? ' risk-progress--after-hero' : ''}`}
       data-overlay-active={afterHero ? 'false' : undefined}
-      style={embedded ? undefined : { '--risk-progress': 0 }}
+      style={embedded ? undefined : { '--risk-progress': afterHero ? 1 : 0 }}
     >
       <div className="risk-progress__sticky">
         <div className="risk-progress__content">
