@@ -1,6 +1,6 @@
 .risk-progress {
   position: relative;
-  min-height: 800svh;
+  min-height: 360svh;
   overflow: clip;
   background: #000;
   color: #fff;
@@ -66,8 +66,8 @@
 
 .risk-progress--after-hero {
   z-index: 2;
-  /* Hero hands the C to this sticky stage at 95% of its 900svh scroll range. */
-  margin-top: -140svh;
+  /* Start as the compact hero reaches its handoff so there is no empty scroll gap. */
+  margin-top: -100svh;
   visibility: hidden;
 }
 
@@ -128,7 +128,7 @@
 
 @media (max-width: 1023px) {
   .risk-progress {
-    min-height: 580svh;
+    min-height: 340svh;
   }
 
   .risk-progress__sticky {
@@ -143,7 +143,7 @@
 
 @media (max-width: 639px) {
   .risk-progress {
-    min-height: 460svh;
+    min-height: 300svh;
   }
 
   .risk-progress__sticky {
