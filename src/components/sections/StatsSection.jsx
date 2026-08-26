@@ -26,11 +26,17 @@ export function StatsSection({ embedded = false, afterHero = false }) {
     const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
     let frame = 0;
 
+    function completeReveal() {
+      if (!afterHero || revealCompleteRef.current) return;
+      revealCompleteRef.current = true;
+      window.dispatchEvent(new Event('juit:risk-reveal-complete'));
+    }
+
     function updateProgress() {
       frame = 0;
 
       if (motionQuery.matches) {
-        revealCompleteRef.current = true;
+        completeReveal();
         section.style.setProperty('--risk-progress', '1');
         return;
       }
@@ -40,8 +46,8 @@ export function StatsSection({ embedded = false, afterHero = false }) {
       const travelled = -section.getBoundingClientRect().top;
       const scrollProgress = Math.min(1, Math.max(0, travelled / revealRange));
 
-      if (afterHero && scrollProgress >= 1) {
-        revealCompleteRef.current = true;
+      if (scrollProgress >= 1) {
+        completeReveal();
       }
 
       const progress = afterHero && revealCompleteRef.current ? 1 : scrollProgress;
