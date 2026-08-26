@@ -70,15 +70,13 @@
   margin-top: -140svh;
   opacity: 0;
   visibility: hidden;
-  transition:
-    opacity 240ms ease,
-    visibility 0s linear 240ms;
+  transition: none;
 }
 
 .risk-progress--after-hero[data-overlay-active='true'] {
   opacity: 1;
   visibility: visible;
-  transition-delay: 0s;
+  transition: opacity 240ms ease;
 }
 
 .risk-progress--embedded .risk-progress__sticky {
@@ -91,7 +89,6 @@
     translate3d(var(--risk-content-translate-x, 0px), var(--risk-content-translate-y, 0px), 0)
     scale(var(--risk-content-scale, 1));
   transform-origin: top left;
-  transition: transform 90ms linear;
   will-change: transform;
 }
 
