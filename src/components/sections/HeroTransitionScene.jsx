@@ -27,6 +27,7 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
   const mediaRevealRef = useRef(null);
   const mediaStartedRef = useRef(false);
   const expansionStartScrollYRef = useRef(null);
+  const riskRevealCompleteRef = useRef(false);
   const [phase, setPhase] = useState('IDLE');
   const reducedMotion = useReducedMotion();
 
@@ -125,6 +126,7 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
         : 0;
     const expansion = ease(raw);
     const handoff = ease(range(raw, HANDOFF_START, 1));
+    const riskCopyVisible = ready && riskRevealCompleteRef.current;
     const riskContentScale = g.riskScreenScale + (1 - g.riskScreenScale) * expansion;
     const sourceCRelX = (g.targetX / g.destinationWidth);
     const sourceCRelY = (g.targetY / g.destinationHeight);
@@ -168,8 +170,8 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
     root.style.setProperty('--risk-content-translate-x', `${g.riskStartTranslateX * (1 - expansion)}px`);
     root.style.setProperty('--risk-content-translate-y', `${g.riskStartTranslateY * (1 - expansion)}px`);
     root.style.setProperty('--risk-content-scale', riskContentScale.toFixed(5));
-    root.style.setProperty('--risk-layer-opacity', ready ? '1' : handoff.toFixed(5));
-    root.style.setProperty('--risk-progress', ready ? '1' : '0');
+    root.style.setProperty('--risk-layer-opacity', riskCopyVisible ? '1' : '0');
+    root.style.setProperty('--risk-progress', riskCopyVisible ? '1' : '0');
     root.dataset.cMode = blackout && !ready && raw < HANDOFF_START ? 'blinking' : 'static';
   }, [reducedMotion]);
 
@@ -265,6 +267,15 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
   useEffect(() => {
     write(progress.get());
   }, [phase, progress, write]);
+
+  useEffect(() => {
+    const completeRiskReveal = () => {
+      riskRevealCompleteRef.current = true;
+      write(progress.get());
+    };
+    window.addEventListener('juit:risk-reveal-complete', completeRiskReveal);
+    return () => window.removeEventListener('juit:risk-reveal-complete', completeRiskReveal);
+  }, [progress, write]);
 
   useEffect(() => {
     const video = videoRef.current;
