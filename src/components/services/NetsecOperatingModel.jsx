@@ -1,244 +1,105 @@
-import { useState } from 'react';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { Container } from '../ui';
+import { useId } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
 import { processStages } from './servicesData.js';
+import './NetsecOperatingModel.css';
 
 const EASE = [0.22, 1, 0.36, 1];
 const SIZE = 400;
-const LAYERS = processStages.length; // 4
+const LAYERS = processStages.length;
 
-// JUIT-loggans gröna kvadrat (brand-green). Platt, ingen glow/skugga/bloom.
-const GREEN = '#00C853';
-const PANEL = '#0A0A0A'; // platt, opak panelyta (ingen static inuti rutan)
-
-// Bottenförankrade, horisontellt centrerade nästlade kvadrater. Den minsta
-// "boxen" vilar mot rutans nederkant; varje yttre lager växer uppåt + utåt.
-//   g = 0 -> yttersta (hela rutan), g = 3 -> minsta boxen längst ned.
 function squareFor(g) {
-  const side = SIZE - 100 * g; // 400, 300, 200, 100
-  return { x: 50 * g, y: 100 * g, w: side, h: side }; // botten = y + h = 400
+  const side = SIZE * (LAYERS - g) / LAYERS;
+  return { x: (SIZE - side) / 2, y: SIZE - side, side };
+}
+function rectPath({ x, y, side }) {
+  return 'M ' + x + ' ' + y + ' H ' + (x + side) + ' V ' + (y + side) + ' H ' + x + ' Z';
 }
 
-function rectPath({ x, y, w, h }) {
-  return `M ${x} ${y} H ${x + w} V ${y + h} H ${x} Z`;
-}
-
-// ⊓-bandet mellan lager g och g+1 (delar nederkant -> öppet i botten).
-function bandPath(g) {
-  return `${rectPath(squareFor(g))} ${rectPath(squareFor(g + 1))}`;
-}
-
-// Grön fyllnad = den hovrade kvadraten (innehåller alla inre lager). I viloläge
-// kollapsar den till en punkt vid nederkantens mitt, så den "startar i boxen".
-function greenFor(g) {
-  if (g == null) return { x: SIZE / 2, y: SIZE, width: 0, height: 0 };
-  const s = squareFor(g);
-  return { x: s.x, y: s.y, width: s.w, height: s.h };
-}
-
-function HitLayer({ g, stageIndex, onActivate }) {
-  const stage = processStages[stageIndex];
-  const handlers = {
-    role: 'button',
-    tabIndex: 0,
-    'aria-label': `${stage.number} ${stage.title}`,
-    onMouseEnter: () => onActivate(g),
-    onFocus: () => onActivate(g),
-    onClick: () => onActivate(g),
-    onKeyDown: (event) => {
-      if (event.key === 'Enter' || event.key === ' ') {
-        event.preventDefault();
-        onActivate(g);
-      }
-    },
-    style: { pointerEvents: 'all', cursor: 'pointer', outline: 'none' },
-  };
-
-  if (g === LAYERS - 1) {
-    const s = squareFor(g);
-    return <rect x={s.x} y={s.y} width={s.w} height={s.h} fill="transparent" {...handlers} />;
-  }
-  return <path d={bandPath(g)} fillRule="evenodd" fill="transparent" {...handlers} />;
-}
-
-function SquareProcess({ hoverG, onActivate, onClear, reduce }) {
-  const green = greenFor(hoverG);
-  const linesLit = hoverG === 0; // sista (yttersta) lagret -> linjerna tonar bort
-  const tween = reduce ? { duration: 0 } : { duration: 0.55, ease: EASE };
-  const lineTween = reduce ? { duration: 0 } : { duration: 0.5, ease: EASE };
-
+function SquareProcess({ activeIndex, onSelect, reduce, panelId }) {
+  const activeGeometry = LAYERS - 1 - activeIndex;
+  const scale = (activeIndex + 1) / LAYERS;
   return (
-    <div
-      className="relative mx-auto aspect-square w-full max-w-[680px]"
-      onMouseLeave={onClear}
-      onBlur={(event) => {
-        if (!event.currentTarget.contains(event.relatedTarget)) {
-          onClear();
-        }
-      }}
-    >
-      <svg
-        viewBox={`-1 -1 ${SIZE + 2} ${SIZE + 2}`}
-        role="img"
-        aria-label="Four bottom-anchored square layers that fill upward and outward: Discover, Map, Secure, Operate"
-        className="h-full w-full"
-      >
-        <defs>
-          <clipPath id="wf-clip">
-            <rect x="0" y="0" width={SIZE} height={SIZE} />
-          </clipPath>
-        </defs>
-
-        {/* 1. Platt, opak panel – ingen static inuti rutan. */}
-        <rect x="0" y="0" width={SIZE} height={SIZE} fill={PANEL} pointerEvents="none" />
-
-        {/* 2. Grön fyllnad – platt JUIT-grön som växer uppåt/utåt från botten-boxen. */}
-        <motion.rect
-          clipPath="url(#wf-clip)"
-          initial={false}
-          animate={{ x: green.x, y: green.y, width: green.width, height: green.height }}
-          transition={tween}
-          fill={GREEN}
-          pointerEvents="none"
-        />
-
-        {/* 3. Separatorlinjer ovanpå fyllnaden – subtila, kvar under de tre inre
-              lagren, men tonar bort när det yttersta lagret aktiveras (en hel
-              grön kvadrat). */}
-        <motion.g
-          initial={false}
-          animate={{ opacity: linesLit ? 0 : 1 }}
-          transition={lineTween}
-          fill="none"
-          pointerEvents="none"
-        >
-          {Array.from({ length: LAYERS }, (_, k) => {
-            const s = squareFor(k);
-            return (
-              <rect
-                key={k}
-                x={s.x}
-                y={s.y}
-                width={s.w}
-                height={s.h}
-                stroke={k === 0 ? 'rgba(229,231,235,0.16)' : 'rgba(229,231,235,0.10)'}
-                strokeWidth="1.2"
-              />
-            );
+    <div className="operating-model__diagram">
+      <svg viewBox="-2 -2 404 404" role="group" aria-label="Service delivery layers" className="operating-model__squares">
+        <motion.rect x="0" y="0" width={SIZE} height={SIZE}
+          className="operating-model__fill"
+          initial={false} animate={{ clipPath: `inset(${(1 - scale) * 100}% ${(1 - scale) * 50}% 0 ${(1 - scale) * 50}%)` }}
+          transition={{ duration: reduce ? 0 : 0.4, ease: EASE }} pointerEvents="none" />
+        <g fill="none" pointerEvents="none" aria-hidden="true">
+          {processStages.map((_, g) => {
+            const s = squareFor(g);
+            return <rect key={g} x={s.x} y={s.y} width={s.side} height={s.side}
+              className={'operating-model__line' + (g > activeGeometry ? ' is-filled' : '')}
+              vectorEffect="non-scaling-stroke" />;
           })}
-        </motion.g>
-
-        {/* 4. Träffytor per lager (överst, fångar hover/fokus). */}
-        <g>
-          {Array.from({ length: LAYERS }, (_, g) => (
-            <HitLayer key={g} g={g} stageIndex={LAYERS - 1 - g} onActivate={onActivate} />
-          ))}
         </g>
+        <g aria-hidden="true" pointerEvents="none">
+          {processStages.map((stage, index) => {
+            const g = LAYERS - 1 - index;
+            return <text key={stage.id} x="200" y={g * 100 + 40} textAnchor="middle"
+              className={'operating-model__layer-label' + (index <= activeIndex ? ' is-filled' : '')}>
+              <tspan x="200" dy="0" className="operating-model__layer-number">{stage.number}</tspan>
+              <tspan x="200" dy="14">{stage.title}</tspan>
+            </text>;
+          })}
+        </g>
+        {processStages.map((stage, index) => {
+          const g = LAYERS - 1 - index;
+          const d = g === LAYERS - 1 ? rectPath(squareFor(g)) : rectPath(squareFor(g)) + ' ' + rectPath(squareFor(g + 1));
+          return <path key={stage.id} d={d} fillRule="evenodd" className="operating-model__hit"
+            role="button" tabIndex={0} aria-label={stage.number + ' ' + stage.title}
+            aria-pressed={index === activeIndex} aria-controls={panelId}
+            onPointerEnter={event => { if (event.pointerType === 'mouse') onSelect(index); }}
+            onFocus={() => onSelect(index)} onClick={() => onSelect(index)}
+            onKeyDown={event => {
+              if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); onSelect(index); }
+              const direction = { ArrowUp: 1, ArrowRight: 1, ArrowDown: -1, ArrowLeft: -1 }[event.key];
+              if (direction) {
+                event.preventDefault();
+                const next = (index + direction + LAYERS) % LAYERS;
+                event.currentTarget.parentElement.querySelectorAll('[role="button"]')[next].focus();
+              }
+            }} />;
+        })}
       </svg>
+      <div className="operating-model__axis" aria-hidden="true"><span />JUIT NETSEC<span /></div>
     </div>
   );
 }
 
-export function NetsecOperatingModel({ activeIndex, onSelect, cinematic = false }) {
+export function NetsecOperatingModel({ activeIndex, onSelect }) {
   const reduce = useReducedMotion();
-  // hoverG = hovrat geometri-lager (0 = yttersta, 3 = botten-boxen) eller null.
-  const [hoverG, setHoverG] = useState(null);
-  const active = processStages[activeIndex] ?? processStages[0];
-
-  function activateLayer(g) {
-    setHoverG(g);
-    onSelect(LAYERS - 1 - g); // botten-boxen = Discover (01), yttersta = Operate (04)
-  }
-
-  function clearLayer() {
-    setHoverG(null);
-  }
-
+  const panelId = useId();
+  const selected = processStages[activeIndex] ? activeIndex : 0;
+  const active = processStages[selected];
   return (
-    <section
-      aria-label="How Netsec works - square process"
-      className={`relative isolate overflow-hidden border-b border-brand-line ${cinematic ? 'bg-transparent' : 'bg-brand-black'} pb-20 pt-28 sm:pb-24 sm:pt-32 lg:py-28`}
-    >
-      {!cinematic && (
-        <>
-          {/* Sidövergripande Shift5-static ligger bakom innehållet; den opaka rutan
-              blockerar den, så det finns ingen static inuti själva rutan. */}
-          <div aria-hidden="true" className="service-static pointer-events-none absolute inset-0 -z-10" />
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(255,255,255,0.018),transparent_42%,rgba(255,255,255,0.012))]"
-          />
-        </>
-      )}
-
-      <Container className="relative">
-        <div className="max-w-3xl">
-          <p className="flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.3em] text-brand-green">
-            <span aria-hidden="true" className="h-1.5 w-1.5 rounded-[1px] bg-brand-green" />
-            Operating model
-          </p>
-          <h2 className="mt-5 font-display text-3xl font-semibold leading-[1.05] tracking-tight text-brand-white sm:text-4xl lg:text-5xl">
-            Four layers of controlled service delivery
-          </h2>
-          <p className="mt-5 max-w-2xl text-base leading-8 text-brand-mist/70 sm:text-lg">
-            JUIT NetSec connects infrastructure, secure communication, cybersecurity and operations
-            into a practical workflow from context to long-term support.
-          </p>
-        </div>
-
-        {/* Rebalanserad layout: den stora kvadraten centreras i en bred, flexibel
-            vänsterkolumn, medan textpanelen är smalare och skjuts åt höger. */}
-        <div className="mt-16 grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-16 xl:grid-cols-[minmax(0,1fr)_24rem] xl:gap-24">
-          <SquareProcess hoverG={hoverG} onActivate={activateLayer} onClear={clearLayer} reduce={reduce} />
-
-          <div className="lg:ml-auto lg:w-full lg:max-w-[24rem] lg:border-l lg:border-brand-line lg:pl-8">
-            <div className="flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.26em]">
-              <span className="text-brand-green">
-                {active.number} <span className="text-brand-mist/35">/ {String(processStages.length).padStart(2, '0')}</span>
-              </span>
-              <span className="text-brand-mist/45">{active.code}</span>
-            </div>
-            <div className="mt-4 h-px w-full bg-brand-line">
-              <div
-                className="h-px bg-brand-green transition-all duration-300"
-                style={{ width: `${((((activeIndex ?? 0) + 1) / processStages.length) * 100)}%` }}
-              />
-            </div>
-
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={active.number}
-                initial={reduce ? false : { opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={reduce ? { opacity: 0 } : { opacity: 0, y: -8 }}
-                transition={{ duration: 0.28, ease: EASE }}
-              >
-                <h3 className="mt-7 font-display text-3xl font-semibold leading-tight tracking-tight text-brand-white sm:text-4xl">
-                  {active.title}
-                </h3>
-                <p className="mt-5 text-base leading-8 text-brand-mist/72">{active.text}</p>
-                <div className="mt-6 flex flex-wrap gap-2">
-                  {active.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="border border-brand-green/30 px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-brand-green"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-                <a
-                  href="/kontakt"
-                  className="group mt-8 inline-flex items-center gap-3 border border-brand-green/55 px-6 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-brand-green transition-colors duration-200 hover:bg-brand-green hover:text-brand-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green"
-                >
-                  Discuss this layer
-                  <span aria-hidden="true" className="transition-transform duration-300 group-hover:translate-x-0.5">-&gt;</span>
-                </a>
-              </motion.div>
-            </AnimatePresence>
+    <section id="operating-model" aria-label="How Netsec works - square process" className="operating-model">
+      <div className="operating-model__layout">
+        <header className="operating-model__intro">
+          <p className="operating-model__eyebrow"><span />Operating model</p>
+          <h2>Four layers of controlled service delivery</h2>
+          <p className="operating-model__summary">JUIT NetSec connects infrastructure, secure communication, cybersecurity and operations into a practical workflow from context to long-term support.</p>
+          <div className="operating-model__readout" aria-hidden="true">
+            <span>PROCESS / {active.code}</span>
+            <span>{selected.toString(2).padStart(8, '0')} 01001010 01010101</span>
+            <span>01001001 01010100 01001110</span>
+            <span>01000101 01010100 01010011</span>
           </div>
+        </header>
+        <SquareProcess activeIndex={selected} onSelect={onSelect} reduce={reduce} panelId={panelId} />
+        <div className="operating-model__detail" id={panelId}>
+          <div className="operating-model__connector" aria-hidden="true"><span /></div>
+          <p className="operating-model__status"><span>{active.number}</span> / 04 <span>{active.code}</span></p>
+          <motion.div key={active.id} initial={reduce ? false : {opacity:0, y:5}}
+            animate={{opacity:1,y:0}} transition={{duration:reduce ? 0 : 0.2,ease:EASE}}
+            className="operating-model__copy">
+            <h3>{active.title}</h3>
+            <p>{active.text}</p>
+            <ul className="operating-model__tags">{active.tags.map(tag=><li key={tag}>{tag}</li>)}</ul>
+          </motion.div>
+          <a href="/kontakt" className="operating-model__cta">Discuss this layer <span aria-hidden="true">↗</span></a>
         </div>
-      </Container>
+      </div>
     </section>
   );
 }
