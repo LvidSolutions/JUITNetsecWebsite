@@ -775,11 +775,11 @@
 }
 
 .glide-services-hero__intro {
-  position: absolute;
+  position: relative;
   z-index: 1;
-  top: clamp(1rem, 7vh, 4.5rem);
-  left: clamp(0.25rem, 7vw, 7rem);
-  width: min(31rem, 56vw);
+  justify-self: start;
+  margin: clamp(1rem, 3vh, 2rem) 0 2.5rem clamp(0.25rem, 7vw, 7rem);
+  width: min(54rem, 85%);
   pointer-events: none;
 }
 
@@ -803,7 +803,7 @@
 }
 
 .glide-services-hero h1 {
-  max-width: 12ch;
+  max-width: 22ch;
   margin: 0 0 1.25rem;
   color: #f4f7f4;
   font-family: "Space Grotesk", sans-serif;
@@ -811,6 +811,7 @@
   font-weight: 500;
   line-height: 0.96;
   letter-spacing: -0.055em;
+  text-wrap: balance;
 }
 
 .glide-services-hero__canvas-stage {
@@ -893,6 +894,7 @@
     position: static;
     width: 100%;
     padding-top: 1.5rem;
+    margin: 0;
   }
 
   .glide-services-hero h1 {

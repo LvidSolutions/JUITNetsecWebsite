@@ -132,6 +132,11 @@ function DesktopGlideCanvas({ reduceMotion }) {
     }
 
     function startVideo() {
+      if (reduceMotion) {
+        video.pause();
+        queuePaint();
+        return;
+      }
       video.play().catch(() => {});
       queuePaint();
       if ('requestVideoFrameCallback' in HTMLVideoElement.prototype && !videoFrameRequest) {
@@ -170,7 +175,7 @@ function DesktopGlideCanvas({ reduceMotion }) {
   return (
     <div ref={stageRef} className="glide-services-hero__canvas-stage" aria-hidden="true">
       <canvas ref={canvasRef} className="glide-services-hero__canvas" />
-      <video ref={videoRef} loop muted playsInline preload="metadata" src={VIDEO_SOURCE} />
+      <video ref={videoRef} loop muted playsInline preload={reduceMotion ? 'auto' : 'metadata'} src={VIDEO_SOURCE} />
     </div>
   );
 }
@@ -178,6 +183,10 @@ function DesktopGlideCanvas({ reduceMotion }) {
 export function GlideServicesHero() {
   const reduceMotion = useReducedMotion();
   const desktop = useDesktopLayout();
+  const mobileVideo = useRef(null);
+  useEffect(() => {
+    if (reduceMotion) mobileVideo.current?.pause();
+  }, [reduceMotion]);
 
   return (
     <section className="glide-services-hero" aria-labelledby="services-hero-title">
@@ -194,7 +203,7 @@ export function GlideServicesHero() {
           <DesktopGlideCanvas reduceMotion={reduceMotion} />
         ) : (
           <div className="glide-services-hero__mobile-media" aria-hidden="true">
-            <video autoPlay loop muted playsInline preload="metadata" src={VIDEO_SOURCE} />
+            <video ref={mobileVideo} autoPlay={!reduceMotion} loop muted playsInline preload={reduceMotion ? 'auto' : 'metadata'} src={VIDEO_SOURCE} />
           </div>
         )}
       </div>
