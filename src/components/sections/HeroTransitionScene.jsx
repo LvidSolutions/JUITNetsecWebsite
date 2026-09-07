@@ -13,6 +13,7 @@ const PLAYBACK_START_TIMEOUT_MS = 15000;
 // on a standard mouse and keeps every expansion frame in the same sticky viewport.
 const EXPANSION_SCROLL_DISTANCE = 2800;
 const VIDEO_REVEAL_DELAY_MS = 650;
+const VIDEO_PLAYBACK_RATE = 1.2;
 
 export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero, risk }) {
   const rootRef = useRef(null);
@@ -197,6 +198,7 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
     setPhaseSafe('PREPARING');
     mediaStartedRef.current = false;
     video.currentTime = 0;
+    video.playbackRate = VIDEO_PLAYBACK_RATE;
     if (playbackFallbackRef.current) window.clearTimeout(playbackFallbackRef.current);
     // This only protects against a video which never starts. Once onPlaying
     // fires, the full clip runs to its natural ended event.
@@ -303,11 +305,12 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
     return () => video.removeEventListener('canplay', resume);
   }, [finishPlayback, progress, startPlayback]);
 
-  // While the clip is running, pin the document at its current real scroll
-  // position. This avoids the previous scrollTo() snap (and its visible upward
-  // movement) while ensuring the later expansion always has its full distance.
+  // Pin only after playback has actually begun. Preparing can include a decode
+  // wait, and holding scroll during that interval makes the site feel stalled.
+  // The later expansion still starts from the real scroll position where the
+  // clip ends.
   useEffect(() => {
-    if (!['PREPARING', 'PLAYING'].includes(phase)) return undefined;
+    if (phase !== 'PLAYING') return undefined;
     const preventScroll = (event) => event.preventDefault();
     const preventKeys = (event) => {
       if ([' ', 'ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End'].includes(event.key)) event.preventDefault();
