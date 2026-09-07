@@ -12,7 +12,6 @@ const PLAYBACK_START_TIMEOUT_MS = 15000;
 // overall progress. It gives the monitor takeover roughly sixteen wheel ticks
 // on a standard mouse and keeps every expansion frame in the same sticky viewport.
 const EXPANSION_SCROLL_DISTANCE = 2800;
-const HANDOFF_START = 0.94;
 const VIDEO_REVEAL_DELAY_MS = 650;
 
 export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero, risk }) {
@@ -63,16 +62,15 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
     const source = root?.querySelector('.contact-monitor-cta__transition-screen');
     const monitor = root?.querySelector('.contact-monitor-cta__expansion-root');
     const sticky = root?.querySelector('.hero-transition-scene__sticky');
-    const target = root?.querySelector('.risk-progress__initial-c');
+    const target = document.querySelector('.risk-progress--after-hero .risk-progress__initial-c');
     const riskContent = root?.querySelector('.risk-progress--embedded .risk-progress__content');
     const riskHandoff = document.querySelector('.risk-progress--after-hero');
     if (!source || !monitor || !sticky || !target || !riskContent) return;
     const sourceRect = source.getBoundingClientRect();
     const monitorRect = monitor.getBoundingClientRect();
     const stickyRect = sticky.getBoundingClientRect();
-    const targetRange = document.createRange();
-    targetRange.selectNodeContents(target);
-    const targetRect = targetRange.getBoundingClientRect();
+    const targetRect = target.getBoundingClientRect();
+    const targetViewport = target.closest('.risk-progress__sticky').getBoundingClientRect();
     const targetStyle = getComputedStyle(target);
     const targetFontSize = Number.parseFloat(targetStyle.fontSize) || 16;
     const riskContentWidth = Math.max(riskContent.offsetWidth, 1);
@@ -96,8 +94,8 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
       screenLeftWithinMonitor: sourceRect.left - monitorRect.left,
       screenTopWithinMonitor: sourceRect.top - monitorRect.top,
       radius: Number.parseFloat(getComputedStyle(source).borderTopLeftRadius) || 0,
-      targetX: targetRect.left - stickyRect.left + targetRect.width / 2,
-      targetY: targetRect.top - stickyRect.top + targetRect.height / 2,
+      targetX: targetRect.left - targetViewport.left + targetRect.width / 2,
+      targetY: targetRect.top - targetViewport.top + targetRect.height / 2,
       targetWidth: targetRect.width, targetHeight: targetRect.height,
       destinationWidth: stickyRect.width, destinationHeight: stickyRect.height,
       fontFamily: targetStyle.fontFamily,
@@ -124,13 +122,6 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
     const ready = phaseRef.current === 'READY' || phaseRef.current === 'EXPANDING' || phaseRef.current === 'HANDED_OFF';
     const blackout = phaseRef.current === 'BLACKOUT' || ready;
     const expansionStart = expansionStartScrollYRef.current ?? window.scrollY;
-    const raw = reducedMotion
-      ? (ready ? 1 : 0)
-      : ready && fontReadyRef.current
-        ? clamp((window.scrollY - expansionStart) / EXPANSION_SCROLL_DISTANCE)
-        : 0;
-    const expansion = ease(raw);
-    const handoff = ease(range(raw, HANDOFF_START, 1));
     const riskCopyVisible = ready && riskRevealCompleteRef.current;
     const riskScrollDistance = g.riskHandoffScrollY === null
       ? EXPANSION_SCROLL_DISTANCE
@@ -142,10 +133,8 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
         : 0;
     const riskExpansion = ease(riskRaw);
     const riskContentScale = g.riskScreenScale + (1 - g.riskScreenScale) * riskExpansion;
-    // Once the full risk copy has been revealed, keep the returning monitor and
-    // its copy on one scroll curve so they contract as a single visual object.
-    // The first downward takeover continues to use the original monitor timing.
-    const screenExpansion = riskCopyVisible ? riskExpansion : expansion;
+    // The screen and its text share one curve ending at the actual handoff.
+    const screenExpansion = riskExpansion;
     const sourceCRelX = (g.targetX / g.destinationWidth);
     const sourceCRelY = (g.targetY / g.destinationHeight);
     const cX = g.left + g.width * sourceCRelX;
@@ -180,22 +169,30 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
     // The Contact Us panel remains beneath the transparent video until then.
     root.style.setProperty('--screen-takeover-opacity', blackout ? '1' : '0');
     root.style.setProperty('--monitor-video-opacity', mediaIsVisible ? '1' : '0');
-    root.style.setProperty('--hero-copy-opacity', (1 - screenExpansion).toFixed(5));
+    root.style.setProperty('--hero-copy-opacity', (1 - ease(range(screenExpansion, 0, 0.55))).toFixed(5));
     root.style.setProperty('--first-character-current-x', `${cX + (g.targetX - cX) * screenExpansion}px`);
     root.style.setProperty('--first-character-current-y', `${cY + (g.targetY - cY) * screenExpansion}px`);
     root.style.setProperty('--first-character-scale', (g.sourceScale + (1 - g.sourceScale) * screenExpansion).toFixed(5));
-    root.style.setProperty('--first-character-opacity', ready ? '0' : blackout ? (1 - handoff).toFixed(5) : '0');
+    root.style.setProperty('--first-character-opacity', ready && !riskCopyVisible && riskRaw < 1 ? '1' : '0');
     root.style.setProperty('--risk-content-translate-x', `${g.riskStartTranslateX * (1 - riskExpansion)}px`);
     root.style.setProperty('--risk-content-translate-y', `${g.riskStartTranslateY * (1 - riskExpansion)}px`);
     root.style.setProperty('--risk-content-scale', riskContentScale.toFixed(5));
     root.style.setProperty('--risk-layer-opacity', riskCopyVisible ? '1' : '0');
     root.style.setProperty('--risk-progress', riskCopyVisible ? '1' : '0');
-    root.dataset.cMode = blackout && !ready && raw < HANDOFF_START ? 'blinking' : 'static';
+    root.dataset.cMode = ready && riskRaw < 0.08 ? 'blinking' : 'static';
   }, [reducedMotion]);
 
   const startPlayback = useCallback(() => {
     if (!introReady || !playbackRequestedRef.current || !['IDLE', 'PREPARING'].includes(phaseRef.current)) return;
+    if (reducedMotion) {
+      expansionStartScrollYRef.current = window.scrollY;
+      setPhaseSafe('READY');
+      return;
+    }
     if (phaseRef.current === 'IDLE') setPhaseSafe('PREPARING');
+    if (!playbackFallbackRef.current) {
+      playbackFallbackRef.current = window.setTimeout(finishPlayback, PLAYBACK_START_TIMEOUT_MS);
+    }
     const video = videoRef.current;
     if (!video || video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) return;
     setPhaseSafe('PREPARING');
@@ -206,7 +203,7 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
     // fires, the full clip runs to its natural ended event.
     playbackFallbackRef.current = window.setTimeout(finishPlayback, PLAYBACK_START_TIMEOUT_MS);
     video.play().catch(() => finishPlayback());
-  }, [finishPlayback, introReady, setPhaseSafe]);
+  }, [finishPlayback, introReady, reducedMotion, setPhaseSafe]);
 
   const confirmPlayback = useCallback(() => {
     if (!['PREPARING', 'PLAYING'].includes(phaseRef.current)) return;
