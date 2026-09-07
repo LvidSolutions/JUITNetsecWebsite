@@ -189,6 +189,9 @@
 @media (prefers-reduced-motion: reduce) {
   .risk-progress--after-hero {
     transition: none;
+    margin-top: 0;
+    opacity: 1;
+    visibility: visible;
   }
 
   .risk-progress {

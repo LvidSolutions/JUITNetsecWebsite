@@ -185,8 +185,7 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
   const startPlayback = useCallback(() => {
     if (!introReady || !playbackRequestedRef.current || !['IDLE', 'PREPARING'].includes(phaseRef.current)) return;
     if (reducedMotion) {
-      expansionStartScrollYRef.current = window.scrollY;
-      setPhaseSafe('READY');
+      playbackRequestedRef.current = false;
       return;
     }
     if (phaseRef.current === 'IDLE') setPhaseSafe('PREPARING');

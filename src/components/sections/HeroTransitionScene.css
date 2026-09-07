@@ -90,11 +90,11 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero-transition-scene { height: 240svh !important; }
+  .hero-transition-scene { height: 160svh !important; }
   .hero-transition-scene__character { animation: none !important; }
   .hero-transition-scene .hero-transition__copy { opacity: 1; }
   .risk-progress--embedded .risk-progress__word { clip-path: none; transform: none; will-change: auto; }
-  .risk-progress--embedded { opacity: 1; }
+  .hero-transition-scene .risk-progress--embedded { display: none; }
 }
 
 @media (max-width: 1023px) {
