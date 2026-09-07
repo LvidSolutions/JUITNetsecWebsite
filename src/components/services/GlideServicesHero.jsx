@@ -80,6 +80,7 @@ function DesktopGlideCanvas({ reduceMotion }) {
 
     let frameRequest = 0;
     let videoFrameRequest = 0;
+    let fallbackFrameRequest = 0;
     let lastScrollY = window.scrollY;
     let targetOffset = 0;
     let currentOffset = 0;
@@ -107,10 +108,26 @@ function DesktopGlideCanvas({ reduceMotion }) {
     }
 
     function onVideoFrame() {
+      videoFrameRequest = 0;
       paint();
-      if (visible && 'requestVideoFrameCallback' in HTMLVideoElement.prototype) {
+      if (visible && !reduceMotion) {
         videoFrameRequest = video.requestVideoFrameCallback(onVideoFrame);
       }
+    }
+
+    function onFallbackFrame() {
+      fallbackFrameRequest = 0;
+      if (!visible || reduceMotion) return;
+      paint();
+      fallbackFrameRequest = window.requestAnimationFrame(onFallbackFrame);
+    }
+
+    function stopVideo() {
+      video.pause();
+      if (videoFrameRequest) video.cancelVideoFrameCallback(videoFrameRequest);
+      if (fallbackFrameRequest) window.cancelAnimationFrame(fallbackFrameRequest);
+      videoFrameRequest = 0;
+      fallbackFrameRequest = 0;
     }
 
     function resize() {
@@ -141,6 +158,8 @@ function DesktopGlideCanvas({ reduceMotion }) {
       queuePaint();
       if ('requestVideoFrameCallback' in HTMLVideoElement.prototype && !videoFrameRequest) {
         videoFrameRequest = video.requestVideoFrameCallback(onVideoFrame);
+      } else if (!('requestVideoFrameCallback' in HTMLVideoElement.prototype) && !fallbackFrameRequest) {
+        fallbackFrameRequest = window.requestAnimationFrame(onFallbackFrame);
       }
     }
 
@@ -148,7 +167,7 @@ function DesktopGlideCanvas({ reduceMotion }) {
       ([entry]) => {
         visible = entry.isIntersecting;
         if (visible) startVideo();
-        else video.pause();
+        else stopVideo();
       },
       { rootMargin: '160px 0px' },
     );
@@ -166,9 +185,7 @@ function DesktopGlideCanvas({ reduceMotion }) {
       window.removeEventListener('scroll', onScroll);
       video.removeEventListener('loadeddata', resize);
       if (frameRequest) window.cancelAnimationFrame(frameRequest);
-      if (videoFrameRequest && 'cancelVideoFrameCallback' in HTMLVideoElement.prototype) {
-        video.cancelVideoFrameCallback(videoFrameRequest);
-      }
+      stopVideo();
     };
   }, [reduceMotion]);
 
