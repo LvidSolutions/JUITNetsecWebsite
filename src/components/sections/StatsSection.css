@@ -120,6 +120,12 @@
   color: #00C853;
 }
 
+/* Keep the opening word on one baseline while the rest of the sentence reveals. */
+.risk-progress__word--after-c {
+  transform: none;
+  clip-path: none;
+}
+
 .risk-progress__sources {
   position: absolute;
   right: clamp(1rem, 3.1vw, 4.5rem);
@@ -183,6 +189,9 @@
 @media (prefers-reduced-motion: reduce) {
   .risk-progress--after-hero {
     transition: none;
+    margin-top: 0;
+    opacity: 1;
+    visibility: visible;
   }
 
   .risk-progress {

@@ -80,6 +80,7 @@ function DesktopGlideCanvas({ reduceMotion }) {
 
     let frameRequest = 0;
     let videoFrameRequest = 0;
+    let fallbackFrameRequest = 0;
     let lastScrollY = window.scrollY;
     let targetOffset = 0;
     let currentOffset = 0;
@@ -107,10 +108,26 @@ function DesktopGlideCanvas({ reduceMotion }) {
     }
 
     function onVideoFrame() {
+      videoFrameRequest = 0;
       paint();
-      if (visible && 'requestVideoFrameCallback' in HTMLVideoElement.prototype) {
+      if (visible && !reduceMotion) {
         videoFrameRequest = video.requestVideoFrameCallback(onVideoFrame);
       }
+    }
+
+    function onFallbackFrame() {
+      fallbackFrameRequest = 0;
+      if (!visible || reduceMotion) return;
+      paint();
+      fallbackFrameRequest = window.requestAnimationFrame(onFallbackFrame);
+    }
+
+    function stopVideo() {
+      video.pause();
+      if (videoFrameRequest) video.cancelVideoFrameCallback(videoFrameRequest);
+      if (fallbackFrameRequest) window.cancelAnimationFrame(fallbackFrameRequest);
+      videoFrameRequest = 0;
+      fallbackFrameRequest = 0;
     }
 
     function resize() {
@@ -132,10 +149,17 @@ function DesktopGlideCanvas({ reduceMotion }) {
     }
 
     function startVideo() {
+      if (reduceMotion) {
+        video.pause();
+        queuePaint();
+        return;
+      }
       video.play().catch(() => {});
       queuePaint();
       if ('requestVideoFrameCallback' in HTMLVideoElement.prototype && !videoFrameRequest) {
         videoFrameRequest = video.requestVideoFrameCallback(onVideoFrame);
+      } else if (!('requestVideoFrameCallback' in HTMLVideoElement.prototype) && !fallbackFrameRequest) {
+        fallbackFrameRequest = window.requestAnimationFrame(onFallbackFrame);
       }
     }
 
@@ -143,7 +167,7 @@ function DesktopGlideCanvas({ reduceMotion }) {
       ([entry]) => {
         visible = entry.isIntersecting;
         if (visible) startVideo();
-        else video.pause();
+        else stopVideo();
       },
       { rootMargin: '160px 0px' },
     );
@@ -161,16 +185,14 @@ function DesktopGlideCanvas({ reduceMotion }) {
       window.removeEventListener('scroll', onScroll);
       video.removeEventListener('loadeddata', resize);
       if (frameRequest) window.cancelAnimationFrame(frameRequest);
-      if (videoFrameRequest && 'cancelVideoFrameCallback' in HTMLVideoElement.prototype) {
-        video.cancelVideoFrameCallback(videoFrameRequest);
-      }
+      stopVideo();
     };
   }, [reduceMotion]);
 
   return (
     <div ref={stageRef} className="glide-services-hero__canvas-stage" aria-hidden="true">
       <canvas ref={canvasRef} className="glide-services-hero__canvas" />
-      <video ref={videoRef} loop muted playsInline preload="metadata" src={VIDEO_SOURCE} />
+      <video ref={videoRef} loop muted playsInline preload={reduceMotion ? 'auto' : 'metadata'} src={VIDEO_SOURCE} />
     </div>
   );
 }
@@ -178,6 +200,10 @@ function DesktopGlideCanvas({ reduceMotion }) {
 export function GlideServicesHero() {
   const reduceMotion = useReducedMotion();
   const desktop = useDesktopLayout();
+  const mobileVideo = useRef(null);
+  useEffect(() => {
+    if (reduceMotion) mobileVideo.current?.pause();
+  }, [reduceMotion]);
 
   return (
     <section className="glide-services-hero" aria-labelledby="services-hero-title">
@@ -194,7 +220,7 @@ export function GlideServicesHero() {
           <DesktopGlideCanvas reduceMotion={reduceMotion} />
         ) : (
           <div className="glide-services-hero__mobile-media" aria-hidden="true">
-            <video autoPlay loop muted playsInline preload="metadata" src={VIDEO_SOURCE} />
+            <video ref={mobileVideo} autoPlay={!reduceMotion} loop muted playsInline preload={reduceMotion ? 'auto' : 'metadata'} src={VIDEO_SOURCE} />
           </div>
         )}
       </div>
