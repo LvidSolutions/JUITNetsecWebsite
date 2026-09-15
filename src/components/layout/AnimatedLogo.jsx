@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { motion, useMotionValueEvent, useReducedMotion, useTransform } from 'framer-motion';
+import { motion, useMotionValueEvent, useReducedMotion, useSpring, useTransform } from 'framer-motion';
 import { BrandCube, BrandJuit, BrandNetsec, BrandWordmark } from './BrandWordmark.jsx';
 
 const FULL_BLEED_FILL = 0.98;
@@ -52,7 +52,7 @@ function SplitWordmark({
   collapsed,
   cubeVerticalOffset,
   fontSize,
-  isLanded,
+  horizontalOffset,
   juitVerticalOffset,
   netsecVerticalOffset,
   prefersReducedMotion,
@@ -69,52 +69,54 @@ function SplitWordmark({
     <motion.span
       aria-hidden="true"
       className="absolute left-1/2 top-1/2 h-0 w-0 -translate-x-1/2 -translate-y-1/2 font-display leading-none whitespace-nowrap"
-      style={{ fontSize }}
-      animate={{ x: collapsed || !isLanded ? 0 : -revealHorizontalOffset }}
-      transition={transition}
+      style={{ fontSize, x: horizontalOffset }}
     >
       <motion.span
-        className="absolute whitespace-nowrap"
-        style={{ right: '0.47em', y: juitVerticalOffset }}
-        animate={{
-          clipPath: collapsed ? 'inset(0 0 0 100%)' : 'inset(0 0 0 0)',
-          x: collapsed ? textOffset : 0,
-        }}
+        className="absolute h-0 w-0"
+        animate={{ x: collapsed ? revealHorizontalOffset : 0 }}
         transition={transition}
       >
-        <BrandJuit />
-      </motion.span>
-
-      <span className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2">
         <motion.span
-          className="inline-flex"
-          style={isLanded ? undefined : { y: cubeVerticalOffset }}
-          animate={isLanded ? { y: 0 } : undefined}
+          className="absolute whitespace-nowrap"
+          style={{ right: '0.47em', y: juitVerticalOffset }}
+          animate={{
+            clipPath: collapsed ? 'inset(0 0 0 100%)' : 'inset(0 0 0 0)',
+            x: collapsed ? textOffset : 0,
+          }}
           transition={transition}
         >
-          <motion.span
-            className="inline-flex items-center justify-center"
-            animate={{
-              rotate: prefersReducedMotion ? 0 : collapsed ? 0 : 135,
-              scale: collapsed ? 1 : 0.46,
-            }}
-            transition={transition}
-          >
-            <BrandCube data-testid="animated-logo-cube" className="h-[0.65em] w-[0.65em] shadow-none" />
-          </motion.span>
+          <BrandJuit />
         </motion.span>
-      </span>
 
-      <motion.span
-        className="absolute whitespace-nowrap"
-        style={{ left: '0.47em', y: netsecVerticalOffset }}
-        animate={{
-          clipPath: collapsed ? 'inset(0 100% 0 0)' : 'inset(0 0 0 0)',
-          x: collapsed ? -textOffset : 0,
-        }}
-        transition={transition}
-      >
-        <BrandNetsec />
+        <span className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2">
+          <motion.span
+            className="inline-flex"
+            style={{ y: cubeVerticalOffset }}
+          >
+            <motion.span
+              className="inline-flex items-center justify-center"
+              animate={{
+                rotate: prefersReducedMotion ? 0 : collapsed ? 0 : 135,
+                scale: collapsed ? 1 : 0.46,
+              }}
+              transition={transition}
+            >
+              <BrandCube data-testid="animated-logo-cube" className="h-[0.65em] w-[0.65em] shadow-none" />
+            </motion.span>
+          </motion.span>
+        </span>
+
+        <motion.span
+          className="absolute whitespace-nowrap"
+          style={{ left: '0.47em', y: netsecVerticalOffset }}
+          animate={{
+            clipPath: collapsed ? 'inset(0 100% 0 0)' : 'inset(0 0 0 0)',
+            x: collapsed ? -textOffset : 0,
+          }}
+          transition={transition}
+        >
+          <BrandNetsec />
+        </motion.span>
       </motion.span>
     </motion.span>
   );
@@ -130,6 +132,14 @@ export function AnimatedLogo({ compact = false, targetRef, progress }) {
   const [isHovered, setIsHovered] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const wasCompactRef = useRef(compact);
+  // Smooth wheel steps only for the logo. Clamp first so returning from further
+  // down the page cannot leave the logo catching up with off-screen progress.
+  const logoTarget = useTransform(progress, (value) => Math.min(Math.max(value, 0), INTRO_COMPLETE_AT));
+  const logoProgress = useSpring(logoTarget, { stiffness: 400, damping: 40, mass: 1, restDelta: 0.0001, restSpeed: 0.001 });
+
+  useEffect(() => {
+    logoProgress.jump(logoTarget.get());
+  }, [compact, prefersReducedMotion, logoProgress, logoTarget]);
 
   useEffect(() => {
     function measureRatio() {
@@ -160,16 +170,19 @@ export function AnimatedLogo({ compact = false, targetRef, progress }) {
     wasCompactRef.current = compact;
   }, [compact, progress]);
 
-  useMotionValueEvent(progress, 'change', (latest) => {
+  useMotionValueEvent(logoProgress, 'change', (latest) => {
     if (compact) return;
 
     setIntroComplete((complete) => (complete ? latest >= INTRO_RESTORE_BELOW : latest >= INTRO_COMPLETE_AT));
   });
 
-  const x = useTransform(progress, [0, INTRO_COMPLETE_AT], geometry ? [geometry.startX, geometry.endX] : [0, 0], { clamp: true });
-  const y = useTransform(progress, [0, INTRO_COMPLETE_AT], geometry ? [geometry.startY, geometry.endY] : [0, 0], { clamp: true });
-  const fontSize = useTransform(progress, [0, INTRO_COMPLETE_AT], geometry ? [geometry.startSize, geometry.endSize] : [20, 20], { clamp: true });
-  const cubeVerticalOffset = useTransform(progress, [0, INTRO_COMPLETE_AT], geometry ? [geometry.startSize / 2, 0] : [0, 0], { clamp: true });
+  const x = useTransform(logoProgress, [0, INTRO_COMPLETE_AT], geometry ? [geometry.startX, geometry.endX] : [0, 0], { clamp: true });
+  const y = useTransform(logoProgress, [0, INTRO_COMPLETE_AT], geometry ? [geometry.startY, geometry.endY] : [0, 0], { clamp: true });
+  const fontSize = useTransform(logoProgress, [0, INTRO_COMPLETE_AT], geometry ? [geometry.startSize, geometry.endSize] : [20, 20], { clamp: true });
+  const cubeVerticalOffset = useTransform(logoProgress, [0, INTRO_COMPLETE_AT], geometry ? [geometry.startSize / 2, 0] : [0, 0], { clamp: true });
+  // Center the expanded wordmark throughout the scroll, rather than applying
+  // its asymmetric-text correction only after it reaches the navbar.
+  const horizontalOffset = useTransform(logoProgress, [0, INTRO_COMPLETE_AT], [0, -(geometry?.endSize || 20) * START_CUBE_OFFSET_EM], { clamp: true });
   const juitVerticalOffset = useTransform(
     [cubeVerticalOffset, fontSize],
     ([cubeOffset, currentFontSize]) => cubeOffset - currentFontSize / 2,
@@ -196,7 +209,7 @@ export function AnimatedLogo({ compact = false, targetRef, progress }) {
   // home render after a compact route, its previous "landed" state would
   // otherwise expose a full-size collapsed cube for one frame.
   const returningFromCompact = !compact && wasCompactRef.current;
-  const isLanded = compact || (!returningFromCompact && introComplete && progress.get() >= INTRO_RESTORE_BELOW);
+  const isLanded = compact || (!returningFromCompact && introComplete && logoProgress.get() >= INTRO_RESTORE_BELOW);
   const collapsed = isFinePointer && isLanded && !isHovered && !isFocused;
   const interactionProps = {
     onMouseEnter: () => setIsHovered(true),
@@ -207,9 +220,9 @@ export function AnimatedLogo({ compact = false, targetRef, progress }) {
   const wordmark = (
     <SplitWordmark
       collapsed={collapsed}
-      cubeVerticalOffset={prefersReducedMotion ? 0 : cubeVerticalOffset}
+      cubeVerticalOffset={compact || prefersReducedMotion ? 0 : cubeVerticalOffset}
       fontSize={compact || prefersReducedMotion ? geometry.endSize : fontSize}
-      isLanded={isLanded}
+      horizontalOffset={compact || prefersReducedMotion ? -geometry.endSize * START_CUBE_OFFSET_EM : horizontalOffset}
       juitVerticalOffset={compact || prefersReducedMotion ? -geometry.endSize / 2 : juitVerticalOffset}
       netsecVerticalOffset={compact || prefersReducedMotion ? -geometry.endSize * 0.62 : netsecVerticalOffset}
       prefersReducedMotion={prefersReducedMotion}
