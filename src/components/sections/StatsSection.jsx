@@ -42,7 +42,7 @@ export function StatsSection({ embedded = false, afterHero = false }) {
       }
 
       const scrollRange = Math.max(section.offsetHeight - window.innerHeight, 1);
-      const revealRange = afterHero ? scrollRange * 0.5 : scrollRange;
+      const revealRange = afterHero ? scrollRange * 0.82 : scrollRange;
       const travelled = -section.getBoundingClientRect().top;
       const scrollProgress = Math.min(1, Math.max(0, travelled / revealRange));
 

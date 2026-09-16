@@ -1,6 +1,6 @@
 .risk-progress {
   position: relative;
-  min-height: 800svh;
+  min-height: 420svh;
   overflow: clip;
   background: #000;
   color: #fff;
@@ -145,7 +145,7 @@
 
 @media (max-width: 1023px) {
   .risk-progress {
-    min-height: 580svh;
+    min-height: 340svh;
   }
 
   .risk-progress__sticky {
@@ -160,7 +160,7 @@
 
 @media (max-width: 639px) {
   .risk-progress {
-    min-height: 460svh;
+    min-height: 300svh;
   }
 
   .risk-progress__sticky {

@@ -538,8 +538,6 @@ export function ContactMonitorCTA({ transitionState = 'IDLE', monitorMedia = nul
   };
 
   const showFallbackLabel = mode === 'viewer-fallback';
-  const showLocalFallback = mode === 'fallback';
-
   return (
     <div
       className="contact-monitor-cta mt-8 sm:mt-10"
@@ -561,13 +559,6 @@ export function ContactMonitorCTA({ transitionState = 'IDLE', monitorMedia = nul
         >
           <div className="contact-monitor-cta__glow" aria-hidden="true" />
           <div className="contact-monitor-cta__frame">
-          {showLocalFallback && (
-            <div className="contact-monitor-cta__local-fallback" aria-hidden="true">
-              <span className="contact-monitor-cta__fallback-kicker">Secure connection</span>
-              <strong>CONTACT US</strong>
-              <span className="contact-monitor-cta__fallback-arrow">&rarr;</span>
-            </div>
-          )}
           <iframe
             ref={frameRef}
             className="contact-monitor-cta__viewer"
@@ -576,14 +567,12 @@ export function ContactMonitorCTA({ transitionState = 'IDLE', monitorMedia = nul
             allowFullScreen
             loading="lazy"
           />
-          {snapshot && (
-            <img
-              className="contact-monitor-cta__render"
-              src={snapshot}
-              alt=""
-              aria-hidden="true"
-            />
-          )}
+          <img
+            className="contact-monitor-cta__render"
+            src={snapshot || '/assets/contact-monitor.png'}
+            alt=""
+            aria-hidden="true"
+          />
           {(mode === 'placeholder' || mode === 'loading') && (
             <div className="contact-monitor-cta__placeholder" aria-hidden="true" />
           )}
@@ -594,12 +583,10 @@ export function ContactMonitorCTA({ transitionState = 'IDLE', monitorMedia = nul
               <em>Open a technical discussion</em>
             </div>
           )}
-          {!showLocalFallback && (
-            <div className="contact-monitor-cta__screen" aria-hidden="true">
-              <strong>Contact us</strong>
-              <em>Start a technical discussion</em>
-            </div>
-          )}
+          <div className="contact-monitor-cta__screen" aria-hidden="true">
+            <strong>Contact us</strong>
+            <em>Start a technical discussion</em>
+          </div>
           <div className="contact-monitor-cta__transition-screen" aria-hidden="true">
             {monitorMedia}
           </div>

@@ -11,7 +11,6 @@ import { IntroLoader } from './components/sections/IntroLoader.jsx';
 import { IntroSequence } from './components/intro/IntroSequence.jsx';
 import { PartnersSection } from './components/sections/PartnersSection.jsx';
 import { StatsSection } from './components/sections/StatsSection.jsx';
-import { TerminalSignalSection } from './components/sections/TerminalSignalSection.jsx';
 import { FaqFooterScene } from './components/sections/FaqFooterScene.jsx';
 import { ServicesSection } from './components/sections/ServicesSection.jsx';
 import { useHeroIntroProgress } from './lib/useHeroIntroProgress.js';
@@ -189,7 +188,6 @@ function App() {
             />
             <StatsSection afterHero />
             <PartnersSection />
-            <TerminalSignalSection />
             <FaqFooterScene />
           </>
         )}

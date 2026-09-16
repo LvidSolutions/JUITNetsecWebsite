@@ -72,8 +72,12 @@
   will-change: top, left, opacity, transform;
 }
 
-.hero-transition-scene[data-phase='READY'] .hero-transition-scene__character {
-  transition: top 90ms linear, left 90ms linear, transform 90ms linear, opacity 120ms linear;
+.hero-transition-scene .contact-monitor-cta__expansion-root {
+  transition: none;
+}
+
+.hero-transition-scene[data-phase='HANDED_OFF'] + .risk-progress--after-hero {
+  transition: none;
 }
 
 .hero-transition-scene[data-c-mode='blinking'] .hero-transition-scene__character {

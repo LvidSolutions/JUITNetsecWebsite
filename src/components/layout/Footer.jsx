@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { BrandWordmark } from './BrandWordmark.jsx';
 import { FooterStatsPanel } from './FooterStatsPanel.jsx';
+import { FooterSignalDial } from './FooterSignalDial.jsx';
 
 // Navigation – samma fyra destinationer som i headern. Engelska etiketter mot
 // de befintliga routsen så att appens klient-navigation (a[href^="/"]) fungerar.
@@ -127,14 +128,7 @@ export function Footer({ homeEffects = false, videoScene = false, revealTargetRe
             {/* ÖVRE band: maze-grafik (vänster) + skarp dashboard-panel (höger). */}
             <div className="footer-pos-maze z-10 flex flex-col items-center gap-12 lg:items-start lg:gap-0">
               <div className="flex shrink-0 flex-col items-center lg:items-start">
-                <img
-                  src="/assets/footer-radar.png"
-                  alt=""
-                  aria-hidden="true"
-                  className="footer-cutout footer-maze-graphic w-[clamp(220px,24vw,300px)] select-none lg:w-[var(--maze-w)]"
-                  loading="lazy"
-                  decoding="async"
-                />
+                <FooterSignalDial className="w-[clamp(220px,24vw,300px)] lg:w-[var(--maze-w)]" />
                 <p className="mt-3 w-[clamp(220px,24vw,300px)] text-center font-mono text-[11px] uppercase leading-relaxed tracking-[0.24em] text-brand-mist/75 lg:w-[var(--maze-w)]">
                   You cannot defend
                   <br />

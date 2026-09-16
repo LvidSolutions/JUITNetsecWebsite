@@ -55,28 +55,22 @@ export function PartnersSection() {
       <div aria-hidden="true" className="partners-reveal-scene__shade" />
 
       <div className="partners-showcase relative z-10 overflow-hidden border-y border-brand-line/60">
-        <Container className="relative z-10 flex flex-col items-center px-5 pb-10 pt-20 text-center sm:pb-12 sm:pt-24 lg:pb-14 lg:pt-24 xl:pb-12 xl:pt-20">
-          <p className="font-mono text-[10px] font-medium uppercase tracking-[0.28em] text-brand-mist/70 sm:text-[11px] sm:tracking-[0.34em]">
-            Trusted technology ecosystem
-          </p>
+        <Container className="relative z-10 flex flex-col items-center px-5 pb-7 pt-12 text-center sm:pb-8 sm:pt-14 lg:pb-9 lg:pt-16 xl:pb-8 xl:pt-14">
           <h2
             id="technology-showcase-heading"
-            className="mt-5 max-w-4xl text-balance text-4xl font-semibold leading-[0.98] tracking-[-0.045em] text-brand-white sm:text-5xl lg:mt-6 lg:text-6xl xl:text-7xl"
+            className="max-w-4xl text-balance text-4xl font-semibold leading-[0.98] tracking-[-0.045em] text-brand-white sm:text-5xl lg:text-6xl xl:text-7xl"
           >
-            Technology your infrastructure can depend on.
+            Trusted Technology Ecosystem
           </h2>
-          <p className="mt-6 max-w-2xl text-pretty text-base leading-7 text-brand-mist/80 sm:text-lg sm:leading-8">
-            JUIT NetSec works across established technology ecosystems to build, secure and support resilient IT environments.
-          </p>
         </Container>
 
-        <div className="relative z-10 pb-20 sm:pb-24 lg:pb-24 xl:pb-20">
+        <div className="relative z-10 pb-12 sm:pb-14 lg:pb-16 xl:pb-14">
           <LogoLoop
             logos={partnerLogos}
             className="partners-strip partners-showcase__marquee"
             speed={34}
             direction="left"
-            logoHeight="clamp(46px, 4.75vw, 68px)"
+            logoHeight="clamp(38px, 3.6vw, 54px)"
             gap="clamp(42px, 5vw, 104px)"
             hoverSpeed={10}
             imageLoading="eager"

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useMotionValueEvent, useReducedMotion } from 'framer-motion';
+import { useMotionValueEvent } from 'framer-motion';
 import './HeroTransitionScene.css';
 
 const clamp = (value) => Math.min(Math.max(value, 0), 1);
@@ -8,10 +8,7 @@ const ease = (value) => value * value * (3 - 2 * value);
 const LOGO_DOCK_PROGRESS = 0.45;
 const PLAYBACK_DELAY_DISTANCE = 900; // Five standard 180 px mouse-wheel ticks after logo docking.
 const PLAYBACK_START_TIMEOUT_MS = 15000;
-// This is deliberately a physical distance, not a small slice of the hero's
-// overall progress. It gives the monitor takeover roughly sixteen wheel ticks
-// on a standard mouse and keeps every expansion frame in the same sticky viewport.
-const EXPANSION_SCROLL_DISTANCE = 2800;
+const EXPANSION_DURATION_MS = 850;
 const VIDEO_REVEAL_DELAY_MS = 650;
 const VIDEO_PLAYBACK_RATE = 1.2;
 
@@ -27,9 +24,20 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
   const mediaRevealRef = useRef(null);
   const mediaStartedRef = useRef(false);
   const expansionStartScrollYRef = useRef(null);
+  const expansionProgressRef = useRef(0);
+  const expansionFrameRef = useRef(0);
   const riskRevealCompleteRef = useRef(false);
   const [phase, setPhase] = useState('IDLE');
-  const reducedMotion = useReducedMotion();
+  const [reducedMotion, setReducedMotion] = useState(() =>
+    typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+  useEffect(() => {
+    const query = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const update = () => setReducedMotion(query.matches);
+    query.addEventListener('change', update);
+    update();
+    return () => query.removeEventListener('change', update);
+  }, []);
 
   const setPhaseSafe = useCallback((next) => { phaseRef.current = next; setPhase(next); }, []);
 
@@ -52,8 +60,7 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
       return;
     }
     mediaStartedRef.current = false;
-    // The blinking C and the scroll-led expansion begin in the same frame.
-    // There is deliberately no timed black holding state between them.
+    // Hold the C until the next deliberate forward gesture starts the zoom.
     expansionStartScrollYRef.current = window.scrollY;
     setPhaseSafe('READY');
   }, [reducedMotion, setPhaseSafe]);
@@ -67,8 +74,12 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
     const riskContent = root?.querySelector('.risk-progress--embedded .risk-progress__content');
     const riskHandoff = document.querySelector('.risk-progress--after-hero');
     if (!source || !monitor || !sticky || !target || !riskContent) return;
+    // Measure the untransformed screen even during resize or font loading.
+    const previousTransform = monitor.style.transform;
+    monitor.style.transform = 'none';
     const sourceRect = source.getBoundingClientRect();
     const monitorRect = monitor.getBoundingClientRect();
+    monitor.style.transform = previousTransform;
     const stickyRect = sticky.getBoundingClientRect();
     const targetRect = target.getBoundingClientRect();
     const targetViewport = target.closest('.risk-progress__sticky').getBoundingClientRect();
@@ -124,14 +135,10 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
     const blackout = phaseRef.current === 'BLACKOUT' || ready;
     const expansionStart = expansionStartScrollYRef.current ?? window.scrollY;
     const riskCopyVisible = ready && riskRevealCompleteRef.current;
-    const riskScrollDistance = g.riskHandoffScrollY === null
-      ? EXPANSION_SCROLL_DISTANCE
-      : Math.max(g.riskHandoffScrollY - expansionStart, 1);
-    const riskRaw = reducedMotion
-      ? (ready ? 1 : 0)
-      : ready && fontReadyRef.current
-        ? clamp((window.scrollY - expansionStart) / riskScrollDistance)
-        : 0;
+    const riskRaw = reducedMotion ? (ready ? 1 : 0)
+      : phaseRef.current === 'HANDED_OFF'
+        ? clamp((window.scrollY - expansionStart) / Math.max((g.riskHandoffScrollY ?? expansionStart + 1) - expansionStart, 1))
+        : expansionProgressRef.current;
     const riskExpansion = ease(riskRaw);
     const riskContentScale = g.riskScreenScale + (1 - g.riskScreenScale) * riskExpansion;
     // The screen and its text share one curve ending at the actual handoff.
@@ -174,14 +181,43 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
     root.style.setProperty('--first-character-current-x', `${cX + (g.targetX - cX) * screenExpansion}px`);
     root.style.setProperty('--first-character-current-y', `${cY + (g.targetY - cY) * screenExpansion}px`);
     root.style.setProperty('--first-character-scale', (g.sourceScale + (1 - g.sourceScale) * screenExpansion).toFixed(5));
-    root.style.setProperty('--first-character-opacity', ready && !riskCopyVisible && riskRaw < 1 ? '1' : '0');
+    root.style.setProperty('--first-character-opacity', ready && !riskCopyVisible && (riskRaw < 1 || phaseRef.current === 'EXPANDING') ? '1' : '0');
     root.style.setProperty('--risk-content-translate-x', `${g.riskStartTranslateX * (1 - riskExpansion)}px`);
     root.style.setProperty('--risk-content-translate-y', `${g.riskStartTranslateY * (1 - riskExpansion)}px`);
     root.style.setProperty('--risk-content-scale', riskContentScale.toFixed(5));
     root.style.setProperty('--risk-layer-opacity', riskCopyVisible ? '1' : '0');
     root.style.setProperty('--risk-progress', riskCopyVisible ? '1' : '0');
-    root.dataset.cMode = ready && riskRaw < 0.08 ? 'blinking' : 'static';
+    root.dataset.cMode = phaseRef.current === 'READY' ? 'blinking' : 'static';
   }, [reducedMotion]);
+
+  const startExpansion = useCallback(() => {
+    if (phaseRef.current !== 'READY' || !fontReadyRef.current || reducedMotion) return;
+    measure();
+    expansionStartScrollYRef.current = window.scrollY;
+    expansionProgressRef.current = 0;
+    setPhaseSafe('EXPANDING');
+    const started = performance.now();
+    const tick = (now) => {
+      if (phaseRef.current !== 'EXPANDING') return;
+      expansionProgressRef.current = clamp((now - started) / EXPANSION_DURATION_MS);
+      write();
+      if (expansionProgressRef.current < 1) {
+        expansionFrameRef.current = requestAnimationFrame(tick);
+      } else {
+        expansionFrameRef.current = 0;
+        const target = document.querySelector('.risk-progress--after-hero');
+        if (target) {
+          // Move through the unused scroll distance under the finished black
+          // viewport. The destination uses the same measured C geometry.
+          window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY, behavior: 'instant' });
+          target.dataset.overlayActive = 'true';
+        }
+        setPhaseSafe('HANDED_OFF');
+        write();
+      }
+    };
+    expansionFrameRef.current = requestAnimationFrame(tick);
+  }, [measure, reducedMotion, setPhaseSafe, write]);
 
   const startPlayback = useCallback(() => {
     if (!introReady || !playbackRequestedRef.current || !['IDLE', 'PREPARING'].includes(phaseRef.current)) return;
@@ -235,6 +271,8 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
       logoDockScrollYRef.current = null;
       mediaStartedRef.current = false;
       expansionStartScrollYRef.current = null;
+      expansionProgressRef.current = 0;
+      cancelAnimationFrame(expansionFrameRef.current);
       if (mediaRevealRef.current) {
         window.clearTimeout(mediaRevealRef.current);
         mediaRevealRef.current = null;
@@ -285,6 +323,21 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
   }, [phase, progress, write]);
 
   useEffect(() => {
+    if (!reducedMotion) return;
+    cancelAnimationFrame(expansionFrameRef.current);
+    clearTimeout(playbackFallbackRef.current);
+    clearTimeout(mediaRevealRef.current);
+    playbackFallbackRef.current = null;
+    mediaRevealRef.current = null;
+    videoRef.current?.pause();
+    mediaStartedRef.current = false;
+    playbackRequestedRef.current = false;
+    expansionProgressRef.current = 0;
+    setPhaseSafe('IDLE');
+    write();
+  }, [reducedMotion, setPhaseSafe, write]);
+
+  useEffect(() => {
     const completeRiskReveal = () => {
       riskRevealCompleteRef.current = true;
       write(progress.get());
@@ -305,34 +358,52 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
     return () => video.removeEventListener('canplay', resume);
   }, [finishPlayback, progress, startPlayback]);
 
-  // Pin only after playback has actually begun. Preparing can include a decode
-  // wait, and holding scroll during that interval makes the site feel stalled.
-  // The later expansion still starts from the real scroll position where the
-  // clip ends.
+  // READY consumes one forward gesture. Only the timed phases hold input;
+  // backward navigation stays available while waiting for that gesture.
   useEffect(() => {
-    if (phase !== 'PLAYING') return undefined;
-    const preventScroll = (event) => event.preventDefault();
-    const preventKeys = (event) => {
-      if ([' ', 'ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End'].includes(event.key)) event.preventDefault();
+    if (!['PLAYING', 'READY', 'EXPANDING'].includes(phase) || reducedMotion) return undefined;
+    let touchY = null;
+    const handleDirection = (event, forward) => {
+      if (event.ctrlKey) return;
+      if (phaseRef.current === 'READY') {
+        if (!forward) return;
+        event.preventDefault();
+        startExpansion();
+      } else if (['PLAYING', 'EXPANDING'].includes(phaseRef.current)) event.preventDefault();
     };
-    window.addEventListener('wheel', preventScroll, { passive: false });
-    window.addEventListener('touchmove', preventScroll, { passive: false });
-    window.addEventListener('keydown', preventKeys);
+    const wheel = (event) => { if (event.deltaY) handleDirection(event, event.deltaY > 0); };
+    const touchStart = (event) => { touchY = event.touches.length === 1 ? event.touches[0].clientY : null; };
+    const touchMove = (event) => {
+      if (touchY === null || event.touches.length !== 1) return;
+      const delta = touchY - event.touches[0].clientY;
+      if (Math.abs(delta) > 4) handleDirection(event, delta > 0);
+    };
+    const key = (event) => {
+      if (event.target instanceof HTMLElement && event.target.closest('input, textarea, select, button, a, [contenteditable="true"]')) return;
+      if ([' ', 'ArrowDown', 'PageDown', 'End', 'ArrowUp', 'PageUp', 'Home'].includes(event.key)) {
+        handleDirection(event, ['ArrowDown', 'PageDown', 'End'].includes(event.key) || (event.key === ' ' && !event.shiftKey));
+      }
+    };
+    window.addEventListener('wheel', wheel, { passive: false });
+    window.addEventListener('touchstart', touchStart, { passive: true });
+    window.addEventListener('touchmove', touchMove, { passive: false });
+    window.addEventListener('keydown', key);
     return () => {
-      window.removeEventListener('wheel', preventScroll);
-      window.removeEventListener('touchmove', preventScroll);
-      window.removeEventListener('keydown', preventKeys);
+      window.removeEventListener('wheel', wheel);
+      window.removeEventListener('touchstart', touchStart);
+      window.removeEventListener('touchmove', touchMove);
+      window.removeEventListener('keydown', key);
     };
-  }, [phase]);
+  }, [phase, reducedMotion, startExpansion]);
 
   useEffect(() => () => {
+    cancelAnimationFrame(expansionFrameRef.current);
     if (playbackFallbackRef.current) window.clearTimeout(playbackFallbackRef.current);
     if (mediaRevealRef.current) window.clearTimeout(mediaRevealRef.current);
   }, []);
 
-  // The root includes room for the five-tick video delay plus the deliberately
-  // long, continuous monitor takeover; the viewport itself remains sticky.
-  return <section id="hem" ref={setRoot} className="hero-transition-scene relative -mt-20 h-[900svh]" data-phase={phase}>
+  // Keep room for logo docking and video initiation; the zoom itself is timed.
+  return <section id="hem" ref={setRoot} className="hero-transition-scene relative -mt-20 h-[600svh]" data-phase={phase}>
     <div className="hero-transition-scene__sticky">
       {renderHero({
         transitionState: phase,
