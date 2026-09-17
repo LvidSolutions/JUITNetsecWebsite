@@ -60,7 +60,7 @@ export function PartnersSection() {
             id="technology-showcase-heading"
             className="max-w-4xl text-balance text-4xl font-semibold leading-[0.98] tracking-[-0.045em] text-brand-white sm:text-5xl lg:text-6xl xl:text-7xl"
           >
-            Trusted Technology Ecosystem
+            Partner with the biggest tech companies
           </h2>
         </Container>
 
