@@ -10,7 +10,7 @@ import { HeroTransitionScene } from './components/sections/HeroTransitionScene.j
 import { IntroLoader } from './components/sections/IntroLoader.jsx';
 import { IntroSequence } from './components/intro/IntroSequence.jsx';
 import { PartnersSection } from './components/sections/PartnersSection.jsx';
-import { StatsSection } from './components/sections/StatsSection.jsx';
+import { RevealGallerySection } from './components/sections/RevealGallerySection.jsx';
 import { FaqFooterScene } from './components/sections/FaqFooterScene.jsx';
 import { ServicesSection } from './components/sections/ServicesSection.jsx';
 import { useHeroIntroProgress } from './lib/useHeroIntroProgress.js';
@@ -184,9 +184,8 @@ function App() {
               renderHero={(transitionProps) => (
                 <Hero introProgress={heroProgress} {...transitionProps} />
               )}
-              risk={<StatsSection embedded />}
             />
-            <StatsSection afterHero />
+            <RevealGallerySection />
             <PartnersSection />
             <FaqFooterScene />
           </>
