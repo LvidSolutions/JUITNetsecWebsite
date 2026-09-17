@@ -7,6 +7,8 @@ const VIEWER_SCRIPT_ID = 'juit-sketchfab-viewer-api';
 const CONTACT_ROUTE = '/kontakt';
 const SCRIPT_TIMEOUT_MS = 12000;
 const VIEWER_TIMEOUT_MS = 25000;
+const MAX_TILT_X = 2.25;
+const MAX_TILT_Y = 3;
 
 let viewerScriptPromise;
 
@@ -299,6 +301,16 @@ export function ContactMonitorCTA({ transitionState = 'IDLE', monitorMedia = nul
     element.style.setProperty('--monitor-rotate-y', `${target.currentY.toFixed(3)}deg`);
 
     const settled = Math.abs(target.targetX - target.currentX) < 0.02 && Math.abs(target.targetY - target.currentY) < 0.02;
+    if (settled && !target.hovering) {
+      target.currentX = 0;
+      target.currentY = 0;
+      target.targetX = 0;
+      target.targetY = 0;
+      element.style.setProperty('--monitor-rotate-x', '0deg');
+      element.style.setProperty('--monitor-rotate-y', '0deg');
+      animationRef.current = 0;
+      return;
+    }
     if (!settled || target.hovering) {
       animationRef.current = window.requestAnimationFrame(updateTilt);
     } else {
@@ -516,8 +528,10 @@ export function ContactMonitorCTA({ transitionState = 'IDLE', monitorMedia = nul
     const percentX = ((event.clientX - rect.left) / rect.width) * 100;
     const percentY = ((event.clientY - rect.top) / rect.height) * 100;
     const target = tiltRef.current;
-    target.targetX = Math.max(-6, Math.min(6, -(percentY - 50) * 0.12));
-    target.targetY = Math.max(-9, Math.min(9, (percentX - 50) * 0.18));
+    // The neutral monitor stays front-on. Pointer motion is deliberately
+    // restrained so it reads as depth rather than a second camera angle.
+    target.targetX = Math.max(-MAX_TILT_X, Math.min(MAX_TILT_X, -(percentY - 50) * 0.045));
+    target.targetY = Math.max(-MAX_TILT_Y, Math.min(MAX_TILT_Y, (percentX - 50) * 0.06));
     containerRef.current?.style.setProperty('--monitor-pointer-x', `${percentX}%`);
     containerRef.current?.style.setProperty('--monitor-pointer-y', `${percentY}%`);
     containerRef.current?.setAttribute('data-active', 'true');
@@ -537,6 +551,13 @@ export function ContactMonitorCTA({ transitionState = 'IDLE', monitorMedia = nul
     startTilt();
   };
 
+  const handlePointerOut = (event) => {
+    // React normally maps onPointerLeave from pointerout, but the monitor has
+    // layered screen and interaction elements. Guarding the native boundary
+    // makes the reset reliable when the pointer exits through any layer.
+    if (!event.currentTarget.contains(event.relatedTarget)) handlePointerLeave();
+  };
+
   const showFallbackLabel = mode === 'viewer-fallback';
   return (
     <div
@@ -554,6 +575,7 @@ export function ContactMonitorCTA({ transitionState = 'IDLE', monitorMedia = nul
           className="contact-monitor-cta__tilt"
           onPointerMove={interactionEnabled ? handlePointerMove : undefined}
           onPointerLeave={interactionEnabled ? handlePointerLeave : undefined}
+          onPointerOut={interactionEnabled ? handlePointerOut : undefined}
           onPointerCancel={interactionEnabled ? handlePointerLeave : undefined}
           onLostPointerCapture={interactionEnabled ? handlePointerLeave : undefined}
         >
