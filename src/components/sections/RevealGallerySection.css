@@ -50,6 +50,7 @@
   gap: 0.55rem;
   margin: 0;
   overflow: visible;
+  position: relative;
 }
 
 .reveal-gallery__placeholder {
@@ -76,6 +77,10 @@
 }
 
 .reveal-gallery__card figcaption {
+  position: absolute;
+  top: calc(100% + 0.55rem);
+  left: 0;
+  z-index: 1;
   color: rgba(255, 255, 255, 0.7);
   font-family: Arial, Helvetica, sans-serif;
   font-size: clamp(0.63rem, 0.75vw, 0.78rem);
