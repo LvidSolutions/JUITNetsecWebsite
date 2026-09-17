@@ -45,11 +45,9 @@ export function RevealGallerySection() {
           <span>Scroll to reveal</span>
         </div>
 
-        {cards.map((card, index) => (
+        {cards.map((card) => (
           <figure key={card.shape} className={`reveal-gallery__card ${card.shape}`} data-inview="false">
-            <div className="reveal-gallery__placeholder" aria-label={`Image placeholder ${index + 1}`}>
-              <span>Image placeholder</span>
-            </div>
+            <div className="reveal-gallery__placeholder" aria-hidden="true" />
             {card.statistic && (
               <figcaption>
                 <strong>{card.statistic}</strong> {card.detail}
