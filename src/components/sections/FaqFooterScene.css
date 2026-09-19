@@ -38,8 +38,28 @@
   inset: 0;
   z-index: 1;
   background:
-    linear-gradient(rgba(0, 200, 83, 0.05), rgba(0, 200, 83, 0.05)),
-    rgba(5, 5, 5, 0.76);
+    linear-gradient(rgba(0, 200, 83, 0.015), rgba(0, 200, 83, 0.015)),
+    rgba(5, 5, 5, 0.87);
+}
+
+.faq-footer-scene__readability::after {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 0% 44%, rgba(255, 12, 40, 0.58), transparent 62%),
+    linear-gradient(to right, rgba(205, 0, 26, 0.18), transparent 68%);
+  content: '';
+  mix-blend-mode: screen;
+  opacity: 0.035;
+  animation: faq-footer-alarm-pulse 3s ease-in-out infinite;
+}
+
+@keyframes faq-footer-alarm-pulse {
+  0%, 55%, 100% { opacity: 0.035; }
+  64% { opacity: 0.14; }
+  70% { opacity: 0.22; }
+  76% { opacity: 0.18; }
+  84% { opacity: 0.06; }
 }
 
 /* These panels reveal a smaller window by covering the unchanged video.  They
@@ -101,5 +121,10 @@
 @media (prefers-reduced-motion: reduce) {
   .faq-footer-scene__edge {
     will-change: auto;
+  }
+
+  .faq-footer-scene__readability::after {
+    animation: none;
+    opacity: 0.1;
   }
 }
