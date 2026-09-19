@@ -127,9 +127,9 @@
   overflow: hidden;
   padding: 4.8% 5.5% 4.2%;
   border: 1px solid rgba(255, 255, 255, 0.72);
-  background: #f4f7f5;
+  background: #fcfefc;
   box-shadow:
-    inset 0 0 28px rgba(0, 200, 83, 0.2),
+    inset 0 0 28px rgba(0, 200, 83, 0.04),
     0 0 24px rgba(0, 200, 83, 0.3),
     0 0 46px rgba(0, 200, 83, 0.16);
   color: #050706;
@@ -172,6 +172,32 @@
   display: block;
   width: 100%;
   height: 100%;
+  transform: translate(-4.7%, 0.087%) scale(1.1265, 1.176);
+  transform-origin: center;
+}
+
+/* The generated white opening is one source pixel narrower than the green
+   opening. Variant-specific subpixel values align both rendered CONTACT US
+   glyph boxes with the live CSS panel at the monitor's display size. */
+.hero-transition-scene[data-monitor-variant='white']
+  .contact-monitor-cta__transition-screen
+  .hero-transition-scene__media {
+  transform: translate(-1.107%, 0.087%) scale(1.1261, 1.176);
+}
+
+.hero-transition-scene[data-monitor-variant='green']
+  .contact-monitor-cta__transition-screen
+  .hero-transition-scene__media {
+  transform: translate(-0.925%, 0.087%) scale(1.1224, 1.176);
+}
+
+.contact-monitor-cta:is(
+    [data-transition-state='READY'],
+    [data-transition-state='EXPANDING'],
+    [data-transition-state='HANDED_OFF']
+  )
+  .contact-monitor-cta__screen {
+  opacity: 0;
 }
 
 .contact-monitor-cta__screen strong {
@@ -205,7 +231,7 @@
 .contact-monitor-cta[data-transition-state='IDLE'] .contact-monitor-cta__tilt[data-active='true'] .contact-monitor-cta__screen,
 .contact-monitor-cta[data-transition-state='IDLE'] .contact-monitor-cta__tilt:is(:hover, :focus-within) .contact-monitor-cta__screen {
   border-color: rgba(128, 255, 151, 0.92);
-  background-color: #00c853;
+  background-color: #28b751;
   box-shadow:
     inset 0 0 34px rgba(157, 255, 177, 0.32),
     0 0 22px rgba(72, 255, 112, 0.78),
@@ -216,6 +242,49 @@
 .contact-monitor-cta[data-transition-state='IDLE'] .contact-monitor-cta__tilt[data-active='true'] .contact-monitor-cta__screen em,
 .contact-monitor-cta[data-transition-state='IDLE'] .contact-monitor-cta__tilt:is(:hover, :focus-within) .contact-monitor-cta__screen em {
   color: rgba(255, 255, 255, 0.82);
+}
+
+/* Once the green version has been selected, keep the exact hover treatment
+   through the playback handoff. The glow fades only when the generated image
+   reaches its fully corrupted phase. */
+.hero-transition-scene[data-monitor-variant='green']
+  .contact-monitor-cta[data-transition-state='PREPARING']
+  .contact-monitor-cta__screen,
+.hero-transition-scene[data-monitor-variant='green']
+  .contact-monitor-cta[data-transition-state='PLAYING']
+  .contact-monitor-cta__screen {
+  border-color: rgba(128, 255, 151, 0.92);
+  background-color: #28b751;
+  box-shadow:
+    inset 0 0 34px rgba(157, 255, 177, 0.32),
+    0 0 22px rgba(72, 255, 112, 0.78),
+    0 0 52px rgba(0, 200, 83, 0.54);
+  color: #fff;
+}
+
+.hero-transition-scene[data-monitor-variant='green']
+  .contact-monitor-cta[data-transition-state='PREPARING']
+  .contact-monitor-cta__screen em,
+.hero-transition-scene[data-monitor-variant='green']
+  .contact-monitor-cta[data-transition-state='PLAYING']
+  .contact-monitor-cta__screen em {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.hero-transition-scene[data-monitor-variant='green']
+  .contact-monitor-cta:is([data-transition-state='PREPARING'], [data-transition-state='PLAYING'])
+  .contact-monitor-cta__glow {
+  filter: blur(31px);
+  opacity: var(--monitor-green-glow-opacity, 1);
+  transition-duration: 120ms;
+  transform: scale(1.08);
+}
+
+.hero-transition-scene[data-monitor-variant='green'][data-monitor-corrupted='true']
+  .contact-monitor-cta:is([data-transition-state='PREPARING'], [data-transition-state='PLAYING'])
+  .contact-monitor-cta__screen {
+  border-color: transparent;
+  box-shadow: none;
 }
 
 .contact-monitor-cta__placeholder {

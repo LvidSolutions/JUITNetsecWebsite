@@ -12,11 +12,8 @@ const navigation = [
   { label: 'Contact', href: '/kontakt' },
 ];
 
-// Verifierad kontaktinformation från projektet (Stockholm-adress från About-
-// sidan, e-post från tidigare footer). Inga påhittade uppgifter.
 const company = {
   email: 'contact@juit.se',
-  addressLines: ['Stockholm, Sweden'],
 };
 
 export function Footer({ homeEffects = false, videoScene = false, revealTargetRef = null }) {
@@ -138,41 +135,11 @@ export function Footer({ homeEffects = false, videoScene = false, revealTargetRe
             </div>
 
             <div className="footer-pos-dashboard z-10 mt-12 w-full max-w-[820px] self-center lg:mt-0 lg:w-[var(--dash-w)] lg:max-w-none">
-              <FooterStatsPanel className="w-full" />
-            </div>
-
-            {/* NEDRE band: navigation + kontakt (höger). Lyft över golv-loggan. */}
-            <div className="footer-pos-nav z-10 mt-14 flex flex-col gap-10 lg:mt-0 lg:flex-row lg:items-end lg:justify-end lg:gap-16">
-              <div className="grid grid-cols-1 gap-y-8 sm:grid-cols-[82px_210px] sm:gap-x-[46px] sm:gap-y-0">
-                <nav aria-label="Footer navigation" className="flex flex-col">
-                  {navigation.map((item) => (
-                    <a
-                      key={item.href}
-                      href={item.href}
-                      className="flex h-9 items-center font-display text-[13px] uppercase tracking-[0.22em] text-brand-white/85 transition-colors duration-200 hover:text-brand-green focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-green"
-                    >
-                      {item.label}
-                    </a>
-                  ))}
-                </nav>
-
-                <address className="flex flex-col not-italic">
-                  {company.addressLines.map((line) => (
-                    <span
-                      key={line}
-                      className="flex h-9 items-center font-mono text-[12px] uppercase tracking-[0.16em] text-brand-mist/55"
-                    >
-                      {line}
-                    </span>
-                  ))}
-                  <a
-                    href={`mailto:${company.email}`}
-                    className="flex h-9 items-center font-mono text-[12px] uppercase tracking-[0.16em] text-brand-white underline decoration-brand-green/50 underline-offset-4 transition-colors duration-200 hover:text-brand-green hover:decoration-brand-green focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-green"
-                  >
-                    {company.email}
-                  </a>
-                </address>
-              </div>
+              <FooterStatsPanel
+                className="w-full"
+                navigation={navigation}
+                email={company.email}
+              />
             </div>
           </div>
         </footer>

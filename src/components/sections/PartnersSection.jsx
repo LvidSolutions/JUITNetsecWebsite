@@ -55,16 +55,16 @@ export function PartnersSection() {
       <div aria-hidden="true" className="partners-reveal-scene__shade" />
 
       <div className="partners-showcase relative z-10 overflow-hidden border-y border-brand-line/60">
-        <Container className="relative z-10 flex flex-col items-center px-5 pb-7 pt-12 text-center sm:pb-8 sm:pt-14 lg:pb-9 lg:pt-16 xl:pb-8 xl:pt-14">
+        <Container className="relative z-10 flex flex-col items-center px-5 pb-3 pt-6 text-center sm:pb-4 sm:pt-7 lg:pb-4 lg:pt-8 xl:pb-4 xl:pt-7">
           <h2
             id="technology-showcase-heading"
-            className="max-w-4xl text-balance text-4xl font-semibold leading-[0.98] tracking-[-0.045em] text-brand-white sm:text-5xl lg:text-6xl xl:text-7xl"
+            className="max-w-4xl text-balance text-2xl font-semibold leading-[0.98] tracking-[-0.04em] text-brand-white sm:text-3xl lg:text-4xl xl:text-5xl"
           >
-            Partner with the biggest tech companies
+            Trusted Partners
           </h2>
         </Container>
 
-        <div className="relative z-10 pb-12 sm:pb-14 lg:pb-16 xl:pb-14">
+        <div className="relative z-10 pb-6 sm:pb-7 lg:pb-8 xl:pb-7">
           <LogoLoop
             logos={partnerLogos}
             className="partners-strip partners-showcase__marquee"

@@ -7,8 +7,11 @@ const LOGO_DOCK_PROGRESS = 0.45;
 const PLAYBACK_DELAY_DISTANCE = 900;
 const PLAYBACK_START_TIMEOUT_MS = 15000;
 const EXPANSION_DURATION_MS = 850;
-const VIDEO_REVEAL_DELAY_MS = 650;
+const VIDEO_REVEAL_DELAY_MS = 0;
+const VIDEO_BACKDROP_DELAY_MS = 120;
 const VIDEO_PLAYBACK_RATE = 1.2;
+const WHITE_MONITOR_VIDEO = '/videos/monitor-virus-white.mp4';
+const GREEN_MONITOR_VIDEO = '/videos/monitor-virus-green.mp4';
 
 export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero }) {
   const rootRef = useRef(null);
@@ -19,8 +22,14 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
   const logoDockScrollYRef = useRef(null);
   const playbackFallbackRef = useRef(null);
   const mediaRevealRef = useRef(null);
+  const mediaBackdropTimerRef = useRef(null);
+  const autoExpansionTimerRef = useRef(null);
   const mediaStartedRef = useRef(false);
+  const mediaBackdropRef = useRef(false);
+  const playbackSourceRef = useRef(null);
   const expansionFrameRef = useRef(0);
+  const videoFrameRef = useRef(0);
+  const startExpansionRef = useRef(null);
   const [phase, setPhase] = useState('IDLE');
   const [reducedMotion, setReducedMotion] = useState(() =>
     typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches,
@@ -72,7 +81,9 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
     const monitorEndY = -geometry.monitorTop - geometry.screenTopWithinMonitor * (geometry.height / geometry.screenHeight);
 
     root.style.setProperty('--monitor-video-opacity', playing ? '1' : '0');
-    root.style.setProperty('--screen-takeover-opacity', blackScreen ? '1' : '0');
+    // Keep an opaque black backing behind the playing video. When playback
+    // ends, the media can fade out without exposing the white Contact panel.
+    root.style.setProperty('--screen-takeover-opacity', blackScreen || mediaBackdropRef.current ? '1' : '0');
     root.style.setProperty('--monitor-expansion-x', `${monitorEndX * expansion}px`);
     root.style.setProperty('--monitor-expansion-y', `${monitorEndY * expansion}px`);
     root.style.setProperty('--monitor-expansion-scale-x', monitorScaleX.toFixed(5));
@@ -83,8 +94,15 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
   const finishPlayback = useCallback(() => {
     window.clearTimeout(playbackFallbackRef.current);
     window.clearTimeout(mediaRevealRef.current);
+    window.clearTimeout(mediaBackdropTimerRef.current);
     playbackFallbackRef.current = null;
     mediaRevealRef.current = null;
+    mediaBackdropTimerRef.current = null;
+    const video = videoRef.current;
+    if (videoFrameRef.current && video?.cancelVideoFrameCallback) {
+      video.cancelVideoFrameCallback(videoFrameRef.current);
+      videoFrameRef.current = 0;
+    }
     if (!['PREPARING', 'PLAYING'].includes(phaseRef.current)) return;
     if (!mediaStartedRef.current) {
       playbackRequestedRef.current = false;
@@ -92,9 +110,40 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
       return;
     }
     mediaStartedRef.current = false;
+    mediaBackdropRef.current = true;
+    rootRef.current?.style.setProperty('--monitor-green-glow-opacity', '0');
     setPhaseSafe('READY');
     write();
+    // The final black video frame is only a transition surface. Move directly
+    // into the existing expansion so it can never remain as a detached black
+    // rectangle over the monitor after playback has ended.
+    window.clearTimeout(autoExpansionTimerRef.current);
+    autoExpansionTimerRef.current = window.setTimeout(() => {
+      startExpansionRef.current?.();
+    }, 120);
   }, [setPhaseSafe, write]);
+
+  const setVideoGlow = useCallback((currentTime) => {
+    const root = rootRef.current;
+    if (!root || root.dataset.monitorVariant !== 'green') return;
+    // The first colour-field corruption is visible at about 2.2 s in the green
+    // cut. Complete the short fade on that first corrupt frame.
+    const glowOpacity = 1 - clamp((currentTime - 1.88) / 0.12);
+    root.style.setProperty('--monitor-green-glow-opacity', glowOpacity.toFixed(3));
+    root.dataset.monitorCorrupted = currentTime >= 1.88 ? 'true' : 'false';
+  }, []);
+
+  const trackVideoGlow = useCallback((_, metadata) => {
+    const video = videoRef.current;
+    setVideoGlow(metadata.mediaTime);
+    if (phaseRef.current === 'PLAYING' && video?.requestVideoFrameCallback) {
+      videoFrameRef.current = video.requestVideoFrameCallback(trackVideoGlow);
+    }
+  }, [setVideoGlow]);
+
+  const updateVideoGlow = useCallback((event) => {
+    if (!event.currentTarget.requestVideoFrameCallback) setVideoGlow(event.currentTarget.currentTime);
+  }, [setVideoGlow]);
 
   const startExpansion = useCallback(() => {
     if (phaseRef.current !== 'READY') return;
@@ -127,14 +176,40 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
     expansionFrameRef.current = requestAnimationFrame(tick);
   }, [measure, reducedMotion, setPhaseSafe, write]);
 
+  startExpansionRef.current = startExpansion;
+
   const startPlayback = useCallback(() => {
     if (!introReady || !playbackRequestedRef.current || !['IDLE', 'PREPARING'].includes(phaseRef.current) || reducedMotion) return;
     const video = videoRef.current;
-    if (!video || video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) return;
+    if (!video) return;
+
+    // The visual state at the instant the sequence starts is the source of
+    // truth. Once selected it stays locked for the complete six-second cut.
+    if (!playbackSourceRef.current) {
+      const hovered = Boolean(rootRef.current?.querySelector('.contact-monitor-cta__tilt[data-active="true"]'));
+      playbackSourceRef.current = hovered ? GREEN_MONITOR_VIDEO : WHITE_MONITOR_VIDEO;
+      if (rootRef.current) {
+        rootRef.current.dataset.monitorVariant = hovered ? 'green' : 'white';
+        rootRef.current.dataset.monitorCorrupted = 'false';
+        rootRef.current.style.setProperty('--monitor-green-glow-opacity', hovered ? '1' : '0');
+      }
+    }
+
+    if (video.dataset.monitorSource !== playbackSourceRef.current) {
+      video.pause();
+      video.src = playbackSourceRef.current;
+      video.dataset.monitorSource = playbackSourceRef.current;
+      video.load();
+      return;
+    }
+
+    if (video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) return;
     setPhaseSafe('PREPARING');
     mediaStartedRef.current = false;
+    mediaBackdropRef.current = false;
     video.currentTime = 0;
     video.playbackRate = VIDEO_PLAYBACK_RATE;
+    video.muted = true;
     window.clearTimeout(playbackFallbackRef.current);
     playbackFallbackRef.current = window.setTimeout(finishPlayback, PLAYBACK_START_TIMEOUT_MS);
     video.play().catch(finishPlayback);
@@ -145,21 +220,39 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
     window.clearTimeout(playbackFallbackRef.current);
     playbackFallbackRef.current = null;
     setPhaseSafe('PLAYING');
+    if (videoRef.current?.requestVideoFrameCallback) {
+      videoFrameRef.current = videoRef.current.requestVideoFrameCallback(trackVideoGlow);
+    }
     window.clearTimeout(mediaRevealRef.current);
     mediaRevealRef.current = window.setTimeout(() => {
       if (phaseRef.current !== 'PLAYING') return;
       mediaStartedRef.current = true;
       measure();
       write();
+      window.clearTimeout(mediaBackdropTimerRef.current);
+      mediaBackdropTimerRef.current = window.setTimeout(() => {
+        if (phaseRef.current !== 'PLAYING') return;
+        mediaBackdropRef.current = true;
+        write();
+      }, VIDEO_BACKDROP_DELAY_MS);
     }, VIDEO_REVEAL_DELAY_MS);
-  }, [measure, setPhaseSafe, write]);
+  }, [measure, setPhaseSafe, trackVideoGlow, write]);
 
   useMotionValueEvent(progress, 'change', (latest) => {
     if (latest >= LOGO_DOCK_PROGRESS && logoDockScrollYRef.current === null) logoDockScrollYRef.current = window.scrollY;
     if (latest < 0.42) {
       playbackRequestedRef.current = false;
+      playbackSourceRef.current = null;
+      if (rootRef.current) {
+        delete rootRef.current.dataset.monitorVariant;
+        delete rootRef.current.dataset.monitorCorrupted;
+        rootRef.current.style.removeProperty('--monitor-green-glow-opacity');
+      }
       logoDockScrollYRef.current = null;
       mediaStartedRef.current = false;
+      mediaBackdropRef.current = false;
+      window.clearTimeout(mediaBackdropTimerRef.current);
+      window.clearTimeout(autoExpansionTimerRef.current);
       cancelAnimationFrame(expansionFrameRef.current);
       if (phaseRef.current !== 'IDLE') {
         videoRef.current?.pause();
@@ -246,8 +339,13 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
 
   useEffect(() => () => {
     cancelAnimationFrame(expansionFrameRef.current);
+    if (videoFrameRef.current && videoRef.current?.cancelVideoFrameCallback) {
+      videoRef.current.cancelVideoFrameCallback(videoFrameRef.current);
+    }
     window.clearTimeout(playbackFallbackRef.current);
     window.clearTimeout(mediaRevealRef.current);
+    window.clearTimeout(mediaBackdropTimerRef.current);
+    window.clearTimeout(autoExpansionTimerRef.current);
   }, []);
 
   return (
@@ -256,10 +354,19 @@ export function HeroTransitionScene({ sceneRef, progress, introReady, renderHero
         {renderHero({
           transitionState: phase,
           monitorMedia: (
-            <video ref={videoRef} muted playsInline preload="auto" className="hero-transition-scene__media" onPlaying={confirmPlayback} onEnded={finishPlayback} onError={finishPlayback}>
-              <source src="/videos/monitor-virus-shutdown-v2.webm" type="video/webm" />
-              <source src="/videos/monitor-virus-shutdown-v2.mp4" type="video/mp4" />
-            </video>
+            <video
+              ref={videoRef}
+              src={WHITE_MONITOR_VIDEO}
+              data-monitor-source={WHITE_MONITOR_VIDEO}
+              muted
+              playsInline
+              preload="auto"
+              className="hero-transition-scene__media"
+              onPlaying={confirmPlayback}
+              onTimeUpdate={updateVideoGlow}
+              onEnded={finishPlayback}
+              onError={finishPlayback}
+            />
           ),
         })}
       </div>
